@@ -9,11 +9,14 @@ export interface Slide {
     button_text: string | null;
     button_link: string | null;
     content_position: string;
-    btn_pos_type?: string; 
+    btn_pos_type?: string;
     btn_relative_pos?: string;
     btn_custom_pos?: string;
     text_color: string;
     text_size?: string;
+    desc_color?: string;
+    desc_size?: string;
+    gap_y?: number;
     button_color?: string;
     button_bg_color?: string;
     button_size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -30,12 +33,12 @@ export interface SliderSettings {
     height_class: string;
     border_radius?: string;
     interval: number;
-    effect?: string; 
+    effect?: string;
     slides_per_view?: number;
-    active_slides?: Slide[]; 
-    
+    active_slides?: Slide[];
+
     loop?: boolean;
-    direction?: string; 
+    direction?: string;
     border_width?: string;
     border_color?: string;
     gap?: number;

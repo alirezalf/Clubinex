@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import { X, Save, Upload, Layout, Type, Zap, Move } from 'lucide-react';
+import { X, Save, Upload, Layout, Type, Zap, Move, Trash2 } from 'lucide-react';
 import { ColorPicker } from '@/Components/Admin/Settings/SharedInputs';
 import clsx from 'clsx';
 
@@ -24,10 +24,13 @@ export default function SlideModal({ sliderId, slide, onClose }: Props) {
         button_link: slide?.button_link || '',
         content_position: slide?.content_position || 'center-center',
         btn_pos_type: slide?.btn_pos_type || 'relative',
-        btn_relative_pos: slide?.btn_relative_pos || 'below', 
+        btn_relative_pos: slide?.btn_relative_pos || 'below',
         btn_custom_pos: slide?.btn_custom_pos || 'bottom-10 right-10',
-        text_color: slide?.text_color || '#ffffff', 
+        text_color: slide?.text_color || '#ffffff',
         text_size: slide?.text_size || 'text-4xl',
+        desc_color: slide?.desc_color || '', // New
+        desc_size: slide?.desc_size || 'text-lg', // New
+        gap_y: slide?.gap_y || 15, // New
         button_color: slide?.button_color || '#ffffff',
         button_bg_color: slide?.button_bg_color || '#0284c7',
         button_size: slide?.button_size || 'md',
@@ -38,7 +41,8 @@ export default function SlideModal({ sliderId, slide, onClose }: Props) {
         btn_anim_out: slide?.btn_anim_out || 'fade-out',
         order: slide?.order || 0,
         is_active: slide ? Boolean(slide.is_active) : true,
-        _method: 'POST' 
+        remove_image: false, // Flag for removal
+        _method: 'POST'
     });
 
     const submit = (e: React.FormEvent) => {
@@ -71,11 +75,26 @@ export default function SlideModal({ sliderId, slide, onClose }: Props) {
         { value: 'flip-x', label: 'Flip X (چرخش افقی)' },
     ];
 
+    // Extended text size options
+    const fontSizeOptions = [
+        { value: 'text-sm', label: 'خیلی کوچک (SM)' },
+        { value: 'text-base', label: 'معمولی (Base)' },
+        { value: 'text-lg', label: 'بزرگ (LG)' },
+        { value: 'text-xl', label: 'خیلی بزرگ (XL)' },
+        { value: 'text-2xl', label: '2XL' },
+        { value: 'text-3xl', label: '3XL' },
+        { value: 'text-4xl', label: '4XL' },
+        { value: 'text-5xl', label: '5XL' },
+        { value: 'text-6xl', label: '6XL' },
+        { value: 'text-7xl', label: '7XL' },
+        { value: 'text-8xl', label: '8XL' },
+        { value: 'text-9xl', label: '9XL' },
+    ];
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-            {/* Reduced max-width */}
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                
+
                 {/* Header */}
                 <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
                     <h3 className="font-bold text-base text-gray-800">{isEditing ? 'ویرایش اسلاید' : 'افزودن اسلاید جدید'}</h3>
@@ -90,8 +109,8 @@ export default function SlideModal({ sliderId, slide, onClose }: Props) {
                             onClick={() => setActiveTab(tab.id as any)}
                             className={clsx(
                                 "flex items-center gap-2 px-4 py-3 text-xs font-bold border-b-2 transition-colors",
-                                activeTab === tab.id 
-                                    ? "border-primary-600 text-primary-600" 
+                                activeTab === tab.id
+                                    ? "border-primary-600 text-primary-600"
                                     : "border-transparent text-gray-500 hover:text-gray-700"
                             )}
                         >
@@ -100,48 +119,71 @@ export default function SlideModal({ sliderId, slide, onClose }: Props) {
                         </button>
                     ))}
                 </div>
-                
+
                 <form onSubmit={submit} className="flex-1 overflow-y-auto p-5">
-                    
+
                     {/* --- Content Tab --- */}
                     {activeTab === 'content' && (
                         <div className="space-y-4 animate-in fade-in">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="block text-xs font-bold text-gray-700">تصویر پس‌زمینه</label>
-                                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition cursor-pointer relative bg-gray-50/50 h-28 flex items-center justify-center">
-                                        <input 
-                                            type="file" 
-                                            onChange={e => setData('image', e.target.files ? e.target.files[0] : null)} 
-                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            accept="image/*"
-                                        />
-                                        <div className="flex flex-col items-center">
-                                            <Upload size={20} className="text-gray-400 mb-1" />
-                                            <span className="text-[10px] text-gray-600 font-medium truncate w-32">
-                                                {data.image ? data.image.name : (isEditing ? 'تغییر تصویر' : 'انتخاب تصویر')}
-                                            </span>
+
+                                    {/* Logic for Image Preview & Removal */}
+                                    {!data.image && slide?.image_path && !data.remove_image ? (
+                                        <div className="relative rounded-xl border border-gray-200 h-28 group overflow-hidden">
+                                            <img src={slide.image_path} alt="Current" className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setData('remove_image', true)}
+                                                    className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 hover:bg-red-700"
+                                                >
+                                                    <Trash2 size={14} /> حذف تصویر
+                                                </button>
+                                            </div>
+                                            <span className="absolute bottom-1 right-1 bg-black/50 text-white text-[9px] px-1.5 rounded">تصویر فعلی</span>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition cursor-pointer relative bg-gray-50/50 h-28 flex items-center justify-center">
+                                            <input
+                                                type="file"
+                                                onChange={e => {
+                                                    if (e.target.files && e.target.files[0]) {
+                                                        setData('image', e.target.files[0]);
+                                                        setData('remove_image', false);
+                                                    }
+                                                }}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                accept="image/*"
+                                            />
+                                            <div className="flex flex-col items-center">
+                                                <Upload size={20} className="text-gray-400 mb-1" />
+                                                <span className="text-[10px] text-gray-600 font-medium truncate w-32">
+                                                    {data.image ? data.image.name : 'انتخاب تصویر'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
                                     {errors.image && <p className="text-red-500 text-xs">{errors.image}</p>}
                                 </div>
-                                
+
                                 <div className="space-y-3">
                                     <div>
                                         <label className="block text-xs font-bold text-gray-700 mb-1">متن پس‌زمینه (Watermark)</label>
-                                        <input 
-                                            type="text" 
-                                            value={data.bg_text} 
-                                            onChange={e => setData('bg_text', e.target.value)} 
-                                            className="w-full border rounded-lg px-3 py-2 text-xs dir-ltr text-left" 
+                                        <input
+                                            type="text"
+                                            value={data.bg_text}
+                                            onChange={e => setData('bg_text', e.target.value)}
+                                            className="w-full border rounded-lg px-3 py-2 text-xs dir-ltr text-left"
                                             placeholder="SALE, NEW, ..."
                                         />
                                     </div>
                                     <div>
-                                        <ColorPicker 
-                                            label="رنگ پس‌زمینه (اگر عکس نباشد)" 
-                                            value={data.bg_color} 
-                                            onChange={(v: string) => setData('bg_color', v)} 
+                                        <ColorPicker
+                                            label="رنگ پس‌زمینه (در صورت نبودن عکس)"
+                                            value={data.bg_color}
+                                            onChange={(v: string) => setData('bg_color', v)}
                                         />
                                     </div>
                                 </div>
@@ -189,27 +231,81 @@ export default function SlideModal({ sliderId, slide, onClose }: Props) {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium mb-1">سایز متن عنوان</label>
-                                    <select value={data.text_size} onChange={e => setData('text_size', e.target.value)} className="w-full border rounded-lg px-3 py-2 text-xs dir-ltr">
-                                        <option value="text-xl">کوچک (XL)</option>
-                                        <option value="text-2xl">متوسط (2XL)</option>
-                                        <option value="text-3xl">بزرگ (3XL)</option>
-                                        <option value="text-4xl">خیلی بزرگ (4XL)</option>
-                                        <option value="text-5xl">غول پیکر (5XL)</option>
-                                    </select>
+                                    <label className="block text-xs font-medium mb-1">فاصله عمودی عنوان و توضیح (px)</label>
+                                    <input
+                                        type="number"
+                                        value={data.gap_y}
+                                        onChange={e => setData('gap_y', parseInt(e.target.value) || 0)}
+                                        className="w-full border rounded-lg px-3 py-2 text-xs dir-ltr"
+                                    />
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <ColorPicker 
-                                        label="رنگ متن اصلی" 
-                                        value={data.text_color} 
-                                        onChange={(v: string) => setData('text_color', v)} 
+                            {/* Title Styling */}
+                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <h4 className="font-bold text-xs text-gray-700 mb-2">استایل عنوان</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <ColorPicker
+                                        label="رنگ متن عنوان"
+                                        value={data.text_color}
+                                        onChange={(v: string) => setData('text_color', v)}
                                     />
+                                    <div>
+                                        <label className="block text-xs font-medium mb-1">سایز فونت</label>
+                                        <select value={data.text_size} onChange={e => setData('text_size', e.target.value)} className="w-full border rounded-lg px-3 py-2 text-xs dir-ltr">
+                                            {fontSizeOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                                        </select>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-medium mb-1">سایز دکمه</label>
+                            </div>
+
+                            {/* Description Styling */}
+                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <h4 className="font-bold text-xs text-gray-700 mb-2">استایل توضیحات</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <ColorPicker
+                                        label="رنگ متن توضیحات (اختیاری)"
+                                        value={data.desc_color}
+                                        onChange={(v: string) => setData('desc_color', v)}
+                                    />
+                                    <div>
+                                        <label className="block text-xs font-medium mb-1">سایز فونت</label>
+                                        <select value={data.desc_size} onChange={e => setData('desc_size', e.target.value)} className="w-full border rounded-lg px-3 py-2 text-xs dir-ltr">
+                                            <option value="text-xs">خیلی کوچک (XS)</option>
+                                            <option value="text-sm">کوچک (SM)</option>
+                                            <option value="text-base">معمولی (Base)</option>
+                                            <option value="text-lg">بزرگ (LG)</option>
+                                            <option value="text-xl">خیلی بزرگ (XL)</option>
+                                            <option value="text-2xl">2XL</option>
+                                            <option value="text-3xl">3XL</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Button Styling */}
+                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <h4 className="font-bold text-xs text-gray-700 mb-2 flex items-center gap-2">
+                                    <Move size={14} /> دکمه
+                                </h4>
+                                <div className="flex gap-4 mb-2 text-xs">
+                                    <label className="flex items-center gap-1 cursor-pointer">
+                                        <input type="radio" checked={data.btn_pos_type === 'relative'} onChange={() => setData('btn_pos_type', 'relative')} />
+                                        شناور (زیر متن)
+                                    </label>
+                                    <label className="flex items-center gap-1 cursor-pointer">
+                                        <input type="radio" checked={data.btn_pos_type === 'absolute'} onChange={() => setData('btn_pos_type', 'absolute')} />
+                                        ثابت (گوشه)
+                                    </label>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mt-2">
+                                    <ColorPicker label="رنگ متن دکمه" value={data.button_color} onChange={(v: string) => setData('button_color', v)} />
+                                    <ColorPicker label="رنگ پس‌زمینه دکمه" value={data.button_bg_color} onChange={(v: string) => setData('button_bg_color', v)} />
+                                </div>
+
+                                <div className="mt-2">
+                                     <label className="block text-xs font-medium mb-1">سایز دکمه</label>
                                     <select value={data.button_size} onChange={e => setData('button_size', e.target.value)} className="w-full border rounded-lg px-3 py-2 text-xs dir-ltr">
                                         <option value="sm">کوچک</option>
                                         <option value="md">متوسط</option>
@@ -217,42 +313,6 @@ export default function SlideModal({ sliderId, slide, onClose }: Props) {
                                         <option value="xl">خیلی بزرگ</option>
                                     </select>
                                 </div>
-                            </div>
-
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                <h4 className="font-bold text-xs text-gray-700 mb-2 flex items-center gap-2">
-                                    <Move size={14} /> موقعیت دکمه
-                                </h4>
-                                <div className="flex gap-4 mb-2 text-xs">
-                                    <label className="flex items-center gap-1 cursor-pointer">
-                                        <input type="radio" checked={data.btn_pos_type === 'relative'} onChange={() => setData('btn_pos_type', 'relative')} />
-                                        شناور (پیش‌فرض)
-                                    </label>
-                                    <label className="flex items-center gap-1 cursor-pointer">
-                                        <input type="radio" checked={data.btn_pos_type === 'absolute'} onChange={() => setData('btn_pos_type', 'absolute')} />
-                                        ثابت (Absolute)
-                                    </label>
-                                </div>
-
-                                {data.btn_pos_type === 'relative' ? (
-                                    <select value={data.btn_relative_pos} onChange={e => setData('btn_relative_pos', e.target.value)} className="w-full border rounded-lg px-3 py-2 text-xs">
-                                        <option value="below">زیر متن</option>
-                                        <option value="above">بالای متن</option>
-                                        <option value="inline-start">کنار متن (شروع)</option>
-                                        <option value="inline-end">کنار متن (پایان)</option>
-                                    </select>
-                                ) : (
-                                    <select value={data.btn_custom_pos} onChange={e => setData('btn_custom_pos', e.target.value)} className="w-full border rounded-lg px-3 py-2 text-xs dir-ltr">
-                                        <option value="bottom-10 right-10">پایین راست</option>
-                                        <option value="bottom-10 left-10">پایین چپ</option>
-                                        <option value="bottom-10 left-1/2 -translate-x-1/2">پایین وسط</option>
-                                    </select>
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <ColorPicker label="رنگ متن دکمه" value={data.button_color} onChange={(v: string) => setData('button_color', v)} />
-                                <ColorPicker label="رنگ پس‌زمینه دکمه" value={data.button_bg_color} onChange={(v: string) => setData('button_bg_color', v)} />
                             </div>
                         </div>
                     )}

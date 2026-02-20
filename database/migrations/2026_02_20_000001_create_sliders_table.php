@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('interval')->default(5000);
             $table->string('effect')->default('fade');
             $table->integer('slides_per_view')->default(1);
-            
+
             // تنظیمات ظاهری
             $table->boolean('loop')->default(true);
             $table->string('direction')->default('ltr'); // ltr, rtl
@@ -35,38 +35,44 @@ return new class extends Migration
         Schema::create('slides', function (Blueprint $table) {
             $table->id();
             $table->foreignId('slider_id')->constrained('sliders')->onDelete('cascade');
-            $table->string('image_path')->nullable(); 
-            $table->string('bg_color')->nullable(); 
+            $table->string('image_path')->nullable();
+            $table->string('bg_color')->nullable();
             $table->string('bg_text')->nullable(); // واترمارک
-            
+
             // محتوا
             $table->string('title')->nullable();
             $table->text('description')->nullable();
             $table->string('button_text')->nullable();
             $table->string('button_link')->nullable();
-            
+
             // موقعیت‌دهی
-            $table->string('content_position')->default('center-center'); 
-            $table->string('btn_relative_pos')->default('below'); 
-            $table->string('btn_pos_type')->default('relative'); 
-            $table->string('btn_custom_pos')->nullable(); 
-            
+            $table->string('content_position')->default('center-center');
+            $table->string('btn_relative_pos')->default('below');
+            $table->string('btn_pos_type')->default('relative');
+            $table->string('btn_custom_pos')->nullable();
+
             // استایل ظاهری
             $table->string('text_color')->default('text-white');
-            $table->string('text_size')->default('text-3xl'); 
-            $table->string('button_color')->default('#ffffff'); 
-            $table->string('button_bg_color')->default('#0284c7'); 
-            $table->string('button_size')->default('md'); 
-            
+            $table->string('text_size')->default('text-3xl');
+
+            // استایل‌های جدید برای توضیحات و فاصله
+            $table->string('desc_color')->nullable(); // رنگ توضیحات
+            $table->string('desc_size')->default('text-base'); // سایز توضیحات
+            $table->integer('gap_y')->default(10); // فاصله عمودی بین عنوان و توضیحات (px)
+
+            $table->string('button_color')->default('#ffffff');
+            $table->string('button_bg_color')->default('#0284c7');
+            $table->string('button_size')->default('md');
+
             // انیمیشن‌ها
-            $table->string('anim_speed')->default('normal'); 
-            $table->string('text_anim_in')->default('fade-in-up'); 
-            $table->string('text_anim_out')->default('fade-out'); 
-            $table->string('btn_anim_in')->default('fade-in-up'); 
-            $table->string('btn_anim_out')->default('fade-out'); 
-            
+            $table->string('anim_speed')->default('normal');
+            $table->string('text_anim_in')->default('fade-in-up');
+            $table->string('text_anim_out')->default('fade-out');
+            $table->string('btn_anim_in')->default('fade-in-up');
+            $table->string('btn_anim_out')->default('fade-out');
+
             // فیلدهای قدیمی
-            $table->string('text_position')->nullable(); 
+            $table->string('text_position')->nullable();
             $table->string('animation_type')->nullable();
 
             $table->integer('order')->default(0);

@@ -95,6 +95,9 @@ class SliderController extends Controller
             $data['slider_id'] = $slider->id;
             $data['image_path'] = $path;
             $data['is_active'] = true;
+            // Default values for new fields
+            $data['gap_y'] = $request->input('gap_y', 15);
+            $data['desc_size'] = $request->input('desc_size', 'text-lg');
 
             Slide::create($data);
 
@@ -122,6 +125,9 @@ class SliderController extends Controller
             'btn_custom_pos' => 'nullable|string',
             'text_color' => 'nullable|string',
             'text_size' => 'nullable|string',
+            'desc_color' => 'nullable|string',
+            'desc_size' => 'nullable|string',
+            'gap_y' => 'nullable|integer|min:0',
             'button_color' => 'nullable|string',
             'button_bg_color' => 'nullable|string',
             'button_size' => 'nullable|string',
@@ -131,12 +137,25 @@ class SliderController extends Controller
             'btn_anim_in' => 'nullable|string',
             'btn_anim_out' => 'nullable|string',
             'order' => 'integer',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'remove_image' => 'boolean', // Flag for removing image
         ]);
 
+        // Handle Image Removal
+        if ($request->boolean('remove_image')) {
+            if ($slide->image_path) {
+                $relativePath = str_replace('/storage/', '', $slide->image_path);
+                if (Storage::disk('public')->exists($relativePath)) {
+                    Storage::disk('public')->delete($relativePath);
+                }
+            }
+            $data['image_path'] = null;
+        }
+
+        // Handle New Image Upload
         if ($request->hasFile('image')) {
             $request->validate(['image' => 'image|max:2048']);
-            
+
             if ($slide->image_path) {
                 $relativePath = str_replace('/storage/', '', $slide->image_path);
                 if (Storage::disk('public')->exists($relativePath)) {
@@ -161,7 +180,7 @@ class SliderController extends Controller
                 Storage::disk('public')->delete($relativePath);
             }
         }
-        
+
         $slide->delete();
         return back()->with('message', 'اسلاید حذف شد.');
     }
@@ -189,14 +208,14 @@ class SliderController extends Controller
 
         foreach ($routes as $route) {
             $name = $route->getName();
-            
+
             // فیلتر کردن روت‌های نامناسب
             if (
-                !$name || 
-                str_starts_with($name, 'sanctum') || 
-                str_starts_with($name, 'ignition') || 
+                !$name ||
+                str_starts_with($name, 'sanctum') ||
+                str_starts_with($name, 'ignition') ||
                 str_starts_with($name, 'api.') ||
-                str_starts_with($name, 'admin.') || // معمولا در ادمین اسلایدر نمی‌گذاریم، اما اگر بخواهید می‌توانید بردارید
+                str_starts_with($name, 'admin.') ||
                 str_starts_with($name, 'login') ||
                 str_starts_with($name, 'register') ||
                 str_starts_with($name, 'password')
@@ -204,14 +223,13 @@ class SliderController extends Controller
                 continue;
             }
 
-            // فقط روت‌های GET که پارامتر اجباری ندارند (یا با منطق خاص هندل شوند)
+            // فقط روت‌های GET که پارامتر اجباری ندارند
             if (in_array('GET', $route->methods())) {
                 $pages[] = $name;
             }
         }
 
-        // افزودن کلیدهای خاص قدیمی برای سازگاری
-        $systemKeys = ['home_main']; 
+        $systemKeys = ['home_main'];
 
         return [
             'system' => $systemKeys,
