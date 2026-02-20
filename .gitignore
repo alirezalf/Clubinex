@@ -19,15 +19,35 @@ auth.json
 /public/storage
 /public/hot
 /public/build
-/storage/*.key
-/storage/pail
-/storage/logs/
-/storage/framework/cache/
-/storage/framework/sessions/
-/storage/framework/views/
-/storage/framework/testing/
-!/storage/framework/.gitkeep
+
+# Ignore all storage except required folders
+/storage/*
+!/storage/app/
+/storage/app/*
+!/storage/app/public/
+!/storage/framework/
+!/storage/framework/cache/
+!/storage/framework/sessions/
+!/storage/framework/views/
+!/storage/framework/testing/
+!/storage/logs/
+
+# Ignore contents but allow gitkeep
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+
+/storage/framework/testing/*
+!/storage/framework/testing/.gitkeep
+
+/storage/logs/*
 !/storage/logs/.gitkeep
+
 
 ### React / Node ###
 /node_modules/
@@ -47,7 +67,6 @@ package-lock.json
 /public/css/
 /public/js/
 /mix-manifest.json
-/vite.config.js
 
 ### محیط توسعه ###
 .DS_Store
@@ -65,15 +84,10 @@ Thumbs.db
 *.temp
 /coverage/
 /coverage-html/
-/.php-cs-fixer.cache
+/.php-cs-fixer.cache/
 /.phpunit.cache/
 
 ### IDE ها ###
-/.vscode/
-/.idea/
-/.fleet/
-/.nova/
-/.zed/
 .project
 .classpath
 .settings/
@@ -86,5 +100,4 @@ Thumbs.db
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db
 desktop.ini
