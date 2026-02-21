@@ -1,4 +1,4 @@
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, usePage } from '@inertiajs/react';
 import { Save, Globe, Smartphone, Palette, Share2, Phone, Mail, BellRing, Code, ShoppingBag, Headphones, Shield } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
@@ -52,7 +52,7 @@ interface EmailTheme {
 interface SettingsProps extends PageProps {
     settings: Record<string, SettingItem[]>;
     notificationTemplates: NotificationTemplate[];
-    emailThemes?: EmailTheme[]; 
+    emailThemes?: EmailTheme[];
     admins?: User[];
 }
 
@@ -67,11 +67,12 @@ const TABS = [
     { id: 'email', label: 'تنظیمات ایمیل', icon: Mail },
     { id: 'support', label: 'تیکت و پشتیبانی', icon: Headphones },
     { id: 'wordpress', label: 'فروشگاه (WordPress)', icon: ShoppingBag },
-    { id: 'email_themes', label: 'قالب‌های ایمیل', icon: Code }, 
-    { id: 'templates', label: 'تنظیمات رویدادها', icon: BellRing }, 
+    { id: 'email_themes', label: 'قالب‌های ایمیل', icon: Code },
+    { id: 'templates', label: 'تنظیمات رویدادها', icon: BellRing },
 ];
 
 export default function AdminSettings({ settings, notificationTemplates, emailThemes = [], admins = [] }: SettingsProps) {
+    const { themeSettings } = usePage<PageProps<{ themeSettings: any }>>().props;
     const [activeTab, setActiveTab] = useState('general');
 
     // Helper to extract values safely
@@ -81,22 +82,33 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
     };
 
     // Prepare initial form data
-    const initialValues = useMemo(() => ({
+    const initialValues = useMemo(() => {
+        // Use Active Theme (themeSettings) for theme values if available, otherwise fallback to DB settings
+        const theme = themeSettings || {};
+
+        return {
         // General & SEO
         site_title: getSettingValue('general', 'site_title', 'Clubinex'),
         site_description: getSettingValue('general', 'site_description', ''),
         meta_keywords: getSettingValue('seo', 'meta_keywords', ''),
-        og_image: getSettingValue('seo', 'og_image', null) as File | string | null, // Added og_image
+        og_image: getSettingValue('seo', 'og_image', null) as File | string | null,
         footer_text: getSettingValue('general', 'footer_text', ''),
-        
-        // Theme
-        primary_color: getSettingValue('theme', 'primary_color', '#0284c7'),
-        sidebar_bg: getSettingValue('theme', 'sidebar_bg', '#ffffff'),
-        sidebar_text: getSettingValue('theme', 'sidebar_text', '#1f2937'),
-        sidebar_texture: getSettingValue('theme', 'sidebar_texture', 'none'),
-        header_bg: getSettingValue('theme', 'header_bg', 'rgba(255,255,255,0.8)',),
-        radius_size: getSettingValue('theme', 'radius_size', '0.75rem'),
-        sidebar_collapsed: getSettingValue('theme', 'sidebar_collapsed', '0') === '1',
+
+        // Theme (Prioritize Active Theme)
+        primary_color: theme.primary_color || getSettingValue('theme', 'primary_color', '#0284c7'),
+        sidebar_bg: theme.sidebar_bg || getSettingValue('theme', 'sidebar_bg', '#ffffff'),
+        sidebar_text: theme.sidebar_text || getSettingValue('theme', 'sidebar_text', '#1f2937'),
+        sidebar_texture: theme.sidebar_texture || getSettingValue('theme', 'sidebar_texture', 'none'),
+        header_bg: theme.header_bg || getSettingValue('theme', 'header_bg', 'rgba(255,255,255,0.8)'),
+        radius_size: theme.radius_size || getSettingValue('theme', 'radius_size', '0.75rem'),
+        card_style: theme.card_style || getSettingValue('theme', 'card_style', 'default'),
+        card_shadow: theme.card_shadow || getSettingValue('theme', 'card_shadow', 'sm'),
+        card_opacity: theme.card_opacity || getSettingValue('theme', 'card_opacity', '1'),
+        sidebar_collapsed: theme.sidebar_collapsed !== undefined
+            ? theme.sidebar_collapsed
+            : getSettingValue('theme', 'sidebar_collapsed', '0') === '1',
+
+        reset_personal_theme: true,
         logo_url: null as File | string | null,
         favicon_url: null as File | string | null,
 
@@ -136,7 +148,8 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         lockout_time: getSettingValue('security', 'lockout_time', '60'),
         session_timeout: getSettingValue('security', 'session_timeout', '30'),
         captcha_enabled: getSettingValue('security', 'captcha_enabled', '0') === '1',
-    }), [settings]);
+    };
+    }, [settings, themeSettings]);
 
     const { data, setData } = useForm(initialValues);
 
@@ -150,8 +163,20 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
             preserveScroll: true,
             onSuccess: () => {
                 const root = document.documentElement;
+                // Apply all theme settings immediately
                 root.style.setProperty('--header-bg', String(data.header_bg));
                 root.style.setProperty('--sidebar-bg', String(data.sidebar_bg));
+                root.style.setProperty('--sidebar-text', String(data.sidebar_text));
+                root.style.setProperty('--sidebar-texture', String(data.sidebar_texture));
+                root.style.setProperty('--radius-xl', String(data.radius_size));
+                root.style.setProperty('--radius-2xl', `calc(${data.radius_size} + 0.25rem)`);
+                root.style.setProperty('--card-opacity', String(data.card_opacity));
+
+                document.body.setAttribute('data-card-style', String(data.card_style));
+                document.body.setAttribute('data-card-shadow', String(data.card_shadow));
+
+                // Re-calculate primary colors if needed (simplified here, ideally import utils)
+                root.style.setProperty('--color-primary-500', String(data.primary_color));
             }
         });
     };
@@ -173,17 +198,17 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
             <Head title="تنظیمات سیستم" />
 
             <div className="flex flex-col lg:flex-row gap-6">
-                
+
                 {/* Sidebar Navigation */}
-                <SettingsSidebar 
-                    tabs={TABS} 
-                    activeTab={activeTab} 
-                    onChange={setActiveTab} 
+                <SettingsSidebar
+                    tabs={TABS}
+                    activeTab={activeTab}
+                    onChange={setActiveTab}
                 />
 
                 {/* Main Content Area */}
-                <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 min-h-[600px]">
-                    
+                <div className="flex-1 card-base p-6 min-h-[600px]">
+
                     {activeTab === 'theme' ? (
                         <ThemeCustomizer data={data} setData={setData} submit={submit} handleFileChange={handleFileChange} />
                     ) : activeTab === 'templates' ? (
@@ -202,7 +227,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
                         <EmailThemesManager themes={emailThemes} />
                     ) : (
                         <form onSubmit={submit} className="space-y-6" encType="multipart/form-data">
-                            
+
                             {activeTab === 'security' && (
                                 <SecuritySettings data={data} setData={setData} />
                             )}

@@ -22,10 +22,10 @@ export default function AdminDashboard({ stats, recentActivities, latestUsers, q
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
              {/* Quick Access Section */}
-             <QuickAccess 
-                pinned={quickAccess.pinned} 
-                frequent={quickAccess.frequent} 
-                isAdmin={true} 
+             <QuickAccess
+                pinned={quickAccess.pinned}
+                frequent={quickAccess.frequent}
+                isAdmin={true}
             />
 
              <div className="flex items-center justify-between">
@@ -34,16 +34,16 @@ export default function AdminDashboard({ stats, recentActivities, latestUsers, q
                     بروزرسانی زنده
                 </div>
             </div>
-            
+
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <StatCard title="کل کاربران" value={stats.total_users.toLocaleString()} icon={Users} trend="+12% این ماه" color="bg-blue-500" />
                 <StatCard title="ثبت‌نام امروز" value={stats.new_users_today.toLocaleString()} icon={UserPlus} trend="کاربر جدید" color="bg-green-500" />
                 <StatCard title="درخواست‌های جایزه" value={stats.pending_rewards.toLocaleString()} icon={Gift} trend="در انتظار تایید" color="bg-amber-500" />
                 <StatCard title="گردش امتیاز" value={stats.total_points_distributed.toLocaleString()} icon={Activity} trend="امتیاز کل" color="bg-purple-500" />
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="card-base p-6">
                     <h3 className="font-bold text-gray-800 mb-4">فعالیت‌های اخیر</h3>
                     <div className="space-y-4">
                         {recentActivities?.map((activity) => (
@@ -60,7 +60,7 @@ export default function AdminDashboard({ stats, recentActivities, latestUsers, q
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="card-base p-6">
                     <h3 className="font-bold text-gray-800 mb-4">کاربران جدید</h3>
                     <div className="space-y-3">
                         {latestUsers?.map((user) => (
@@ -83,7 +83,7 @@ export default function AdminDashboard({ stats, recentActivities, latestUsers, q
 };
 
 const StatCard = ({ title, value, icon: Icon, trend, color }: any) => (
-    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-start justify-between hover:shadow-md transition-shadow">
+    <div className="card-base p-5 flex items-start justify-between hover:shadow-md transition-shadow">
         <div>
             <p className="text-gray-500 text-sm font-medium mb-1">{title}</p>
             <h3 className="text-2xl font-bold text-gray-800">{value}</h3>

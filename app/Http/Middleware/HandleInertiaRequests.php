@@ -10,9 +10,17 @@ use App\Models\SystemSetting;
 use App\Models\Slider;
 use Illuminate\Support\Facades\Route;
 
+use App\Services\ThemeService;
+
 class HandleInertiaRequests extends Middleware
 {
     protected $rootView = 'app';
+    protected $themeService;
+
+    public function __construct(ThemeService $themeService)
+    {
+        $this->themeService = $themeService;
+    }
 
     public function version(Request $request): ?string
     {
@@ -24,34 +32,14 @@ class HandleInertiaRequests extends Middleware
         $ticketBadges = ['user' => 0, 'admin' => 0];
         $user = $request->user();
 
-        // 1. تنظیمات سیستم
-        $settings = cache()->remember('global_settings', 3600, function () {
-            return SystemSetting::getSettingsArray();
-        });
+        // 1. Theme Settings via Service
+        $activeTheme = $this->themeService->getActiveTheme($user);
 
-        $activeTheme = [
-            'primary_color' => $settings['theme.primary_color'] ?? '#0284c7',
-            'radius_size' => $settings['theme.radius_size'] ?? '0.75rem',
-            'sidebar_bg' => $settings['theme.sidebar_bg'] ?? '#ffffff',
-            'sidebar_text' => $settings['theme.sidebar_text'] ?? '#1f2937',
-            'sidebar_texture' => $settings['theme.sidebar_texture'] ?? 'none',
-            'header_bg' => $settings['theme.header_bg'] ?? 'rgba(255,255,255,0.8)',
-            'sidebar_collapsed' => filter_var($settings['theme.sidebar_collapsed'] ?? false, FILTER_VALIDATE_BOOLEAN),
-        ];
-
-        if ($user && !empty($user->theme_preferences) && is_array($user->theme_preferences)) {
-            foreach ($user->theme_preferences as $key => $value) {
-                if (!empty($value)) {
-                    $activeTheme[$key] = $value;
-                }
-            }
-        }
-
-        // 2. بج‌ها و اعلان‌ها
+        // 2. Badges & Notifications
         $unreadNotificationsCount = 0;
         if ($user) {
             $unreadNotificationsCount = $user->unreadNotifications()->count();
-            
+
             $ticketBadges['user'] = Ticket::where('user_id', $user->id)
                 ->where('status', 'answered')
                 ->count();

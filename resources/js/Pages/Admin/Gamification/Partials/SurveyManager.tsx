@@ -7,10 +7,10 @@ interface Survey {
     id: number;
     title: string;
     type: string;
-    participants_count: number; 
+    participants_count: number;
     is_active: number;
     description: string;
-    starts_at: string; 
+    starts_at: string;
     ends_at: string;
     duration_minutes: number;
     starts_at_jalali?: string;
@@ -120,7 +120,7 @@ export default function SurveyManager({ surveys }: Props) {
                 </button>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="card-base overflow-hidden">
                 {(surveys && surveys.length > 0) ? surveys.map((survey) => (
                     <div key={survey.id} className="p-4 border-b border-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center last:border-0 hover:bg-gray-50 transition gap-4">
                         <div className="flex-1">
@@ -142,21 +142,21 @@ export default function SurveyManager({ surveys }: Props) {
                             )}
                         </div>
                         <div className="flex items-center gap-1 self-end sm:self-auto">
-                            <button 
+                            <button
                                 onClick={() => openSurveyModal(survey)}
                                 className="text-gray-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-lg transition"
                                 title="ویرایش تنظیمات"
                             >
                                 <Edit2 size={18} />
                             </button>
-                            <Link 
+                            <Link
                                 href={route('admin.surveys.questions', survey.id)}
                                 className="text-gray-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-lg transition"
                                 title="مدیریت سوالات"
                             >
                                 <ListChecks size={18} />
                             </Link>
-                            <button 
+                            <button
                                 onClick={() => handleDuplicateSurvey(survey.id)}
                                 disabled={duplicatingId === survey.id}
                                 className="text-gray-400 hover:text-purple-600 p-2 hover:bg-purple-50 rounded-lg transition disabled:opacity-50"
@@ -168,14 +168,14 @@ export default function SurveyManager({ surveys }: Props) {
                                     <Copy size={18} />
                                 )}
                             </button>
-                            <button 
+                            <button
                                 onClick={() => router.post(route('admin.surveys.toggle', survey.id), {}, { preserveScroll: true })}
                                 className={`p-2 rounded-lg transition ${survey.is_active ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-100'}`}
                                 title={survey.is_active ? 'فعال (کلیک برای غیرفعال کردن)' : 'غیرفعال (کلیک برای فعال کردن)'}
                             >
                                 <Power size={18} />
                             </button>
-                            <button 
+                            <button
                                 onClick={() => handleDeleteSurvey(survey.id)}
                                 className="text-gray-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition"
                                 title="حذف مسابقه"
@@ -202,21 +202,21 @@ export default function SurveyManager({ surveys }: Props) {
                         <form onSubmit={submitSurvey} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-gray-700">عنوان مسابقه</label>
-                                <input 
-                                    type="text" 
-                                    value={data.title} 
-                                    onChange={e => setData('title', e.target.value)} 
-                                    className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500 border" 
+                                <input
+                                    type="text"
+                                    value={data.title}
+                                    onChange={e => setData('title', e.target.value)}
+                                    className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500 border"
                                     placeholder="مثلا: مسابقه اطلاعات عمومی نوروز"
-                                    required 
+                                    required
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-gray-700">توضیحات</label>
-                                <textarea 
-                                    value={data.description} 
-                                    onChange={e => setData('description', e.target.value)} 
-                                    className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500 border" 
+                                <textarea
+                                    value={data.description}
+                                    onChange={e => setData('description', e.target.value)}
+                                    className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500 border"
                                     rows={3}
                                     placeholder="توضیحاتی در مورد مسابقه و جوایز..."
                                 />
@@ -224,9 +224,9 @@ export default function SurveyManager({ surveys }: Props) {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1 text-gray-700">نوع</label>
-                                    <select 
-                                        value={data.type} 
-                                        onChange={e => setData('type', e.target.value)} 
+                                    <select
+                                        value={data.type}
+                                        onChange={e => setData('type', e.target.value)}
                                         className="w-full border-gray-300 rounded-lg p-2.5 border"
                                     >
                                         <option value="quiz">مسابقه (آزمون)</option>
@@ -235,45 +235,45 @@ export default function SurveyManager({ surveys }: Props) {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1 text-gray-700">مدت زمان (دقیقه)</label>
-                                    <input 
-                                        type="number" 
-                                        value={data.duration_minutes} 
-                                        onChange={e => setData('duration_minutes', e.target.value)} 
+                                    <input
+                                        type="number"
+                                        value={data.duration_minutes}
+                                        onChange={e => setData('duration_minutes', e.target.value)}
                                         className="w-full border-gray-300 rounded-lg p-2.5 border"
-                                        placeholder="خالی = نامحدود" 
+                                        placeholder="خالی = نامحدود"
                                     />
                                 </div>
                             </div>
-                            
+
                             <div className="flex items-center pt-2">
                                 <label className="flex items-center gap-2 cursor-pointer">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={data.is_active} 
-                                        onChange={e => setData('is_active', e.target.checked)} 
+                                    <input
+                                        type="checkbox"
+                                        checked={data.is_active}
+                                        onChange={e => setData('is_active', e.target.checked)}
                                         className="rounded text-blue-600 focus:ring-blue-500 w-5 h-5 border-gray-300 border"
                                     />
                                     <span className="text-sm font-medium text-gray-700">فعال باشد</span>
                                 </label>
                             </div>
-                            
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <PersianDatePicker 
+                                    <PersianDatePicker
                                         label="شروع از (تاریخ و ساعت)"
                                         value={data.starts_at}
                                         onChange={(date) => setData('starts_at', date)}
                                         placeholder="انتخاب زمان"
-                                        withTime={true} 
+                                        withTime={true}
                                     />
                                 </div>
                                 <div>
-                                    <PersianDatePicker 
+                                    <PersianDatePicker
                                         label="پایان در (تاریخ و ساعت)"
                                         value={data.ends_at}
                                         onChange={(date) => setData('ends_at', date)}
                                         placeholder="انتخاب زمان"
-                                        withTime={true} 
+                                        withTime={true}
                                     />
                                 </div>
                             </div>

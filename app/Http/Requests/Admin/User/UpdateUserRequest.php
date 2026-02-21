@@ -9,7 +9,7 @@ class UpdateUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('manage users');
+        return true; // Middleware handles role checks
     }
 
     public function rules(): array

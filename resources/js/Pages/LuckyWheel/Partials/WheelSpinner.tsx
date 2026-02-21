@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Loader2 } from 'lucide-react';
 import { usePage } from '@inertiajs/react';
@@ -16,7 +17,7 @@ interface Props {
 export default function WheelSpinner({ wheel, prizes, rotation, spinning, userPoints, onSpin, defaultColors }: Props) {
     // دریافت نام سایت از پراپ‌های سراسری
     const { site } = usePage<PageProps & { site: { name: string } }>().props;
-    
+
     const numSegments = prizes.length;
     const segmentAngle = 360 / numSegments;
 
@@ -38,7 +39,7 @@ export default function WheelSpinner({ wheel, prizes, rotation, spinning, userPo
 
                 {/* 2. Outer Ring */}
                 <div className="relative w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] rounded-full bg-[#2c3e50] p-4 shadow-2xl border-b-8 border-r-8 border-black/20 z-10">
-                    
+
                     {/* Lights */}
                     <style>{`
                         .wheel-light {
@@ -72,7 +73,7 @@ export default function WheelSpinner({ wheel, prizes, rotation, spinning, userPo
                     {/* 3. Inner Ring */}
                     <div className="w-full h-full rounded-full bg-white p-2 shadow-inner">
                         {/* 4. The SVG Wheel */}
-                        <div 
+                        <div
                             className="w-full h-full relative overflow-hidden rounded-full"
                             style={{
                                 transform: `rotate(${rotation}deg)`,
@@ -93,20 +94,62 @@ export default function WheelSpinner({ wheel, prizes, rotation, spinning, userPo
                                     ].join(' ');
 
                                     const color = prize.color || defaultColors[index % defaultColors.length];
+                                    const textColor = prize.text_color || '#ffffff';
+                                    const fontSize = (prize.font_size || 12) / 100; // Convert to SVG scale
+                                    const orientation = prize.text_orientation || 'horizontal';
+
+                                    // Text wrapping logic
+                                    const wrapText = (text: string, maxChars: number) => {
+                                        const words = text.split(' ');
+                                        const lines = [];
+                                        let currentLine = words[0];
+
+                                        for (let i = 1; i < words.length; i++) {
+                                            if (currentLine.length + words[i].length + 1 < maxChars) {
+                                                currentLine += ' ' + words[i];
+                                            } else {
+                                                lines.push(currentLine);
+                                                currentLine = words[i];
+                                            }
+                                        }
+                                        lines.push(currentLine);
+                                        return lines;
+                                    };
+
+                                    const lines = wrapText(prize.title, 12); // Wrap after 12 chars
 
                                     return (
                                         <g key={prize.id}>
                                             <path d={pathData} fill={color} stroke="white" strokeWidth="0.02" />
                                             <g transform={`rotate(${(index * segmentAngle) + (segmentAngle / 2)} 0 0) translate(0.6 0)`}>
-                                                <g transform="rotate(90)">
-                                                    <text 
-                                                        x="0" y="0" fill="white" textAnchor="middle" dominantBaseline="middle" 
-                                                        fontSize="0.12" fontWeight="bold" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}
-                                                    >
-                                                        {prize.title.length > 12 ? prize.title.substring(0, 10) + '..' : prize.title}
-                                                    </text>
+                                                <g transform={orientation === 'vertical' ? 'rotate(0)' : 'rotate(90)'}>
+                                                    {lines.map((line, i) => (
+                                                        <text
+                                                            key={i}
+                                                            x={0}
+                                                            y={i * fontSize * 1.2}
+                                                            fill={textColor}
+                                                            textAnchor="middle"
+                                                            dominantBaseline="middle"
+                                                            fontSize={fontSize}
+                                                            fontWeight="bold"
+                                                            style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.1)' }}
+                                                            transform={`translate(0, -${(lines.length - 1) * fontSize * 0.6})`}
+                                                        >
+                                                            {line}
+                                                        </text>
+                                                    ))}
+
                                                     {prize.type === 'points' && (
-                                                        <text x="0" y="0.15" fill="white" textAnchor="middle" fontSize="0.08" fontWeight="normal">
+                                                        <text
+                                                            x={0}
+                                                            y={(lines.length * fontSize * 1.2) + 0.05}
+                                                            fill={textColor}
+                                                            textAnchor="middle"
+                                                            fontSize={fontSize * 0.8}
+                                                            fontWeight="normal"
+                                                            transform={`translate(0, -${(lines.length - 1) * fontSize * 0.6})`}
+                                                        >
                                                             {prize.value}
                                                         </text>
                                                     )}
@@ -146,9 +189,9 @@ export default function WheelSpinner({ wheel, prizes, rotation, spinning, userPo
                 <button
                     onClick={onSpin}
                     disabled={spinning || userPoints < wheel.cost_per_spin}
-                    className={`group relative w-full py-4 rounded-2xl font-black text-lg overflow-hidden transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl 
+                    className={`group relative w-full py-4 rounded-2xl font-black text-lg overflow-hidden transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl
                         ${spinning || userPoints < wheel.cost_per_spin
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-red-500/30'
                         }`}
                 >

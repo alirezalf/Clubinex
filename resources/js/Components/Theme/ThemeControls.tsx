@@ -1,14 +1,15 @@
 import React from 'react';
-import { Layout, Sun, Moon, Palette, Monitor, MenuSquare, X } from 'lucide-react';
+import { Layout, Sun, Moon, Palette, Monitor, MenuSquare, X, CreditCard, Layers, Box } from 'lucide-react';
 import clsx from 'clsx';
 
 interface Props {
     data: any;
     setData: (key: string, value: any) => void;
+    isAdminContext?: boolean;
 }
 
-export default function ThemeControls({ data, setData }: Props) {
-    
+export default function ThemeControls({ data, setData, isAdminContext = false }: Props) {
+
     // منطق تغییر حالت سایدبار (روشن/تیره/رنگی/شیشه‌ای)
     const applySidebarMode = (mode: 'light' | 'dark' | 'brand' | 'glass') => {
         let bg = '#ffffff';
@@ -91,6 +92,77 @@ export default function ThemeControls({ data, setData }: Props) {
                         onChange={(e) => setData('radius_size', `${parseInt(e.target.value) / 16}rem`)}
                         className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-primary-600"
                     />
+                </div>
+            </div>
+
+            <hr className="border-gray-100" />
+
+            {/* Card Style Settings */}
+            <div>
+                <label className="mb-3 block flex items-center gap-1 text-xs font-bold text-gray-500">
+                    <CreditCard size={14} /> استایل کارت‌ها (Cards)
+                </label>
+
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                    {[
+                        { id: 'default', icon: Layout, label: 'استاندارد' },
+                        { id: 'glass', icon: Box, label: 'شیشه‌ای' },
+                        { id: 'flat', icon: Layers, label: 'تخت (Flat)' },
+                        { id: 'dark', icon: Moon, label: 'تیره' },
+                    ].map((style) => (
+                        <button
+                            key={style.id}
+                            type="button"
+                            onClick={() => setData('card_style', style.id)}
+                            className={clsx(
+                                'flex flex-col items-center justify-center gap-1 rounded-lg border py-2 text-[10px] font-medium transition',
+                                data.card_style === style.id
+                                    ? 'border-primary-500 bg-primary-50 text-primary-700 ring-1 ring-primary-500'
+                                    : 'border-gray-200 text-gray-600 hover:bg-gray-50 bg-white',
+                            )}
+                        >
+                            <style.icon size={14} />
+                            {style.label}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="mb-2 block text-[10px] font-bold text-gray-400">
+                            میزان سایه
+                        </label>
+                        <select
+                            value={data.card_shadow || 'sm'}
+                            onChange={(e) => setData('card_shadow', e.target.value)}
+                            className="w-full rounded-lg border-gray-200 text-xs"
+                        >
+                            <option value="none">بدون سایه</option>
+                            <option value="sm">کم</option>
+                            <option value="md">متوسط</option>
+                            <option value="lg">زیاد</option>
+                            <option value="xl">خیلی زیاد</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div className="mb-2 flex items-center justify-between">
+                            <label className="text-[10px] font-bold text-gray-400">
+                                شفافیت
+                            </label>
+                            <span className="font-mono text-[10px] text-gray-400">
+                                {Math.round((parseFloat(data.card_opacity || '1')) * 100)}%
+                            </span>
+                        </div>
+                        <input
+                            type="range"
+                            min="0.5"
+                            max="1"
+                            step="0.05"
+                            value={data.card_opacity || 1}
+                            onChange={(e) => setData('card_opacity', e.target.value)}
+                            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-primary-600"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -182,7 +254,7 @@ export default function ThemeControls({ data, setData }: Props) {
                 </label>
                 <div className="grid grid-cols-5 gap-2">
                     {[
-                        'none', 'dots', 'lines', 'grid', 'hex', 
+                        'none', 'dots', 'lines', 'grid', 'hex',
                         'waves', 'sea', 'sunset', 'space', 'forest',
                     ].map((tex) => (
                         <button

@@ -10,27 +10,20 @@ import ThemeSettingsPanel from '@/Components/ThemeSettingsPanel';
 import ToastContainer from '@/Components/Dashboard/ToastContainer';
 import DynamicSlider from '@/Components/DynamicSlider'; // اضافه شده
 import type { PageProps } from '@/types';
-import { generateColorShades, getContrastColor } from '@/Utils/ThemeUtils';
+import { useThemeSystem, ThemeSettings } from '@/Hooks/useThemeSystem';
 
 interface DashboardLayoutProps {
     children: ReactNode;
     breadcrumbs?: BreadcrumbItem[];
 }
 
-interface ThemeSettings {
-    primary_color?: string;
-    header_bg?: string;
-    sidebar_bg?: string;
-    sidebar_text?: string;
-    sidebar_texture?: string;
-    radius_size?: string;
-    sidebar_collapsed?: boolean;
-}
-
 export default function DashboardLayout({ children, breadcrumbs }: DashboardLayoutProps) {
     // دریافت pageSlider از پراپ‌های سراسری
-    const { auth, themeSettings, flash, unreadNotificationsCount, pageSlider } = 
+    const { auth, themeSettings, flash, unreadNotificationsCount, pageSlider } =
         usePage<PageProps<{ themeSettings?: ThemeSettings, unreadNotificationsCount: number, pageSlider?: any }>>().props;
+
+    // Apply Theme Globally
+    useThemeSystem(themeSettings);
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -47,10 +40,10 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
 
     useEffect(() => {
         const interval = setInterval(() => {
-            router.reload({ 
+            router.reload({
                 only: ['unreadNotificationsCount', 'badges']
             });
-        }, 60000); 
+        }, 60000);
 
         return () => clearInterval(interval);
     }, []);
@@ -64,34 +57,6 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
         });
         setCurrentDate(date);
     }, []);
-
-    useLayoutEffect(() => {
-        if (themeSettings) {
-            const root = document.documentElement;
-            const settings = themeSettings as ThemeSettings;
-            const hex = settings.primary_color || '#0284c7';
-            const headerBg = (settings.header_bg as string) || 'rgba(255,255,255,0.8)';
-            const sidebarBg = settings.sidebar_bg || '#ffffff';
-
-            const shades = generateColorShades(hex);
-            Object.entries(shades).forEach(([key, value]) => {
-                root.style.setProperty(key, value as string);
-            });
-
-            const headerText = getContrastColor(headerBg, '#ffffff', '#1f2937');
-            const headerTextMuted = getContrastColor(headerBg, 'rgba(255,255,255,0.7)', '#6b7280');
-            const headerHover = getContrastColor(headerBg, 'rgba(255,255,255,0.1)', 'rgba(0,0,0,0.05)');
-
-            root.style.setProperty('--sidebar-bg', sidebarBg);
-            root.style.setProperty('--sidebar-text', settings.sidebar_text || '#1f2937');
-            root.style.setProperty('--sidebar-texture', settings.sidebar_texture || 'none');
-            root.style.setProperty('--header-bg', headerBg);
-            root.style.setProperty('--header-text', headerText);
-            root.style.setProperty('--header-text-muted', headerTextMuted);
-            root.style.setProperty('--header-hover', headerHover);
-            root.style.setProperty('--radius-xl', settings.radius_size || '0.75rem');
-        }
-    }, [themeSettings]);
 
     return (
         <div className="min-h-screen font-sans" dir="rtl" style={{ background: 'var(--body-bg-gradient, #f9fafb)', transition: 'background 0.5s ease' }}>

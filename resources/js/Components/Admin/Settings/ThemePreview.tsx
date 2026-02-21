@@ -5,7 +5,7 @@ export default function ThemePreview({ settings }: { settings: any }) {
     const primary = settings.primary_color || '#0284c7';
     // Create a very light version of primary for preview using simple opacity
     // We bind directly to the hex value provided by the settings object
-    
+
     // Helper to add alpha to hex
     const addAlpha = (hex: string, alpha: number) => {
         const _hex = hex.replace('#', '');
@@ -18,8 +18,8 @@ export default function ThemePreview({ settings }: { settings: any }) {
         return hex;
     };
 
-    const primary50 = addAlpha(primary, 0.1); 
-    
+    const primary50 = addAlpha(primary, 0.1);
+
     // Inline styles for the preview container
     // We use the direct props to ensure reactivity
     const style = {
@@ -32,11 +32,22 @@ export default function ThemePreview({ settings }: { settings: any }) {
         '--preview-texture': settings.sidebar_texture,
     } as React.CSSProperties;
 
+    // Card Style Logic for Preview
+    const getCardClass = () => {
+        switch (settings.card_style) {
+            case 'glass': return 'bg-white/60 backdrop-blur-sm border border-white/40 shadow-sm';
+            case 'flat': return 'bg-gray-100 border border-gray-200 shadow-none';
+            case 'dark': return 'bg-gray-800 border border-gray-700 text-white shadow-md';
+            default: return 'bg-white border border-gray-100 shadow-sm';
+        }
+    };
+    const cardClass = getCardClass();
+
     return (
         <div className="w-full h-full bg-gray-50 overflow-hidden flex text-right font-sans text-[10px]" style={style} dir="rtl">
-            
+
             {/* Preview Sidebar */}
-            <div 
+            <div
                 className="w-1/4 h-full flex flex-col border-l border-black/5 transition-colors duration-300 relative"
                 style={{ backgroundColor: 'var(--preview-sidebar-bg)', color: 'var(--preview-sidebar-text)' }}
             >
@@ -65,7 +76,7 @@ export default function ThemePreview({ settings }: { settings: any }) {
             {/* Preview Main Content */}
             <div className="flex-1 flex flex-col h-full overflow-hidden">
                 {/* Preview Header */}
-                <div 
+                <div
                     className="h-10 border-b border-gray-200/50 flex items-center justify-between px-3 backdrop-blur-sm transition-colors duration-300"
                     style={{ backgroundColor: 'var(--preview-header-bg)' }}
                 >
@@ -80,12 +91,12 @@ export default function ThemePreview({ settings }: { settings: any }) {
                 <div className="p-3 space-y-3 overflow-y-auto">
                     {/* Stats Cards */}
                     <div className="grid grid-cols-2 gap-2">
-                        <div className="bg-white p-2 rounded shadow-sm border border-gray-100" style={{ borderRadius: 'var(--preview-radius)' }}>
+                        <div className={`p-2 rounded ${cardClass}`} style={{ borderRadius: 'var(--preview-radius)' }}>
                             <div className="w-6 h-6 rounded mb-1" style={{ backgroundColor: primary50, color: 'var(--preview-primary)' }}></div>
                             <div className="h-1 w-8 bg-gray-200 rounded-full mb-1"></div>
                             <div className="h-2 w-4 bg-gray-800 rounded-full"></div>
                         </div>
-                        <div className="bg-white p-2 rounded shadow-sm border border-gray-100" style={{ borderRadius: 'var(--preview-radius)' }}>
+                        <div className={`p-2 rounded ${cardClass}`} style={{ borderRadius: 'var(--preview-radius)' }}>
                             <div className="w-6 h-6 rounded bg-green-50 mb-1"></div>
                             <div className="h-1 w-8 bg-gray-200 rounded-full mb-1"></div>
                             <div className="h-2 w-4 bg-gray-800 rounded-full"></div>
@@ -93,7 +104,7 @@ export default function ThemePreview({ settings }: { settings: any }) {
                     </div>
 
                     {/* Main Card */}
-                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100" style={{ borderRadius: 'var(--preview-radius)' }}>
+                    <div className={`p-3 rounded ${cardClass}`} style={{ borderRadius: 'var(--preview-radius)' }}>
                         <div className="flex justify-between items-center mb-2">
                             <div className="h-2 w-20 bg-gray-200 rounded-full"></div>
                             <div className="h-4 w-10 rounded opacity-20" style={{ backgroundColor: 'var(--preview-primary)' }}></div>
@@ -115,7 +126,7 @@ export default function ThemePreview({ settings }: { settings: any }) {
                     </div>
                 </div>
             </div>
-            
+
             {/* CSS for Preview Textures (Injected locally for preview) */}
             <style>{`
                 .sidebar-texture-dots { background-image: radial-gradient(currentColor 1px, transparent 1px); background-size: 8px 8px; }

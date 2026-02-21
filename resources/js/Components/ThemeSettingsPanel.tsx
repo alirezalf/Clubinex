@@ -17,7 +17,7 @@ export default function ThemeSettingsPanel({
     onClose,
     currentSettings,
 }: Props) {
-    
+
     // اصلاح کلیدی: این پنل همیشه به روت تنظیمات "کاربر" درخواست می‌فرستد.
     // ادمین اگر بخواهد تنظیمات کل سیستم را عوض کند باید به "تنظیمات سیستم" برود.
     // این کار جلوی تداخل تم ادمین و تم سراسری را می‌گیرد.
@@ -30,6 +30,9 @@ export default function ThemeSettingsPanel({
         sidebar_text: currentSettings?.sidebar_text || '#1f2937',
         sidebar_texture: currentSettings?.sidebar_texture || 'none',
         radius_size: currentSettings?.radius_size || '0.75rem',
+        card_style: currentSettings?.card_style || 'default',
+        card_shadow: currentSettings?.card_shadow || 'sm',
+        card_opacity: currentSettings?.card_opacity || '1',
         sidebar_collapsed:
             currentSettings?.sidebar_collapsed === '1' ||
             currentSettings?.sidebar_collapsed === true ||
@@ -47,9 +50,12 @@ export default function ThemeSettingsPanel({
                 sidebar_text: currentSettings.sidebar_text || prev.sidebar_text,
                 sidebar_texture: currentSettings.sidebar_texture || prev.sidebar_texture,
                 radius_size: currentSettings.radius_size || prev.radius_size,
-                sidebar_collapsed: 
-                    currentSettings.sidebar_collapsed === '1' || 
-                    currentSettings.sidebar_collapsed === true || 
+                card_style: currentSettings.card_style || prev.card_style,
+                card_shadow: currentSettings.card_shadow || prev.card_shadow,
+                card_opacity: currentSettings.card_opacity || prev.card_opacity,
+                sidebar_collapsed:
+                    currentSettings.sidebar_collapsed === '1' ||
+                    currentSettings.sidebar_collapsed === true ||
                     currentSettings.sidebar_collapsed === 1
             }));
         }
@@ -98,6 +104,12 @@ export default function ThemeSettingsPanel({
 
         root.style.setProperty('--radius-xl', data.radius_size as string);
         root.style.setProperty('--radius-2xl', `calc(${data.radius_size} + 0.25rem)`);
+
+        // Apply Card Style
+        document.body.setAttribute('data-card-style', data.card_style as string);
+        document.body.setAttribute('data-card-shadow', data.card_shadow as string);
+        root.style.setProperty('--card-opacity', data.card_opacity as string);
+
     }, [data]);
 
     const saveSettings = () => {
@@ -119,10 +131,13 @@ export default function ThemeSettingsPanel({
             sidebar_text: '#1f2937',
             sidebar_texture: 'none',
             radius_size: '0.75rem',
+            card_style: 'default',
+            card_shadow: 'sm',
+            card_opacity: '1',
             sidebar_collapsed: false,
         };
         setData(defaults);
-        
+
         // درخواست مستقیم برای ریست کردن تنظیمات در دیتابیس
         router.post(route(saveRoute), defaults, {
             preserveScroll: true,
@@ -181,8 +196,8 @@ export default function ThemeSettingsPanel({
 
                 {/* Content */}
                 <div className="scrollbar-thin flex-1 space-y-7 overflow-y-auto p-5">
-                    
-                    <ThemePresets 
+
+                    <ThemePresets
                         currentPrimary={data.primary_color as string}
                         currentSidebar={data.sidebar_bg as string}
                         onSelect={handlePresetSelect}
@@ -190,7 +205,7 @@ export default function ThemeSettingsPanel({
 
                     <hr className="border-gray-100" />
 
-                    <ThemeControls 
+                    <ThemeControls
                         data={data}
                         setData={handleControlChange}
                     />

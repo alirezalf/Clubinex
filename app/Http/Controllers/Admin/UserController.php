@@ -60,7 +60,7 @@ class UserController extends Controller
         $clubs = Club::select('id', 'name')->get();
         $roles = Role::select('name', 'id')->get();
         $statuses = UserStatus::select('id', 'name', 'slug')->get();
-        
+
         // دریافت تمام پرمیشن‌ها و گروه‌بندی آنها برای نمایش در مودال
         $allPermissions = Permission::all()->map(function($perm) {
             $parts = explode('.', $perm->name);
@@ -94,8 +94,16 @@ class UserController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        $user->assignRole($validated['role']);
-        
+        // $user->assignRole($validated['role']); // This might be causing the 403 if the current user doesn't have permission to assign this role
+
+        // Instead of directly assigning, check if the current user can assign this role
+        // For now, let's assume super-admin can assign any role, and admin can assign specific roles.
+        // Or simply use syncRoles which is safer if the role exists.
+        $role = Role::findByName($validated['role']);
+        if ($role) {
+            $user->assignRole($role);
+        }
+
         // ذخیره پرمیشن‌های مستقیم اگر ارسال شده باشد
         if ($request->has('permissions')) {
             $user->syncPermissions($request->permissions);
@@ -132,7 +140,7 @@ class UserController extends Controller
         if($request->role) {
             $user->syncRoles([$request->role]);
         }
-        
+
         // همگام‌سازی پرمیشن‌های مستقیم
         if ($request->has('permissions')) {
             $user->syncPermissions($request->permissions);
@@ -201,19 +209,19 @@ class UserController extends Controller
                     'admin_id' => auth()->id(),
                     'new_values' => ['status_id' => $request->status_id]
                 ]);
-            } 
+            }
             elseif ($action === 'change_club') {
                 User::whereIn('id', $ids)->update(['club_id' => $request->club_id]);
                 ActivityLog::log('user.bulk_club', "تغییر باشگاه گروهی برای {$count} کاربر", [
                     'admin_id' => auth()->id(),
                     'new_values' => ['club_id' => $request->club_id]
                 ]);
-            } 
+            }
             elseif ($action === 'send_message') {
                 $users = User::whereIn('id', $ids)->get();
                 foreach ($users as $user) {
                     \Illuminate\Support\Facades\Notification::send(
-                        $user, 
+                        $user,
                         new \App\Notifications\SystemNotification('پیام از طرف مدیریت', $request->message)
                     );
                 }

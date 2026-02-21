@@ -5,7 +5,7 @@ import ThemePresets from '@/Components/Theme/ThemePresets';
 import ThemeControls from '@/Components/Theme/ThemeControls';
 
 export default function ThemeCustomizer({ data, setData, submit, handleFileChange }: any) {
-    
+
     const handlePresetSelect = (preset: any) => {
         setData(prev => ({
             ...prev,
@@ -37,21 +37,41 @@ export default function ThemeCustomizer({ data, setData, submit, handleFileChang
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                 {/* Left Column: Controls */}
                 <div className="space-y-8">
-                    
+
                     {/* Presets */}
-                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                        <ThemePresets 
+                    <div className="card-base p-4">
+                        <ThemePresets
                             currentPrimary={data.primary_color}
                             currentSidebar={data.sidebar_bg}
-                            onSelect={handlePresetSelect} 
+                            onSelect={handlePresetSelect}
                         />
                     </div>
 
-                    <ThemeControls 
+                    <ThemeControls
                         data={data}
                         setData={handleControlChange}
                         isAdminContext={true}
                     />
+
+                    <hr className="border-gray-100" />
+
+                    {/* Reset Personal Theme Option */}
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={data.reset_personal_theme}
+                                onChange={e => setData('reset_personal_theme', e.target.checked)}
+                                className="w-5 h-5 text-amber-600 rounded focus:ring-amber-500 border-gray-300"
+                            />
+                            <div>
+                                <span className="block text-sm font-bold text-gray-800">اعمال سراسری و حذف تنظیمات شخصی من</span>
+                                <span className="block text-xs text-gray-500 mt-1">
+                                    اگر این گزینه فعال باشد، تنظیمات شخصی شما حذف شده و تنظیمات جدید سراسری برای شما هم اعمال می‌شود.
+                                </span>
+                            </div>
+                        </label>
+                    </div>
 
                     <hr className="border-gray-100" />
 
@@ -68,7 +88,7 @@ export default function ThemeCustomizer({ data, setData, submit, handleFileChang
                                 )}
                                 <span className="text-xs text-gray-500 font-medium group-hover:text-primary-600">تغییر لوگو</span>
                             </div>
-                            
+
                             <div className="flex-1 border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center bg-gray-50 hover:bg-white hover:border-primary-300 transition cursor-pointer relative group">
                                 <input type="file" onChange={e => handleFileChange('favicon_url', e)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" />
                                 {data.favicon_url ? (
@@ -88,13 +108,13 @@ export default function ThemeCustomizer({ data, setData, submit, handleFileChang
                         <div className="flex justify-center mb-2">
                             <div className="w-16 h-1 bg-gray-700 rounded-full"></div>
                         </div>
-                        
+
                         {/* Screen Content */}
                         <div className="bg-gray-50 rounded-xl overflow-hidden relative" style={{ height: '500px' }}>
                             <ThemePreview settings={data} />
                         </div>
                     </div>
-                    
+
                     <p className="text-center text-xs text-gray-400 mt-3 flex items-center justify-center gap-1">
                         <Laptop size={14} /> پیش‌نمایش زنده ظاهر سیستم
                     </p>

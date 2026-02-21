@@ -1,4 +1,3 @@
-
 @import 'tailwindcss';
 
 @source '../views';
@@ -59,6 +58,67 @@
     }
 }
 
+/* Card Styles */
+.card-base {
+    @apply transition-all duration-300;
+    border-radius: var(--radius-xl); /* Use global radius or specific card radius */
+    --card-shadow-val: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    box-shadow: var(--card-shadow-val);
+    background-color: rgba(255, 255, 255, var(--card-opacity, 1));
+}
+
+/* Hover Effect */
+.card-base:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+[data-card-style="default"] .card-base {
+    @apply border border-gray-100;
+}
+
+[data-card-style="glass"] .card-base {
+    @apply backdrop-blur-xl border border-white/50;
+    background-color: rgba(255, 255, 255, var(--card-opacity, 0.6));
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+[data-card-style="flat"] .card-base {
+    @apply border-2 border-dashed border-gray-200;
+    box-shadow: none !important;
+    background-color: rgba(249, 250, 251, var(--card-opacity, 1)); /* gray-50 */
+}
+
+[data-card-style="dark"] .card-base {
+    @apply border border-gray-700 text-white;
+    background-color: rgba(31, 41, 55, var(--card-opacity, 1)); /* gray-800 */
+}
+
+/* Shadow Utilities based on CSS Variable */
+body[data-card-shadow="none"] .card-base { box-shadow: none; }
+body[data-card-shadow="sm"] .card-base { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+body[data-card-shadow="md"] .card-base { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+body[data-card-shadow="lg"] .card-base { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+body[data-card-shadow="xl"] .card-base { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+
+/* Text Colors for Dark Card Style */
+[data-card-style="dark"] .card-base h1,
+[data-card-style="dark"] .card-base h2,
+[data-card-style="dark"] .card-base h3,
+[data-card-style="dark"] .card-base h4,
+[data-card-style="dark"] .card-base p,
+[data-card-style="dark"] .card-base span,
+[data-card-style="dark"] .card-base div {
+    @apply text-gray-100;
+}
+
+[data-card-style="dark"] .card-base .text-gray-500,
+[data-card-style="dark"] .card-base .text-gray-600,
+[data-card-style="dark"] .card-base .text-gray-700,
+[data-card-style="dark"] .card-base .text-gray-800 {
+    @apply text-gray-300;
+}
+
 :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -66,7 +126,7 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --color-primary-500: #0284c7; 
+    --color-primary-500: #0284c7;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
@@ -128,7 +188,7 @@
         height: 100% !important;
         overflow: visible !important;
     }
-    
+
     /* مخفی کردن تمام اجزای داشبورد */
     header, aside, .no-print, nav {
         display: none !important;
@@ -150,7 +210,7 @@
         background: white;
         z-index: 9999;
     }
-    
+
     /* حذف سایه‌ها و افکت‌ها برای چاپ بهتر */
     * {
         box-shadow: none !important;

@@ -52,6 +52,10 @@ class GamificationController extends Controller
             'type' => 'required|in:points,item,empty,retry',
             'value' => 'required|integer|min:0',
             'stock' => 'nullable|integer',
+            'color' => 'nullable|string',
+            'text_color' => 'nullable|string',
+            'font_size' => 'nullable|integer|min:8|max:48',
+            'text_orientation' => 'nullable|in:horizontal,vertical',
         ]);
 
         $prize = LuckyWheelPrize::create($validated);
@@ -75,7 +79,11 @@ class GamificationController extends Controller
             'type' => 'required|in:points,item,empty,retry',
             'value' => 'required|integer|min:0',
             'stock' => 'nullable|integer',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'color' => 'nullable|string',
+            'text_color' => 'nullable|string',
+            'font_size' => 'nullable|integer|min:8|max:48',
+            'text_orientation' => 'nullable|in:horizontal,vertical',
         ]);
 
         $prize->update($validated);

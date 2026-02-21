@@ -26,6 +26,9 @@ return new class extends Migration {
             $table->string('title');                         // عنوان آیتم (مثلا: 100 امتیاز)
             $table->string('icon')->nullable();              // آیکون یا تصویر آیتم
             $table->string('color')->default('#ffffff');     // رنگ پس‌زمینه اسلایس
+            $table->string('text_color')->default('#000000'); // رنگ متن
+            $table->integer('font_size')->default(12);       // سایز فونت
+            $table->enum('text_orientation', ['horizontal', 'vertical'])->default('horizontal'); // جهت متن
             $table->enum('type', ['points', 'item', 'empty', 'retry']); // نوع جایزه
             $table->integer('value')->default(0);            // مقدار (مثلا تعداد امتیاز)
             $table->integer('probability')->default(0);      // شانس برنده شدن (وزن)

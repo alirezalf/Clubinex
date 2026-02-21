@@ -10,7 +10,7 @@ class LuckyWheelPrize extends Model
     use HasFactory;
 
     protected $fillable = [
-        'lucky_wheel_id', 'title', 'icon', 'color', 
+        'lucky_wheel_id', 'title', 'icon', 'color', 'text_color', 'font_size', 'text_orientation',
         'type', 'value', 'probability', 'stock', 'is_active'
     ];
 

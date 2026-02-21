@@ -30,8 +30,11 @@ class SettingSeeder extends Seeder
             ['group' => 'social', 'key' => 'linkedin', 'value' => 'https://linkedin.com/in/clubinex', 'type' => 'string', 'is_public' => true, 'label' => 'لینکدین'],
 
             // تنظیمات ظاهری (تم)
-            ['group' => 'theme', 'key' => 'primary_color', 'value' => '#0284c7', 'type' => 'string', 'is_public' => true, 'label' => 'رنگ اصلی'], 
+            ['group' => 'theme', 'key' => 'primary_color', 'value' => '#0284c7', 'type' => 'string', 'is_public' => true, 'label' => 'رنگ اصلی'],
             ['group' => 'theme', 'key' => 'radius_size', 'value' => '0.75rem', 'type' => 'string', 'is_public' => true, 'label' => 'اندازه گردی گوشه‌ها'],
+            ['group' => 'theme', 'key' => 'card_style', 'value' => 'default', 'type' => 'string', 'is_public' => true, 'label' => 'استایل کارت‌ها'],
+            ['group' => 'theme', 'key' => 'card_shadow', 'value' => 'sm', 'type' => 'string', 'is_public' => true, 'label' => 'سایه کارت‌ها'], // Added
+            ['group' => 'theme', 'key' => 'card_opacity', 'value' => '1', 'type' => 'string', 'is_public' => true, 'label' => 'شفافیت کارت‌ها'], // Added
             ['group' => 'theme', 'key' => 'logo_url', 'value' => '', 'type' => 'string', 'is_public' => true, 'label' => 'لوگو'],
             ['group' => 'theme', 'key' => 'favicon_url', 'value' => '', 'type' => 'string', 'is_public' => true, 'label' => 'فاوآیکون'],
             ['group' => 'theme', 'key' => 'sidebar_collapsed', 'value' => false, 'type' => 'boolean', 'is_public' => true, 'label' => 'منوی کناری بصورت پیش‌فرض بسته باشد'],
@@ -47,7 +50,7 @@ class SettingSeeder extends Seeder
             ['group' => 'club', 'key' => 'referral_points', 'value' => '20', 'type' => 'number', 'is_public' => false, 'label' => 'امتیاز معرفی'],
             ['group' => 'club', 'key' => 'daily_point_limit', 'value' => '1000', 'type' => 'number', 'is_public' => false, 'label' => 'سقف امتیاز روزانه'],
             ['group' => 'finance', 'key' => 'currency', 'value' => 'تومان', 'type' => 'string', 'is_public' => true, 'label' => 'واحد پول'],
-            
+
             // تنظیمات پیامک
             ['group' => 'sms', 'key' => 'sms_provider', 'value' => 'kavenegar', 'type' => 'string', 'is_public' => false, 'label' => 'سرویس دهنده پیامک'],
             ['group' => 'sms', 'key' => 'sms_api_key', 'value' => '', 'type' => 'string', 'is_public' => false, 'label' => 'کلید API پیامک'],

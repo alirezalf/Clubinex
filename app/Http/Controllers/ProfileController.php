@@ -13,9 +13,17 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use App\Services\ThemeService;
 
 class ProfileController extends Controller
 {
+    protected $themeService;
+
+    public function __construct(ThemeService $themeService)
+    {
+        $this->themeService = $themeService;
+    }
+
     public function show()
     {
         /** @var User $user */
@@ -42,8 +50,8 @@ class ProfileController extends Controller
         }
 
         $provinces = DB::table('provinces')->where('is_active', true)->select('id', 'name')->get();
-        $cities = $user->province_id 
-            ? DB::table('cities')->where('province_id', $user->province_id)->select('id', 'name')->get() 
+        $cities = $user->province_id
+            ? DB::table('cities')->where('province_id', $user->province_id)->select('id', 'name')->get()
             : [];
 
         return Inertia::render('Profile', [
@@ -132,14 +140,7 @@ class ProfileController extends Controller
     public function updateTheme(Request $request)
     {
         $user = auth()->user();
-        
-        $preferences = $request->only([
-            'primary_color', 'header_bg', 'sidebar_bg', 'sidebar_text', 
-            'sidebar_texture', 'radius_size', 'sidebar_collapsed'
-        ]);
-
-        $user->theme_preferences = $preferences;
-        $user->save();
+        $this->themeService->updateUserTheme($user, $request->all());
 
         return back()->with('message', 'تنظیمات ظاهری شما شخصی‌سازی شد.');
     }

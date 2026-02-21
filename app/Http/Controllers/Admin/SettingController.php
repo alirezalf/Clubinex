@@ -12,16 +12,27 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log; // Added Log
 use Carbon\Carbon;
+
+use App\Services\ThemeService;
 
 class SettingController extends Controller
 {
+    protected $themeService;
+
+    public function __construct(ThemeService $themeService)
+    {
+        $this->themeService = $themeService;
+    }
+
     public function index()
     {
+        // ... (keep index method as is)
         $settings = SystemSetting::all()->groupBy('group');
         $notificationTemplates = NotificationTemplate::with('emailTheme')->get();
         $emailThemes = EmailTheme::latest()->get();
-        
+
         $admins = User::whereHas('roles', function($q) {
             $q->whereIn('name', ['super-admin', 'admin', 'staff']);
         })->select('id', 'first_name', 'last_name', 'email', 'avatar')->get();
@@ -30,42 +41,60 @@ class SettingController extends Controller
             'settings' => $settings,
             'notificationTemplates' => $notificationTemplates,
             'emailThemes' => $emailThemes,
-            'admins' => $admins 
+            'admins' => $admins
         ]);
     }
 
     public function update(Request $request)
     {
         $data = $request->except(['_token', '_method']);
+        $themeKeys = ThemeService::getAllowedKeys();
 
-        // دریافت تمام کلیدهای تنظیمات موجود در دیتابیس برای تعیین گروه صحیح
-        $existingKeys = SystemSetting::pluck('group', 'key')->toArray();
+        // 1. Handle Reset Personal Theme
+        if ($request->has('reset_personal_theme')) {
+             $shouldReset = filter_var($request->reset_personal_theme, FILTER_VALIDATE_BOOLEAN);
+             if ($shouldReset) {
+                $this->themeService->resetUserTheme(auth()->user());
+             }
+             unset($data['reset_personal_theme']);
+        }
+
+        // 2. Separate Theme Settings from General Settings
+        $themeData = [];
+        $generalData = [];
 
         foreach ($data as $key => $value) {
-            // مدیریت آپلود فایل‌ها (لوگو و فاوآیکون)
+            // Handle File Uploads
             if ($request->hasFile($key)) {
                 $file = $request->file($key);
                 $path = $file->store('public/settings');
                 $value = Storage::url($path);
             }
 
-            // اگر مقدار نال بود و فایلی هم آپلود نشده بود، از پردازش رد شو
             if ($value === null && !$request->hasFile($key)) {
-                continue; 
+                continue;
             }
 
-            // تعیین گروه: اگر کلید در دیتابیس بود از گروه خودش استفاده کن، وگرنه 'general'
-            $group = $existingKeys[$key] ?? 'general';
-
-            // ذخیره یا بروزرسانی تنظیمات
-            SystemSetting::setValue(
-                $group, 
-                $key,
-                $value
-            );
+            if (in_array($key, $themeKeys)) {
+                $themeData[$key] = $value;
+            } else {
+                $generalData[$key] = $value;
+            }
         }
 
-        // پاک کردن کش برای اعمال تغییرات در کل سیستم
+        // 3. Update Theme Settings via Service
+        if (!empty($themeData)) {
+            $this->themeService->updateSystemTheme($themeData);
+        }
+
+        // 4. Update General Settings (Legacy Logic)
+        $existingKeys = SystemSetting::pluck('group', 'key')->toArray();
+        foreach ($generalData as $key => $value) {
+            $group = $existingKeys[$key] ?? 'general';
+            SystemSetting::setValue($group, $key, $value);
+        }
+
+        // Clear cache
         cache()->forget('global_settings');
 
         return back()->with('message', 'تنظیمات با موفقیت ذخیره و اعمال شد.');
@@ -82,7 +111,7 @@ class SettingController extends Controller
 
         try {
             $response = Http::withBasicAuth($request->key, $request->secret)
-                ->withOptions(['verify' => app()->isProduction()]) 
+                ->withOptions(['verify' => app()->isProduction()])
                 ->get(rtrim($request->url, '/') . "/wp-json/wc/v3/system_status", [
                     'timeout' => 10
                 ]);
@@ -90,7 +119,7 @@ class SettingController extends Controller
             if ($response->successful()) {
                 $data = $response->json();
                 $env = $data['environment'] ?? [];
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => 'اتصال با موفقیت برقرار شد.',
@@ -163,7 +192,7 @@ class SettingController extends Controller
             ], 500);
         }
     }
-    
+
     // --- مدیریت تم‌های ایمیل ---
 
     public function storeTheme(Request $request)
@@ -182,7 +211,7 @@ class SettingController extends Controller
     public function updateTheme(Request $request, $id)
     {
         $theme = EmailTheme::findOrFail($id);
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'content' => 'required|string',
@@ -197,7 +226,7 @@ class SettingController extends Controller
     public function destroyTheme($id)
     {
         $theme = EmailTheme::findOrFail($id);
-        
+
         if ($theme->templates()->count() > 0) {
             return back()->with('error', 'این تم به برخی رویدادها متصل است و نمی‌توان آن را حذف کرد.');
         }
@@ -222,7 +251,7 @@ class SettingController extends Controller
                   });
             });
         }
-        
+
         if ($request->action && $request->action !== 'all') {
             $query->where('action_group', $request->action);
         }
@@ -231,7 +260,7 @@ class SettingController extends Controller
             if ($request->has('hour') && $request->hour !== null && $request->hour !== '') {
                  $startTime = Carbon::parse($request->date)->setHour($request->hour)->setMinute(0)->setSecond(0);
                  $endTime = Carbon::parse($request->date)->setHour($request->hour)->setMinute(59)->setSecond(59);
-                 
+
                  $query->whereBetween('created_at', [$startTime, $endTime]);
             } else {
                  $query->whereDate('created_at', $request->date);
@@ -239,12 +268,12 @@ class SettingController extends Controller
         }
 
         $logs = $query->latest()->paginate(20)->withQueryString();
-        
+
         $logs->getCollection()->transform(function ($log) {
             $log->created_at_jalali = $log->created_at_jalali;
             return $log;
         });
-            
+
         return Inertia::render('Admin/Logs', [
             'logs' => $logs,
             'filters' => $request->only(['search', 'date', 'hour', 'action'])

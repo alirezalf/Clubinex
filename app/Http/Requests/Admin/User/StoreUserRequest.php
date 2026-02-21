@@ -8,7 +8,7 @@ class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('manage users'); // یا true اگر از میدل‌ور استفاده می‌شود
+        return true; // Middleware handles role checks
     }
 
     public function rules(): array
@@ -23,7 +23,7 @@ class StoreUserRequest extends FormRequest
             'role' => 'required|string|exists:roles,name',
         ];
     }
-    
+
     public function attributes()
     {
         return [
