@@ -39,7 +39,6 @@ export function useThemeSystem(themeSettings?: ThemeSettings) {
         // 3. Apply CSS Variables
         root.style.setProperty('--sidebar-bg', sidebarBg);
         root.style.setProperty('--sidebar-text', settings.sidebar_text || '#1f2937');
-        root.style.setProperty('--sidebar-texture', settings.sidebar_texture || 'none');
         root.style.setProperty('--header-bg', headerBg);
         root.style.setProperty('--header-text', headerText);
         root.style.setProperty('--header-text-muted', headerTextMuted);
@@ -47,6 +46,9 @@ export function useThemeSystem(themeSettings?: ThemeSettings) {
         root.style.setProperty('--radius-xl', settings.radius_size || '0.75rem');
         root.style.setProperty('--radius-2xl', `calc(${settings.radius_size || '0.75rem'} + 0.25rem)`);
         root.style.setProperty('--card-opacity', settings.card_opacity || '1');
+
+        // Apply Texture as Data Attribute
+        root.setAttribute('data-sidebar-texture', settings.sidebar_texture || 'none');
 
         // 4. Apply Body Attributes (Global Scope)
         document.body.setAttribute('data-card-style', settings.card_style || 'default');

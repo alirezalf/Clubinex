@@ -32,7 +32,7 @@ export default function EmailLoginForm({ captchaUrl, refreshCaptcha, onSwitchMet
                         type="email"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
-                        className="w-full pl-4 pr-9 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-left ltr transition-all text-xs placeholder:text-gray-300"
+                        className="w-full pl-4 pr-9 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-left ltr transition-all text-xs placeholder:text-gray-300 text-gray-900 bg-white"
                         placeholder="example@domain.com"
                         required
                     />
@@ -48,7 +48,7 @@ export default function EmailLoginForm({ captchaUrl, refreshCaptcha, onSwitchMet
                         type="password"
                         value={data.password}
                         onChange={(e) => setData('password', e.target.value)}
-                        className="w-full pl-4 pr-9 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-left ltr transition-all text-xs placeholder:text-gray-300"
+                        className="w-full pl-4 pr-9 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-left ltr transition-all text-xs placeholder:text-gray-300 text-gray-900 bg-white"
                         placeholder="••••••••"
                         required
                     />
@@ -56,34 +56,30 @@ export default function EmailLoginForm({ captchaUrl, refreshCaptcha, onSwitchMet
                 </div>
             </div>
 
-            <div className="space-y-1">
-                <label className="block text-[10px] font-medium text-gray-500">کد امنیتی</label>
-                <div className="flex gap-2">
-                    <input
-                        type="text"
-                        value={data.captcha}
-                        onChange={(e) => setData('captcha', e.target.value)}
-                        className="w-24 px-2 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dir-ltr text-center transition-all text-xs font-mono tracking-widest"
-                        placeholder="Code"
-                        required
-                    />
-                    <div className="relative group cursor-pointer flex-1" onClick={refreshCaptcha} title="تغییر کد">
-                        {captchaUrl ? (
+            {captchaUrl && (
+                <div className="space-y-1">
+                    <label className="block text-[10px] font-medium text-gray-500">کد امنیتی</label>
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={data.captcha}
+                            onChange={(e) => setData('captcha', e.target.value)}
+                            className="w-24 px-2 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dir-ltr text-center transition-all text-xs font-mono tracking-widest text-gray-900 bg-white"
+                            placeholder="Code"
+                            required
+                        />
+                        <div className="relative group cursor-pointer flex-1" onClick={refreshCaptcha} title="تغییر کد">
                             <div className="h-[34px] w-full rounded-lg border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
                                 <img src={captchaUrl} alt="captcha" className="h-full w-full object-contain" />
                             </div>
-                        ) : (
-                            <div className="h-[34px] w-full bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 text-[10px]">
-                                ...
+                            <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg">
+                                <RefreshCw size={14} className="text-gray-700" />
                             </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg">
-                            <RefreshCw size={14} className="text-gray-700" />
                         </div>
                     </div>
+                    {errors.captcha && <p className="text-red-500 text-[10px]">{errors.captcha}</p>}
                 </div>
-                {errors.captcha && <p className="text-red-500 text-[10px]">{errors.captcha}</p>}
-            </div>
+            )}
 
             <button
                 disabled={processing}

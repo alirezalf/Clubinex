@@ -1,5 +1,6 @@
 import React from 'react';
 import { Palette, Save, Laptop } from 'lucide-react';
+import { router } from '@inertiajs/react';
 import ThemePreview from './ThemePreview';
 import ThemePresets from '@/Components/Theme/ThemePresets';
 import ThemeControls from '@/Components/Theme/ThemeControls';
@@ -24,10 +25,23 @@ export default function ThemeCustomizer({ data, setData, submit, handleFileChang
     return (
         <form onSubmit={submit} className="space-y-8 animate-in fade-in" encType="multipart/form-data">
             <div className="flex justify-between items-center border-b pb-4">
-                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <Palette size={24} className="text-primary-600" />
-                    تنظیمات ظاهری سیستم (سراسری)
-                </h3>
+                <div className="flex items-center gap-4">
+                    <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <Palette size={24} className="text-primary-600" />
+                        تنظیمات ظاهری سیستم (سراسری)
+                    </h3>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (confirm('آیا مطمئن هستید که می‌خواهید تنظیمات ظاهری را به حالت پیش‌فرض برگردانید؟')) {
+                                router.post(route('admin.settings.reset_defaults'), { group: 'theme' });
+                            }
+                        }}
+                        className="text-xs text-red-500 hover:text-red-700 underline"
+                    >
+                        بازنشانی به پیش‌فرض
+                    </button>
+                </div>
                 <button type="submit" className="bg-primary-600 text-white px-6 py-2 rounded-xl hover:bg-primary-700 shadow-md flex items-center gap-2 font-bold text-sm">
                     <Save size={16} />
                     ذخیره و اعمال سراسری

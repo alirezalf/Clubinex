@@ -1,5 +1,5 @@
 import { Head, useForm, router, usePage } from '@inertiajs/react';
-import { Save, Globe, Smartphone, Palette, Share2, Phone, Mail, BellRing, Code, ShoppingBag, Headphones, Shield } from 'lucide-react';
+import { Save, Globe, Smartphone, Palette, Share2, Phone, Mail, BellRing, Code, ShoppingBag, Headphones, Shield, User as UserIcon } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import clsx from 'clsx';
@@ -17,7 +17,8 @@ import ContactSettings from '@/Components/Admin/Settings/ContactSettings';
 import SocialSettings from '@/Components/Admin/Settings/SocialSettings';
 import SmsSettings from '@/Components/Admin/Settings/SmsSettings';
 import EmailSettings from '@/Components/Admin/Settings/EmailSettings';
-import { PageProps, User } from '@/types';
+import LoginSettings from '@/Components/Admin/Settings/LoginSettings';
+import type { PageProps, User } from '@/types/index';
 
 // Types
 interface SettingItem {
@@ -60,6 +61,7 @@ interface SettingsProps extends PageProps {
 const TABS = [
     { id: 'general', label: 'عمومی و سئو', icon: Globe },
     { id: 'theme', label: 'شخصی‌سازی ظاهر', icon: Palette },
+    { id: 'login', label: 'تنظیمات ورود', icon: UserIcon }, // New Tab
     { id: 'security', label: 'امنیت', icon: Shield },
     { id: 'contact', label: 'اطلاعات تماس', icon: Phone },
     { id: 'social', label: 'شبکه‌های اجتماعی', icon: Share2 },
@@ -111,6 +113,31 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         reset_personal_theme: true,
         logo_url: null as File | string | null,
         favicon_url: null as File | string | null,
+
+        // Login Settings
+        login_theme: getSettingValue('login', 'login_theme', 'classic'),
+        login_layout_reversed: getSettingValue('login', 'login_layout_reversed', '0') === '1',
+        login_left_bg_type: getSettingValue('login', 'login_left_bg_type', 'random'),
+        login_left_image: getSettingValue('login', 'login_left_image', null) as File | string | null,
+        login_left_color: getSettingValue('login', 'login_left_color', '#f3f4f6'),
+        login_left_gradient: getSettingValue('login', 'login_left_gradient', ''),
+        login_right_bg_type: getSettingValue('login', 'login_right_bg_type', 'color'),
+        login_right_image: getSettingValue('login', 'login_right_image', null) as File | string | null,
+        login_right_color: getSettingValue('login', 'login_right_color', '#ffffff'),
+        login_right_gradient: getSettingValue('login', 'login_right_gradient', ''),
+        login_title: getSettingValue('login', 'login_title', 'خوش آمدید'),
+        login_subtitle: getSettingValue('login', 'login_subtitle', 'به باشگاه مشتریان Clubinex وارد شوید'),
+        login_copyright: getSettingValue('login', 'login_copyright', '© 2024 تمامی حقوق محفوظ است.'),
+        login_slogan_title: getSettingValue('login', 'login_slogan_title', 'تجربه ای متفاوت از وفاداری'),
+        login_slogan_text: getSettingValue('login', 'login_slogan_text', 'با پیوستن به باشگاه مشتریان، از تخفیف‌ها و جوایز ویژه بهره‌مند شوید.'),
+        login_logo: getSettingValue('login', 'login_logo', null) as File | string | null,
+        login_title_color: getSettingValue('login', 'login_title_color', '#111827'),
+        login_subtitle_color: getSettingValue('login', 'login_subtitle_color', '#6b7280'),
+        login_slogan_color: getSettingValue('login', 'login_slogan_color', '#ffffff'),
+        login_copyright_color: getSettingValue('login', 'login_copyright_color', '#9ca3af'),
+        login_btn_bg: getSettingValue('login', 'login_btn_bg', '#0284c7'),
+        login_btn_text: getSettingValue('login', 'login_btn_text', '#ffffff'),
+        login_card_bg: getSettingValue('login', 'login_card_bg', '#ffffff'),
 
         // Contact & Social
         admin_mobile: getSettingValue('contact', 'admin_mobile', ''),
@@ -236,6 +263,10 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
                                 <GeneralSettings data={data} setData={handleSettingChange} />
                             )}
 
+                            {activeTab === 'login' && (
+                                <LoginSettings data={data} setData={handleSettingChange} />
+                            )}
+
                             {activeTab === 'contact' && (
                                 <ContactSettings data={data} setData={handleSettingChange} />
                             )}
@@ -249,7 +280,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
                             )}
 
                             {activeTab === 'email' && (
-                                <EmailSettings data={data} setData={handleSettingChange} />
+                                <EmailSettings data={data} setData={handleSettingChange} emailThemes={emailThemes} />
                             )}
 
                             {activeTab === 'support' && (

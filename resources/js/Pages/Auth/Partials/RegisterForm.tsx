@@ -131,34 +131,30 @@ export default function RegisterForm({ captchaUrl, refreshCaptcha }: Props) {
                 </div>
             </div>
 
-            <div className="space-y-0.5">
-                <label className="block text-[10px] font-medium text-gray-500">کد امنیتی</label>
-                <div className="flex gap-2 h-[34px]">
-                    <input
-                        type="text"
-                        value={data.captcha}
-                        onChange={(e) => setData('captcha', e.target.value)}
-                        className="w-20 px-2 h-full border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dir-ltr text-center transition-all text-[11px] font-mono tracking-widest"
-                        placeholder="Code"
-                        required
-                    />
-                    <div className="relative group cursor-pointer flex-1 h-full" onClick={refreshCaptcha} title="تغییر کد">
-                        {captchaUrl ? (
+            {captchaUrl && (
+                <div className="space-y-0.5">
+                    <label className="block text-[10px] font-medium text-gray-500">کد امنیتی</label>
+                    <div className="flex gap-2 h-[34px]">
+                        <input
+                            type="text"
+                            value={data.captcha}
+                            onChange={(e) => setData('captcha', e.target.value)}
+                            className="w-20 px-2 h-full border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dir-ltr text-center transition-all text-[11px] font-mono tracking-widest"
+                            placeholder="Code"
+                            required
+                        />
+                        <div className="relative group cursor-pointer flex-1 h-full" onClick={refreshCaptcha} title="تغییر کد">
                             <div className="h-full w-full rounded-lg border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
                                 <img src={captchaUrl} alt="captcha" className="h-full w-full object-contain" />
                             </div>
-                        ) : (
-                            <div className="h-full w-full bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 text-[10px]">
-                                ...
+                            <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg">
+                                <RefreshCw size={14} className="text-gray-700" />
                             </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg">
-                            <RefreshCw size={14} className="text-gray-700" />
                         </div>
                     </div>
+                    {errors.captcha && <p className="text-red-500 text-[9px]">{errors.captcha}</p>}
                 </div>
-                {errors.captcha && <p className="text-red-500 text-[9px]">{errors.captcha}</p>}
-            </div>
+            )}
 
             <input type="hidden" name="referral_code" value={data.referral_code} />
 

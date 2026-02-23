@@ -32,7 +32,7 @@
               if (!$wheel) {
                   throw new Exception('در حال حاضر هیچ گردونه‌ای فعال نیست.');
               }
-              
+
               if ($wheel->required_club_id && $lockedUser->club_id < $wheel->required_club_id) {
                   throw new Exception('سطح کاربری شما برای استفاده از این گردونه کافی نیست.');
               }
@@ -73,7 +73,7 @@
                   } else {
                       // اگر موجودی تمام شده بود، جایزه پوچ یا شانس مجدد را جایگزین کن
                       $fallbackPrize = $prizes->whereIn('type', ['empty', 'retry'])->first();
-                      
+
                       if (!$fallbackPrize) {
                           throw new Exception('موجودی این جایزه به پایان رسید و جایگزینی یافت نشد.');
                       }
@@ -83,7 +83,7 @@
 
               // 7. ثبت نتیجه چرخش
               $isWin = !in_array($selectedPrize->type, ['empty', 'retry']);
-              
+
               $spin = LuckyWheelSpin::create([
                   'user_id' => $user->id,
                   'lucky_wheel_id' => $wheel->id,
@@ -124,14 +124,14 @@
           $availablePrizes = $prizes->filter(function($p) {
               return is_null($p->stock) || $p->stock > 0;
           });
-          
+
           // اگر همه جوایز اصلی تمام شده بودند، فقط پوچ/Retry را برگردان
           if ($availablePrizes->isEmpty()) {
               return $prizes->whereIn('type', ['empty', 'retry'])->first() ?? $prizes->first();
           }
 
           $totalWeight = $availablePrizes->sum('probability');
-          
+
           if ($totalWeight <= 0) return $availablePrizes->first();
 
           $random = rand(1, $totalWeight);
@@ -171,12 +171,24 @@
               // ثبت درخواست جایزه فیزیکی
               RewardRedemption::create([
                   'user_id' => $user->id,
-                  'reward_id' => null, 
+                  'reward_id' => null,
                   'lucky_wheel_spin_id' => $spin->id,
                   'points_spent' => 0,
                   'status' => 'pending',
                   'admin_note' => "برنده شده در گردونه شانس: {$prize->title}"
               ]);
+
+              // ارسال نوتیفیکیشن به ادمین‌ها
+              try {
+                  $admins = User::role(['super-admin', 'admin'])->get();
+                  if ($admins->isNotEmpty()) {
+                      \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\SystemNotification(
+                          'برنده جایزه فیزیکی در گردونه',
+                          "کاربر {$user->first_name} {$user->last_name} برنده جایزه '{$prize->title}' در گردونه شانس شد."
+                      ));
+                  }
+              } catch (Exception $e) {}
+
               $message = "تبریک! شما برنده \"{$prize->title}\" شدید. همکاران ما جهت هماهنگی ارسال با شما تماس می‌گیرند.";
               $messageType = 'success';
           } elseif ($prize->type === 'retry') {

@@ -54,38 +54,34 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
                             value={mobile}
                             onChange={(e) => setMobile(e.target.value)}
                             placeholder="0912..."
-                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-left ltr transition-all text-xs placeholder:text-gray-300"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-left ltr transition-all text-xs placeholder:text-gray-300 text-gray-900 bg-white"
                             required
                         />
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="block text-[10px] font-medium text-gray-500">کد امنیتی</label>
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                value={captcha}
-                                onChange={(e) => setCaptcha(e.target.value)}
-                                className="w-24 px-2 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dir-ltr text-center transition-all text-xs font-mono tracking-widest"
-                                placeholder="Code"
-                                required
-                            />
-                            <div className="relative group cursor-pointer flex-1" onClick={refreshCaptcha} title="تغییر کد">
-                                {captchaUrl ? (
+                    {captchaUrl && (
+                        <div className="space-y-1">
+                            <label className="block text-[10px] font-medium text-gray-500">کد امنیتی</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={captcha}
+                                    onChange={(e) => setCaptcha(e.target.value)}
+                                    className="w-24 px-2 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dir-ltr text-center transition-all text-xs font-mono tracking-widest text-gray-900 bg-white"
+                                    placeholder="Code"
+                                    required
+                                />
+                                <div className="relative group cursor-pointer flex-1" onClick={refreshCaptcha} title="تغییر کد">
                                     <div className="h-[34px] w-full rounded-lg border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
                                         <img src={captchaUrl} alt="captcha" className="h-full w-full object-contain" />
                                     </div>
-                                ) : (
-                                    <div className="h-[34px] w-full bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 text-[10px]">
-                                        ...
+                                    <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg">
+                                        <RefreshCw size={14} className="text-gray-700" />
                                     </div>
-                                )}
-                                <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg">
-                                    <RefreshCw size={14} className="text-gray-700" />
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {otpError && <p className="text-red-500 text-[10px] mt-1 bg-red-50 p-1.5 rounded-lg border border-red-100">{otpError}</p>}
 
@@ -114,7 +110,7 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
                             type="text"
                             value={otpCode}
                             onChange={(e) => setOtpCode(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-center text-xl tracking-[0.5em] font-mono transition-all placeholder:text-gray-200"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-center text-xl tracking-[0.5em] font-mono transition-all placeholder:text-gray-200 text-gray-900 bg-white"
                             maxLength={5}
                             autoFocus
                             placeholder="-----"

@@ -108,7 +108,8 @@ body[data-card-shadow="xl"] .card-base { box-shadow: 0 20px 25px -5px rgb(0 0 0 
 [data-card-style="dark"] .card-base h4,
 [data-card-style="dark"] .card-base p,
 [data-card-style="dark"] .card-base span,
-[data-card-style="dark"] .card-base div {
+[data-card-style="dark"] .card-base div,
+[data-card-style="dark"] .card-base li {
     @apply text-gray-100;
 }
 
@@ -117,6 +118,47 @@ body[data-card-shadow="xl"] .card-base { box-shadow: 0 20px 25px -5px rgb(0 0 0 
 [data-card-style="dark"] .card-base .text-gray-700,
 [data-card-style="dark"] .card-base .text-gray-800 {
     @apply text-gray-300;
+}
+
+/* Fix for Hover states on cards to ensure text readability */
+.card-base:hover h1,
+.card-base:hover h2,
+.card-base:hover h3,
+.card-base:hover h4,
+.card-base:hover p,
+.card-base:hover span,
+.card-base:hover div {
+    /* If card has a highlight color on hover, ensure text contrasts */
+    /* This is a general fix, specific components might need overrides */
+}
+
+/* Ensure text is readable on dark cards even when not explicitly targeted */
+[data-card-style="dark"] .card-base {
+    color: #f3f4f6;
+}
+
+/* Global Card Text Color Fixes */
+[data-card-style="dark"] .card-base .text-gray-900,
+[data-card-style="dark"] .card-base .text-gray-800,
+[data-card-style="dark"] .card-base .text-gray-700 {
+    @apply text-gray-100;
+}
+
+[data-card-style="dark"] .card-base .text-gray-600,
+[data-card-style="dark"] .card-base .text-gray-500 {
+    @apply text-gray-300;
+}
+
+/* Hover states for cards */
+[data-card-style="dark"] .card-base:hover {
+    @apply bg-gray-800 border-gray-700;
+}
+
+/* Ensure inputs in dark cards are readable */
+[data-card-style="dark"] .card-base input,
+[data-card-style="dark"] .card-base select,
+[data-card-style="dark"] .card-base textarea {
+    @apply bg-gray-800 border-gray-700 text-white placeholder-gray-500;
 }
 
 :root {

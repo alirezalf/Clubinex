@@ -13,11 +13,16 @@ class LoginRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            'captcha' => ['required', 'captcha'],
         ];
+
+        if (\App\Models\SystemSetting::getValue('security', 'captcha_enabled', false)) {
+            $rules['captcha'] = ['required', 'captcha'];
+        }
+
+        return $rules;
     }
 
     public function messages()

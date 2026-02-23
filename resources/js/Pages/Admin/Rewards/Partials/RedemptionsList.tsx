@@ -44,9 +44,9 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
     });
 
     const applyFilters = () => {
-        router.get(route('admin.rewards.index'), params, { 
+        router.get(route('admin.rewards.index'), params, {
             preserveState: true,
-            preserveScroll: true 
+            preserveScroll: true
         });
     };
 
@@ -83,9 +83,9 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                 <div className="lg:col-span-2">
                     <label className="text-xs font-bold text-gray-500 mb-1 block">جستجو</label>
                     <div className="relative">
-                        <input 
-                            type="text" 
-                            placeholder="کد رهگیری، نام کاربر، موبایل..." 
+                        <input
+                            type="text"
+                            placeholder="کد رهگیری، نام کاربر، موبایل..."
                             value={params.search}
                             onChange={e => setParams({...params, search: e.target.value})}
                             onKeyDown={handleKeyDown}
@@ -97,7 +97,7 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
 
                 <div>
                     <label className="text-xs font-bold text-gray-500 mb-1 block">وضعیت</label>
-                    <select 
+                    <select
                         value={params.status}
                         onChange={e => setParams({...params, status: e.target.value})}
                         className="w-full py-2 px-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-sm"
@@ -111,7 +111,7 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                 </div>
 
                 <div>
-                    <PersianDatePicker 
+                    <PersianDatePicker
                         label="از تاریخ"
                         value={params.date_from}
                         onChange={(date) => setParams({...params, date_from: date})}
@@ -120,7 +120,7 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                 </div>
 
                 <div className="flex">
-                    <button 
+                    <button
                         onClick={applyFilters}
                         className="w-full bg-primary-600 text-white py-2 rounded-xl hover:bg-primary-700 transition flex justify-center items-center gap-2 text-sm font-bold shadow-lg shadow-primary-500/20 h-[42px]"
                     >
@@ -180,14 +180,14 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                                     </td>
                                     <td className="px-6 py-4 text-gray-500">{item.created_at_jalali}</td>
                                     <td className="px-6 py-4 flex items-center gap-2">
-                                        <button 
+                                        <button
                                             onClick={() => openStatusModal(item)}
                                             className="text-primary-600 hover:bg-primary-50 p-2 rounded-lg transition border border-transparent hover:border-primary-100"
                                             title="مدیریت وضعیت"
                                         >
                                             <Settings size={18} />
                                         </button>
-                                        <Link 
+                                        <Link
                                             href={route('admin.rewards.user_history', { id: item.user.id, from: 'rewards' })}
                                             className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition"
                                             title="مشاهده سوابق کاربر"
@@ -211,7 +211,7 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                             <h3 className="font-bold text-lg text-gray-800">مدیریت درخواست #{selectedRedemption.id}</h3>
                             <button onClick={() => setStatusModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
                         </div>
-                        
+
                         <form onSubmit={submitStatus} className="p-6 space-y-4">
                             <div className="bg-gray-50 p-4 rounded-xl text-sm space-y-2 border border-gray-200">
                                 <div className="font-bold text-gray-700 mb-2 flex items-center gap-2">
@@ -229,7 +229,7 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">وضعیت جدید</label>
-                                <select 
+                                <select
                                     value={statusData.status}
                                     onChange={e => setStatusData('status', e.target.value)}
                                     className="w-full border border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500"
@@ -239,6 +239,8 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                                     <option value="completed">تکمیل / ارسال شده</option>
                                     <option value="rejected">رد شده (برگشت امتیاز)</option>
                                 </select>
+                                {/* @ts-ignore */}
+                                {statusData.errors?.status && <div className="text-red-500 text-xs mt-1">{statusData.errors.status}</div>}
                             </div>
 
                             {statusData.status === 'rejected' && (
@@ -250,8 +252,8 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">کد رهگیری (اختیاری)</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     value={statusData.tracking_code}
                                     onChange={e => setStatusData('tracking_code', e.target.value)}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2"

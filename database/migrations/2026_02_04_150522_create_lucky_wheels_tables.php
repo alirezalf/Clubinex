@@ -35,6 +35,7 @@ return new class extends Migration {
             $table->integer('stock')->nullable();            // محدودیت تعداد موجودی این جایزه
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         // لاگ چرخش‌ها

@@ -33,7 +33,9 @@ class RewardController extends Controller
             });
 
         $myRedemptions = $user ? RewardRedemption::where('user_id', $user->id)
-            ->with('reward')
+            ->with(['reward' => function($q) {
+                $q->withTrashed();
+            }])
             ->latest()
             ->get()
             ->map(function ($r) {
@@ -41,10 +43,10 @@ class RewardController extends Controller
                 $r->created_at_jalali = $r->created_at_jalali;
                 return $r;
             }) : [];
-            
+
         return Inertia::render('Rewards/Index', [
             'rewards' => $rewards,
-            'current_points' => $points, 
+            'current_points' => $points,
             'myRedemptions' => $myRedemptions
         ]);
     }
@@ -53,8 +55,8 @@ class RewardController extends Controller
     {
         try {
             $this->rewardService->redeemReward(
-                auth()->user(), 
-                $id, 
+                auth()->user(),
+                $id,
                 $request->delivery_info
             );
 

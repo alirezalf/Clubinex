@@ -29,7 +29,7 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
-        $ticketBadges = ['user' => 0, 'admin' => 0];
+        $ticketBadges = ['user' => 0, 'admin' => 0, 'rewards' => 0];
         $user = $request->user();
 
         // 1. Theme Settings via Service
@@ -50,6 +50,9 @@ class HandleInertiaRequests extends Middleware
                     $query->where('assigned_to', $user->id);
                 }
                 $ticketBadges['admin'] = $query->count();
+
+                // Count pending reward redemptions
+                $ticketBadges['rewards'] = \App\Models\RewardRedemption::where('status', 'pending')->count();
             }
         }
 
@@ -67,6 +70,9 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
+        // 4. Login Settings
+        $loginSettings = SystemSetting::where('group', 'login')->pluck('value', 'key')->toArray();
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $user ? [
@@ -81,6 +87,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'unreadNotificationsCount' => $unreadNotificationsCount,
             'themeSettings' => $activeTheme,
+            'loginSettings' => $loginSettings,
             'badges' => $ticketBadges,
             'pageSlider' => $pageSlider, // اسلایدر سراسری
             'flash' => [

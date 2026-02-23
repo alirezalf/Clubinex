@@ -25,7 +25,16 @@ class AuthController extends Controller
 
     public function showLogin()
     {
-        return Inertia::render('Auth/Login');
+        // Fetch all settings flattened by key
+        $settings = \App\Models\SystemSetting::all()->pluck('value', 'key')->toArray();
+
+        $captchaEnabled = filter_var($settings['captcha_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $captchaUrl = $captchaEnabled ? captcha_src('flat') : null;
+
+        return Inertia::render('Auth/Login', [
+            'captchaUrl' => $captchaUrl,
+            'settings' => $settings
+        ]);
     }
 
     // ورود با ایمیل و پسورد (ریفکتور شده)
@@ -35,10 +44,10 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            
+
             session(['locked' => false]);
             session(['last_activity_time' => now()->timestamp]);
-            
+
             ActivityLog::log('user.login', 'ورود موفق با ایمیل', ['user_id' => Auth::id()]);
 
             return redirect()->intended('dashboard');
@@ -74,10 +83,10 @@ class AuthController extends Controller
         if ($user) {
             Auth::login($user, true);
             $request->session()->regenerate();
-            
+
             session(['locked' => false]);
             session(['last_activity_time' => now()->timestamp]);
-            
+
             ActivityLog::log('user.login', 'ورود با موبایل (OTP)', ['user_id' => $user->id]);
 
             return redirect()->intended('dashboard');
@@ -91,7 +100,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             ActivityLog::log('user.logout', 'خروج از حساب', ['user_id' => Auth::id()]);
         }
-        
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -114,11 +123,11 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'status_id' => 1, // Active
         ]);
-        
+
         $user->assignRole('user');
 
         Auth::login($user);
-        
+
         session(['locked' => false]);
         session(['last_activity_time' => now()->timestamp]);
 

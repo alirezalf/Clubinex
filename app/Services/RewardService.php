@@ -80,7 +80,7 @@ class RewardService
         }
 
         $reward->delete();
-        
+
         ActivityLog::log('reward.deleted', "جایزه '{$reward->title}' حذف شد", [
             'admin_id' => auth()->id(),
             'model_id' => $id
@@ -109,7 +109,7 @@ class RewardService
                 "دریافت جایزه: {$reward->title}",
                 $reward
             );
-            
+
             if (!$transaction) {
                  throw new Exception('خطا در کسر امتیاز. موجودی کافی نیست.');
             }
@@ -126,13 +126,22 @@ class RewardService
 
             // کاهش موجودی انبار
             $reward->decrement('stock');
-            
-            // ارسال نوتیفیکیشن
+
+            // ارسال نوتیفیکیشن به کاربر
             try {
                 NotificationService::send('reward_redemption', $user, [
                     'reward_title' => $reward->title,
                     'points' => $reward->points_cost
                 ]);
+
+                // ارسال نوتیفیکیشن به ادمین‌ها
+                $admins = User::role(['super-admin', 'admin'])->get();
+                if ($admins->isNotEmpty()) {
+                    \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\SystemNotification(
+                        'درخواست جایزه جدید',
+                        "کاربر {$user->first_name} {$user->last_name} درخواست دریافت جایزه '{$reward->title}' را ثبت کرد."
+                    ));
+                }
             } catch (Exception $e) {}
 
             return $redemption;
@@ -147,7 +156,7 @@ class RewardService
         $redemption = RewardRedemption::with(['reward', 'user'])->findOrFail($id);
 
         return DB::transaction(function () use ($redemption, $status, $adminNote, $trackingCode, $adminId) {
-            
+
             // اگر وضعیت به "رد شده" تغییر کرد و قبلاً رد نشده بود -> برگشت امتیاز به کاربر
             if ($status === 'rejected' && $redemption->status !== 'rejected') {
                 if ($redemption->points_spent > 0) {

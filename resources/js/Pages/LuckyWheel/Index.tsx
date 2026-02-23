@@ -12,7 +12,7 @@ interface Prize {
     color: string;
     icon: string | null;
     type: string;
-    value: number; 
+    value: number;
 }
 
 interface Wheel {
@@ -43,10 +43,10 @@ export default function LuckyWheelIndex({ wheel, userPoints: initialPoints, spin
     const { auth } = usePage<PageProps>().props;
     const [spinning, setSpinning] = useState(false);
     const [result, setResult] = useState<{title: string, message: string, prize_type: string} | null>(null);
-    
+
     // Sync local point state with global auth state to ensure sidebar/header are in sync
     const [userPoints, setUserPoints] = useState(auth.user.points || initialPoints || 0);
-    
+
     const [rotation, setRotation] = useState(0);
     const [history, setHistory] = useState<SpinHistoryItem[]>(spinHistory);
 
@@ -79,7 +79,7 @@ export default function LuckyWheelIndex({ wheel, userPoints: initialPoints, spin
 
         setSpinning(true);
         setResult(null);
-        
+
         // Optimistic update for UI immediate feedback
         const tempPoints = userPoints - wheel.cost_per_spin;
         setUserPoints(tempPoints);
@@ -95,16 +95,16 @@ export default function LuckyWheelIndex({ wheel, userPoints: initialPoints, spin
             const currentRotationMod = rotation % 360;
             const rounds = 8 * 360;
             const targetRotation = rotation + rounds + (360 - prizeCenterAngle - currentRotationMod);
-            
+
             setRotation(targetRotation);
 
             setTimeout(() => {
                 setSpinning(false);
                 setResult({ title: prize_title, message, prize_type });
-                
+
                 // Critical: Reload page props to update sidebar/header points and history
                 // This ensures all components reflect the true server state
-                router.reload({ 
+                router.reload({
                     only: ['auth', 'userPoints', 'spinHistory'],
                     onSuccess: (page) => {
                          // Update local state from fresh server data
@@ -112,7 +112,7 @@ export default function LuckyWheelIndex({ wheel, userPoints: initialPoints, spin
                          setUserPoints(newPoints);
                     }
                 });
-            }, 5500); 
+            }, 5500);
 
         } catch (error: any) {
             setSpinning(false);
@@ -137,7 +137,7 @@ export default function LuckyWheelIndex({ wheel, userPoints: initialPoints, spin
                         <p className="text-gray-500 text-sm max-w-md mx-auto">{wheel.description}</p>
                     </div>
 
-                    <WheelSpinner 
+                    <WheelSpinner
                         wheel={wheel}
                         prizes={wheel.prizes}
                         rotation={rotation}
@@ -150,7 +150,7 @@ export default function LuckyWheelIndex({ wheel, userPoints: initialPoints, spin
                     <div className="mt-6 flex justify-center items-center bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100 w-full max-w-sm">
                         <span className="text-gray-500 font-medium text-sm ml-2">موجودی شما:</span>
                         <div className="flex items-center gap-1 font-bold text-xl text-primary-600">
-                            {userPoints.toLocaleString()} 
+                            {userPoints.toLocaleString()}
                             <Dna size={16} className="text-primary-400" />
                         </div>
                     </div>
@@ -185,14 +185,14 @@ export default function LuckyWheelIndex({ wheel, userPoints: initialPoints, spin
                             <History size={20} className="text-gray-400" />
                             آخرین شانس‌ها
                         </h3>
-                        
+
                         <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin">
                             {history.length > 0 ? (
                                 <div className="space-y-3">
                                     {history.map((spin) => (
                                         <div key={spin.id} className="bg-gray-50/50 rounded-2xl p-3 border border-gray-100 hover:bg-gray-50 transition relative overflow-hidden group">
                                             {spin.is_win && <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-400 rounded-l-full"></div>}
-                                            
+
                                             <div className="flex justify-between items-center mb-1">
                                                 <span className={`font-bold text-sm ${spin.is_win ? 'text-gray-800' : 'text-gray-400'}`}>
                                                     {spin.prize_title}
@@ -203,10 +203,10 @@ export default function LuckyWheelIndex({ wheel, userPoints: initialPoints, spin
                                                     <Frown size={14} className="text-gray-300" />
                                                 )}
                                             </div>
-                                            
+
                                             <div className="flex justify-between items-center">
                                                 <span className="text-[10px] text-gray-400">{spin.created_at_jalali}</span>
-                                                
+
                                                 {spin.prize_type === 'item' && spin.redemption_status && (
                                                     <span className="text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1 bg-gray-100 text-gray-600">
                                                         {spin.redemption_status_farsi}
@@ -240,22 +240,33 @@ export default function LuckyWheelIndex({ wheel, userPoints: initialPoints, spin
                         )}
 
                         <div className="relative z-10">
-                            <div className={`w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-white 
+                            <div className={`w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-white
                                 ${result.prize_type === 'empty' ? 'bg-gray-100 text-gray-400' : 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white'}`}
                             >
                                 {result.prize_type === 'empty' ? <Frown size={56} /> : <Trophy size={56} className="animate-bounce" />}
                             </div>
-                            
+
                             <h3 className="text-2xl font-black text-gray-800 mb-2">{result.title}</h3>
                             <p className="text-gray-600 mb-8 text-sm leading-relaxed">{result.message}</p>
-                            
-                            <button 
-                                onClick={() => setResult(null)}
-                                className="w-full bg-gray-900 text-white py-4 rounded-xl hover:bg-gray-800 font-bold transition shadow-lg flex items-center justify-center gap-2"
-                            >
-                                <XCircle size={18} />
-                                بستن
-                            </button>
+
+                            <div className="flex flex-col gap-3">
+                                {result.prize_type === 'item' && (
+                                    <button
+                                        onClick={() => router.visit(route('rewards.index'))}
+                                        className="w-full bg-primary-600 text-white py-3 rounded-xl hover:bg-primary-700 font-bold transition shadow-lg flex items-center justify-center gap-2"
+                                    >
+                                        <Trophy size={18} />
+                                        مشاهده در جوایز من
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => setResult(null)}
+                                    className="w-full bg-gray-900 text-white py-3 rounded-xl hover:bg-gray-800 font-bold transition shadow-lg flex items-center justify-center gap-2"
+                                >
+                                    <XCircle size={18} />
+                                    بستن
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

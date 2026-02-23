@@ -53,21 +53,40 @@ class SendSms implements ShouldQueue
         ]);
 
         try {
-            // شبیه‌سازی ارسال (در پروژه واقعی اینجا به API درگاه وصل می‌شوید)
-            // مثلا برای کاوه نگار:
-            // $api = new \Kavenegar\KavenegarApi($apiKey);
-            // $api->Send($sender, $this->mobile, $this->message);
-            
-            // فعلا فقط لاگ می‌گیریم
+            // ارسال واقعی پیامک
+            if ($provider === 'smsir') {
+                $response = Http::withHeaders([
+                    'X-API-KEY' => $apiKey,
+                    'Accept' => 'application/json',
+                ])->post('https://api.sms.ir/v1/send/bulk', [
+                    'lineNumber' => $sender,
+                    'MessageText' => $this->message,
+                    'Mobiles' => [$this->mobile],
+                ]);
+
+                if (!$response->successful()) {
+                    throw new \Exception('SMS.ir Error: ' . $response->body());
+                }
+
+                $result = $response->json();
+                if (($result['status'] ?? 0) !== 1) {
+                     throw new \Exception('SMS.ir API Error: ' . ($result['message'] ?? 'Unknown error'));
+                }
+
+            } elseif ($provider === 'kavenegar') {
+                // $api = new \Kavenegar\KavenegarApi($apiKey);
+                // $api->Send($sender, $this->mobile, $this->message);
+            }
+
             Log::info("SMS Sent to {$this->mobile}: {$this->message}");
-            
+
             // آپدیت وضعیت به ارسال شده
             $log->updateStatus('sent', ['cost' => 500]); // هزینه فرضی
 
         } catch (\Exception $e) {
             $log->updateStatus('failed', ['error_message' => $e->getMessage()]);
             Log::error("SMS Job Failed: " . $e->getMessage());
-            
+
             // پرتاب خطا برای تلاش مجدد توسط صف لاراول
             throw $e;
         }

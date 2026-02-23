@@ -216,7 +216,6 @@ class SliderController extends Controller
                 str_starts_with($name, 'ignition') ||
                 str_starts_with($name, 'api.') ||
                 str_starts_with($name, 'admin.') ||
-                str_starts_with($name, 'login') ||
                 str_starts_with($name, 'register') ||
                 str_starts_with($name, 'password')
             ) {

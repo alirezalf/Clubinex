@@ -1,4 +1,3 @@
-
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
@@ -29,8 +28,13 @@ export default {
             borderRadius: {
                 'xl': 'var(--radius-xl)',
                 '2xl': 'var(--radius-2xl)',
+            },
+            animation: {
+                'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             }
         },
     },
-    plugins: [],
+    plugins: [
+        require("tailwindcss-animate")
+    ],
 };

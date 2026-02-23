@@ -39,16 +39,37 @@ class AppServiceProvider extends ServiceProvider
                 return SystemSetting::getSettingsArray();
             });
 
+            // تنظیمات ایمیل
+            if (!empty($settings['mail_host'])) {
+                config([
+                    'mail.default' => 'smtp',
+                    'mail.mailers.smtp.host' => $settings['mail_host'],
+                    'mail.mailers.smtp.port' => $settings['mail_port'],
+                    'mail.mailers.smtp.encryption' => (int)$settings['mail_port'] === 465 ? 'ssl' : 'tls',
+                    'mail.mailers.smtp.username' => $settings['mail_username'],
+                    'mail.mailers.smtp.password' => $settings['mail_password'],
+                    'mail.from.address' => $settings['mail_from_address'],
+                    'mail.from.name' => $settings['mail_from_name'],
+                    'mail.mailers.smtp.stream' => [
+                        'ssl' => [
+                            'allow_self_signed' => true,
+                            'verify_peer' => false,
+                            'verify_peer_name' => false,
+                        ],
+                    ],
+                ]);
+            }
+
             // مدیریت رنگ‌ها
             $primaryColor = $settings['theme.primary_color'] ?? '#0284c7';
             if (!str_starts_with($primaryColor, '#')) {
                 $primaryColor = '#' . $primaryColor;
             }
-            
+
             // تبدیل به RGB برای استفاده در CSS Variables
             // مقادیر پیش‌فرض در صورت خطا
-            $r = 2; $g = 132; $b = 199; 
-            
+            $r = 2; $g = 132; $b = 199;
+
             try {
                 if (preg_match('/^#([a-f0-9]{6})$/i', $primaryColor)) {
                     list($r, $g, $b) = sscanf($primaryColor, "#%02x%02x%02x");
@@ -65,7 +86,7 @@ class AppServiceProvider extends ServiceProvider
                 'sidebar_text' => $settings['theme.sidebar_text'] ?? '#1f2937',
                 'sidebar_texture' => $settings['theme.sidebar_texture'] ?? 'none',
                 'header_bg' => $settings['theme.header_bg'] ?? 'rgba(255,255,255,0.8)',
-                'sidebar_collapsed' => filter_var($settings['theme.sidebar_collapsed'] ?? false, FILTER_VALIDATE_BOOLEAN), 
+                'sidebar_collapsed' => filter_var($settings['theme.sidebar_collapsed'] ?? false, FILTER_VALIDATE_BOOLEAN),
             ];
 
             // اشتراک‌گذاری تنظیمات مهم با ویوی اصلی بلید (برای CSS Variables اولیه)

@@ -19,7 +19,7 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
         interval: slider?.interval || 5000,
         effect: slider?.effect || 'fade',
         slides_per_view: slider?.slides_per_view || 1,
-        
+
         // New Settings
         loop: slider?.loop !== undefined ? Boolean(slider.loop) : true,
         direction: slider?.direction || 'ltr',
@@ -72,28 +72,28 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
             <form onSubmit={submit} className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium mb-1">عنوان (نمایشی)</label>
-                    <input 
-                        type="text" 
-                        value={data.title} 
-                        onChange={e => setData('title', e.target.value)} 
+                    <input
+                        type="text"
+                        value={data.title}
+                        onChange={e => setData('title', e.target.value)}
                         className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-primary-500"
                         placeholder="مثلا: اسلایدر صفحه اصلی"
                     />
                     {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
                 </div>
-                
+
                 <div className="relative" ref={locationMenuRef}>
                     <label className="block text-sm font-medium mb-1">مکان نمایش (Key)</label>
                     <div className="relative flex items-center">
-                        <input 
-                            type="text" 
-                            value={data.location_key} 
-                            onChange={e => setData('location_key', e.target.value)} 
+                        <input
+                            type="text"
+                            value={data.location_key}
+                            onChange={e => setData('location_key', e.target.value)}
                             className="w-full border rounded-lg px-3 py-2 text-sm dir-ltr text-left focus:ring-primary-500 pl-10"
                             placeholder="کلید یکتا را وارد یا انتخاب کنید..."
                             onFocus={() => setShowLocationMenu(true)}
                         />
-                        <button 
+                        <button
                             type="button"
                             onClick={() => setShowLocationMenu(!showLocationMenu)}
                             className="absolute left-1 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100"
@@ -102,7 +102,7 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
                             <ChevronDown size={16} className={`transition-transform duration-200 ${showLocationMenu ? 'rotate-180' : ''}`} />
                         </button>
                     </div>
-                    
+
                     {/* Custom Dropdown Menu */}
                     {showLocationMenu && (
                         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto scrollbar-thin">
@@ -119,7 +119,7 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
                                         {data.location_key === key && <Check size={14} className="text-primary-600" />}
                                     </button>
                                 ))}
-                                
+
                                 <div className="border-t my-1"></div>
                                 <div className="text-xs font-bold text-gray-400 px-2 py-1">صفحات داخلی</div>
                                 {availablePages.pages.map(page => (
@@ -142,27 +142,49 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
                 <div className="grid grid-cols-2 gap-3">
                     <div>
                         <label className="block text-sm font-medium mb-1">ارتفاع</label>
-                        <select 
-                            value={data.height_class} 
-                            onChange={e => setData('height_class', e.target.value)} 
-                            className="w-full border rounded-lg px-3 py-2 text-sm dir-ltr"
-                        >
-                            <option value="h-32">کوچک (128px)</option>
-                            <option value="h-48">متوسط (192px)</option>
-                            <option value="h-64">استاندارد (256px)</option>
-                            <option value="h-80">بزرگ (320px)</option>
-                            <option value="h-96">خیلی بزرگ (384px)</option>
-                            <option value="h-[500px]">بنر مرتفع (500px)</option>
-                            <option value="h-[600px]">بنر خیلی مرتفع (600px)</option>
-                            <option value="h-[80vh]">تمام صفحه (80% ویوپورت)</option>
-                            <option value="aspect-video h-auto">نسبت 16:9</option>
-                        </select>
+                        <div className="flex gap-2">
+                            <select
+                                value={['h-32', 'h-48', 'h-64', 'h-80', 'h-96', 'h-[500px]', 'h-[600px]', 'h-[80vh]', 'h-full', 'aspect-video h-auto'].includes(data.height_class) ? data.height_class : 'custom'}
+                                onChange={e => {
+                                    if (e.target.value !== 'custom') {
+                                        setData('height_class', e.target.value);
+                                    } else {
+                                        setData('height_class', ''); // Clear for custom input
+                                    }
+                                }}
+                                className="w-full border rounded-lg px-3 py-2 text-sm dir-ltr"
+                            >
+                                <option value="h-32">کوچک (128px)</option>
+                                <option value="h-48">متوسط (192px)</option>
+                                <option value="h-64">استاندارد (256px)</option>
+                                <option value="h-80">بزرگ (320px)</option>
+                                <option value="h-96">خیلی بزرگ (384px)</option>
+                                <option value="h-[500px]">بنر مرتفع (500px)</option>
+                                <option value="h-[600px]">بنر خیلی مرتفع (600px)</option>
+                                <option value="h-[80vh]">تمام صفحه (80% ویوپورت)</option>
+                                <option value="h-full">ارتفاع کامل (Full Height)</option>
+                                <option value="aspect-video h-auto">نسبت 16:9</option>
+                                <option value="custom">سفارشی...</option>
+                            </select>
+                        </div>
+                        {(!['h-32', 'h-48', 'h-64', 'h-80', 'h-96', 'h-[500px]', 'h-[600px]', 'h-[80vh]', 'h-full', 'aspect-video h-auto'].includes(data.height_class)) && (
+                            <div>
+                                <input
+                                    type="text"
+                                    value={data.height_class}
+                                    onChange={e => setData('height_class', e.target.value)}
+                                    className="w-full border rounded-lg px-3 py-2 text-sm dir-ltr mt-2"
+                                    placeholder="مثلا: h-[400px] یا h-screen"
+                                />
+                                <p className="text-[10px] text-gray-400 mt-1">از کلاس‌های Tailwind استفاده کنید (مثلا h-[500px] برای 500 پیکسل)</p>
+                            </div>
+                        )}
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">تعداد نمایش</label>
-                        <select 
-                            value={data.slides_per_view} 
-                            onChange={e => setData('slides_per_view', parseInt(e.target.value))} 
+                        <select
+                            value={data.slides_per_view}
+                            onChange={e => setData('slides_per_view', parseInt(e.target.value))}
                             className="w-full border rounded-lg px-3 py-2 text-sm dir-ltr"
                         >
                             <option value={1}>1 اسلاید</option>
@@ -176,9 +198,9 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
                 <div className="grid grid-cols-2 gap-3">
                     <div>
                         <label className="block text-sm font-medium mb-1">نوع افکت</label>
-                        <select 
-                            value={data.effect} 
-                            onChange={e => setData('effect', e.target.value)} 
+                        <select
+                            value={data.effect}
+                            onChange={e => setData('effect', e.target.value)}
                             className="w-full border rounded-lg px-3 py-2 text-sm dir-ltr"
                         >
                             <option value="fade">Fade (محو شدن)</option>
@@ -193,10 +215,10 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">زمان توقف (ms)</label>
-                        <input 
-                            type="number" 
-                            value={data.interval} 
-                            onChange={e => setData('interval', parseInt(e.target.value))} 
+                        <input
+                            type="number"
+                            value={data.interval}
+                            onChange={e => setData('interval', parseInt(e.target.value))}
                             className="w-full border rounded-lg px-3 py-2 text-sm dir-ltr"
                             placeholder="5000"
                         />
@@ -206,9 +228,9 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
                 <div className="grid grid-cols-2 gap-3">
                     <div>
                         <label className="block text-sm font-medium mb-1">جهت حرکت</label>
-                        <select 
-                            value={data.direction} 
-                            onChange={e => setData('direction', e.target.value)} 
+                        <select
+                            value={data.direction}
+                            onChange={e => setData('direction', e.target.value)}
                             className="w-full border rounded-lg px-3 py-2 text-sm"
                         >
                             <option value="ltr">چپ به راست (استاندارد)</option>
@@ -217,16 +239,16 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">فاصله (px)</label>
-                        <input 
-                            type="number" 
-                            value={data.gap} 
-                            onChange={e => setData('gap', parseInt(e.target.value))} 
+                        <input
+                            type="number"
+                            value={data.gap}
+                            onChange={e => setData('gap', parseInt(e.target.value))}
                             className="w-full border rounded-lg px-3 py-2 text-sm dir-ltr"
                             placeholder="0"
                         />
                     </div>
                 </div>
-                
+
                 {data.gap > 0 && (
                     <div>
                         <ColorPicker label="رنگ پس‌زمینه فاصله (Gap)" value={data.gap_color} onChange={(v: string) => setData('gap_color', v)} />
@@ -239,9 +261,9 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
                     <div className="grid grid-cols-2 gap-3 mb-3">
                         <div>
                             <label className="block text-xs text-gray-500 mb-1">گوشه‌ها</label>
-                            <select 
-                                value={data.border_radius} 
-                                onChange={e => setData('border_radius', e.target.value)} 
+                            <select
+                                value={data.border_radius}
+                                onChange={e => setData('border_radius', e.target.value)}
                                 className="w-full border rounded-lg px-2 py-1.5 text-sm dir-ltr"
                             >
                                 <option value="rounded-none">صاف (0px)</option>
@@ -254,9 +276,9 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
                         </div>
                         <div>
                             <label className="block text-xs text-gray-500 mb-1">ضخامت بوردر</label>
-                            <select 
-                                value={data.border_width} 
-                                onChange={e => setData('border_width', e.target.value)} 
+                            <select
+                                value={data.border_width}
+                                onChange={e => setData('border_width', e.target.value)}
                                 className="w-full border rounded-lg px-2 py-1.5 text-sm dir-ltr"
                             >
                                 <option value="0">بدون بوردر</option>
@@ -276,20 +298,20 @@ export default function SliderSettingsForm({ slider, availablePages, isEditing, 
 
                 <div className="flex flex-col gap-2 pt-2 bg-gray-50 p-3 rounded-lg">
                     <div className="flex items-center gap-2">
-                        <input 
-                            type="checkbox" 
-                            checked={data.loop} 
-                            onChange={e => setData('loop', e.target.checked)} 
+                        <input
+                            type="checkbox"
+                            checked={data.loop}
+                            onChange={e => setData('loop', e.target.checked)}
                             className="rounded text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer"
                             id="loop_check"
                         />
                         <label htmlFor="loop_check" className="text-sm font-medium cursor-pointer select-none">چرخش بی‌نهایت (Loop)</label>
                     </div>
                     <div className="flex items-center gap-2">
-                        <input 
-                            type="checkbox" 
-                            checked={data.is_active} 
-                            onChange={e => setData('is_active', e.target.checked)} 
+                        <input
+                            type="checkbox"
+                            checked={data.is_active}
+                            onChange={e => setData('is_active', e.target.checked)}
                             className="rounded text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer"
                             id="active_check"
                         />
