@@ -120,7 +120,7 @@ class PointTransaction extends Model
             // محاسبه مانده جدید
             $currentBalance = $user->current_points;
             $amount = (int) $data['amount'];
-            
+
             // جلوگیری از منفی شدن موجودی (برای خرج کردن و کسر)
             if ($amount < 0 && ($currentBalance + $amount < 0)) {
                 // اگر تایپ "adjust" باشد و ادمین بخواهد کسر کند، شاید اجازه دهیم منفی شود؟
@@ -174,10 +174,12 @@ class PointTransaction extends Model
         // بررسی سقف امتیاز روزانه (Restored Logic)
         $dailyLimit = (int) SystemSetting::getValue('club', 'daily_point_limit', 0);
 
-        // اگر مرجع تراکنش "سریال محصول" یا "ثبت محصول" باشد، سقف روزانه را نادیده بگیر
+        // اگر مرجع تراکنش "سریال محصول" یا "ثبت محصول" یا "گردونه شانس" باشد، سقف روزانه را نادیده بگیر
         $isProductRegistration = $reference && (
             $reference instanceof \App\Models\ProductSerial ||
-            $reference instanceof \App\Models\ProductRegistration
+            $reference instanceof \App\Models\ProductRegistration ||
+            $reference instanceof \App\Models\LuckyWheelSpin ||
+            $reference instanceof \App\Models\RewardRedemption
         );
 
         if ($dailyLimit > 0 && !$isProductRegistration) {
@@ -194,6 +196,10 @@ class PointTransaction extends Model
                 );
                 return null; // عدم اعطای امتیاز
             }
+        } else {
+             if ($dailyLimit > 0) {
+                 \Illuminate\Support\Facades\Log::info("PointTransaction: Bypassing daily limit for user {$userId}. Reference: " . ($reference ? get_class($reference) : 'null'));
+             }
         }
 
         $data = [

@@ -9,12 +9,13 @@ import UserSelectionTab from './Components/UserSelectionTab';
 import BroadcastHistory from './Components/BroadcastHistory';
 import { TargetTypeBtn, ChannelCheckbox } from './Components/FormElements';
 
-export default function AdminSendNotification({ clubs, tab = 'send', history }: any) {
+export default function AdminSendNotification({ clubs, emailThemes, tab = 'send', history }: any) {
     const { data, setData, post, processing, errors, reset } = useForm({
         target_type: 'all', // all, club, manual
         club_id: '',
         selected_user_ids: [] as number[],
         channels: ['database'], // database, sms, email
+        email_theme_id: '',
         title: '',
         message: '',
     });
@@ -49,7 +50,7 @@ export default function AdminSendNotification({ clubs, tab = 'send', history }: 
             <Head title="ارسال پیام و تاریخچه" />
 
             <div className="flex bg-white p-1 rounded-xl shadow-sm border border-gray-100 mb-6 w-fit no-print">
-                <button 
+                <button
                     onClick={() => switchTab('send')}
                     className={clsx(
                         "flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all",
@@ -59,7 +60,7 @@ export default function AdminSendNotification({ clubs, tab = 'send', history }: 
                     <Send size={18} />
                     ارسال اعلان جدید
                 </button>
-                <button 
+                <button
                     onClick={() => switchTab('history')}
                     className={clsx(
                         "flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all",
@@ -90,20 +91,20 @@ export default function AdminSendNotification({ clubs, tab = 'send', history }: 
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-3">گیرندگان پیام</label>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                                <TargetTypeBtn 
-                                    active={data.target_type === 'all'} 
-                                    onClick={() => setData('target_type', 'all')} 
-                                    icon={Users} label="همه کاربران" 
+                                <TargetTypeBtn
+                                    active={data.target_type === 'all'}
+                                    onClick={() => setData('target_type', 'all')}
+                                    icon={Users} label="همه کاربران"
                                 />
-                                <TargetTypeBtn 
-                                    active={data.target_type === 'club'} 
-                                    onClick={() => setData('target_type', 'club')} 
-                                    icon={Building} label="بر اساس باشگاه" 
+                                <TargetTypeBtn
+                                    active={data.target_type === 'club'}
+                                    onClick={() => setData('target_type', 'club')}
+                                    icon={Building} label="بر اساس باشگاه"
                                 />
-                                <TargetTypeBtn 
-                                    active={data.target_type === 'manual'} 
-                                    onClick={() => setData('target_type', 'manual')} 
-                                    icon={ListChecks} label="انتخاب دستی از لیست" 
+                                <TargetTypeBtn
+                                    active={data.target_type === 'manual'}
+                                    onClick={() => setData('target_type', 'manual')}
+                                    icon={ListChecks} label="انتخاب دستی از لیست"
                                 />
                             </div>
 
@@ -126,9 +127,9 @@ export default function AdminSendNotification({ clubs, tab = 'send', history }: 
                                 )}
 
                                 {data.target_type === 'manual' && (
-                                    <UserSelectionTab 
-                                        selectedIds={data.selected_user_ids} 
-                                        onChange={(ids: number[]) => setData('selected_user_ids', ids)} 
+                                    <UserSelectionTab
+                                        selectedIds={data.selected_user_ids}
+                                        onChange={(ids: number[]) => setData('selected_user_ids', ids)}
                                     />
                                 )}
                             </div>
@@ -140,29 +141,46 @@ export default function AdminSendNotification({ clubs, tab = 'send', history }: 
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-3">کانال‌های ارسال</label>
                             <div className="flex flex-wrap gap-4">
-                                <ChannelCheckbox 
-                                    label="اعلان پنل" 
-                                    icon={Database} 
-                                    checked={data.channels.includes('database')} 
-                                    onChange={() => handleChannelChange('database')} 
+                                <ChannelCheckbox
+                                    label="اعلان پنل"
+                                    icon={Database}
+                                    checked={data.channels.includes('database')}
+                                    onChange={() => handleChannelChange('database')}
                                     color="blue"
                                 />
-                                <ChannelCheckbox 
-                                    label="پیامک (SMS)" 
-                                    icon={Smartphone} 
-                                    checked={data.channels.includes('sms')} 
-                                    onChange={() => handleChannelChange('sms')} 
+                                <ChannelCheckbox
+                                    label="پیامک (SMS)"
+                                    icon={Smartphone}
+                                    checked={data.channels.includes('sms')}
+                                    onChange={() => handleChannelChange('sms')}
                                     color="green"
                                 />
-                                <ChannelCheckbox 
-                                    label="ایمیل" 
-                                    icon={Mail} 
-                                    checked={data.channels.includes('email')} 
-                                    onChange={() => handleChannelChange('email')} 
+                                <ChannelCheckbox
+                                    label="ایمیل"
+                                    icon={Mail}
+                                    checked={data.channels.includes('email')}
+                                    onChange={() => handleChannelChange('email')}
                                     color="purple"
                                 />
                             </div>
                             {errors.channels && <p className="text-red-500 text-xs mt-1">{errors.channels}</p>}
+
+                            {data.channels.includes('email') && (
+                                <div className="mt-4 animate-in fade-in slide-in-from-top-2">
+                                    <label className="block text-sm text-gray-600 mb-1">قالب ایمیل</label>
+                                    <select
+                                        value={data.email_theme_id}
+                                        onChange={e => setData('email_theme_id', e.target.value)}
+                                        className="w-full border-gray-300 border rounded-xl focus:ring-primary-500 focus:border-primary-500 px-3 py-2.5"
+                                    >
+                                        <option value="">قالب پیش‌فرض (ساده)</option>
+                                        {/* @ts-ignore */}
+                                        {(emailThemes || []).map((theme: any) => (
+                                            <option key={theme.id} value={theme.id}>{theme.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                         </div>
 
                         {/* Content */}

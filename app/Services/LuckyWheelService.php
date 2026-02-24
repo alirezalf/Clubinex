@@ -37,13 +37,27 @@
                   throw new Exception('سطح کاربری شما برای استفاده از این گردونه کافی نیست.');
               }
 
-              // 3. بررسی موجودی امتیاز
-              if ($lockedUser->current_points < $wheel->cost_per_spin) {
+              // بررسی اینکه آیا چرخش قبلی جایزه "شانس مجدد" بوده است؟
+              $lastSpin = LuckyWheelSpin::where('user_id', $user->id)
+                  ->where('lucky_wheel_id', $wheel->id)
+                  ->latest()
+                  ->with('prize') // Eager load prize
+                  ->first();
+
+              $isFreeSpin = false;
+              if ($lastSpin && $lastSpin->prize && $lastSpin->prize->type === 'retry') {
+                  // اگر آخرین چرخش "شانس مجدد" بوده، این چرخش رایگان است.
+                  // چون رکورد جدیدی ایجاد می‌شود، این شرط برای چرخش بعدی (اگر دوباره شانس مجدد نباشد) برقرار نخواهد بود.
+                  $isFreeSpin = true;
+              }
+
+              // 3. بررسی موجودی امتیاز (اگر رایگان نیست)
+              if (!$isFreeSpin && $lockedUser->current_points < $wheel->cost_per_spin) {
                   throw new Exception('موجودی امتیاز شما کافی نیست.');
               }
 
               // 4. کسر هزینه چرخش (تراکنش منفی)
-              if ($wheel->cost_per_spin > 0) {
+              if (!$isFreeSpin && $wheel->cost_per_spin > 0) {
                   PointTransaction::createTransaction([
                       'user_id' => $user->id,
                       'amount' => -$wheel->cost_per_spin,

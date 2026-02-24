@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
@@ -22,20 +23,29 @@ export default function TicketsIndex({ tickets, filters, auth, flash }: Props) {
         message: ''
     });
 
+    React.useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('create_ticket')) {
+            setShowModal(true);
+            if (params.get('subject')) setData('subject', params.get('subject') || '');
+            if (params.get('message')) setData('message', params.get('message') || '');
+        }
+    }, []);
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('tickets.store'), {
-            onSuccess: () => { 
-                setShowModal(false); 
-                reset(); 
+            onSuccess: () => {
+                setShowModal(false);
+                reset();
             }
         });
     };
 
     const handleFilter = (status: string) => {
-        router.get(route('tickets.index'), { status }, { 
+        router.get(route('tickets.index'), { status }, {
             preserveState: true,
-            preserveScroll: true 
+            preserveScroll: true
         });
     };
 
@@ -60,7 +70,7 @@ export default function TicketsIndex({ tickets, filters, auth, flash }: Props) {
                     </h1>
                     <p className="text-sm text-gray-500 mt-1 mr-12">سوالات و مشکلات خود را با ما در میان بگذارید.</p>
                 </div>
-                <button 
+                <button
                     onClick={() => setShowModal(true)}
                     className="w-full md:w-auto bg-primary-600 text-white px-6 py-3 rounded-2xl flex items-center justify-center gap-2 hover:bg-primary-700 transition shadow-xl shadow-primary-500/30 font-bold transform active:scale-95"
                 >
@@ -76,12 +86,12 @@ export default function TicketsIndex({ tickets, filters, auth, flash }: Props) {
                         onClick={() => handleFilter(tab.id)}
                         className={clsx(
                             "flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap",
-                            currentStatus === tab.id 
-                                ? "bg-primary-600 text-white shadow-lg shadow-primary-500/20" 
+                            currentStatus === tab.id
+                                ? "bg-primary-600 text-white shadow-lg shadow-primary-500/20"
                                 : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                         )}
                     >
-                        <tab.icon size={18} className={currentStatus === tab.id ? "text-white" : tab.color} /> 
+                        <tab.icon size={18} className={currentStatus === tab.id ? "text-white" : tab.color} />
                         {tab.label}
                     </button>
                 ))}
@@ -114,7 +124,7 @@ export default function TicketsIndex({ tickets, filters, auth, flash }: Props) {
                                         <div className="flex items-center gap-2">
                                             <div className="w-2 h-2 rounded-full bg-primary-400"></div>
                                             <span className="text-gray-600 font-medium">
-                                                {ticket.department === 'support' ? 'پشتیبانی' : 
+                                                {ticket.department === 'support' ? 'پشتیبانی' :
                                                  ticket.department === 'sales' ? 'فروش و مالی' : 'فنی و وب‌سایت'}
                                             </span>
                                         </div>
@@ -148,7 +158,7 @@ export default function TicketsIndex({ tickets, filters, auth, flash }: Props) {
                                         </div>
                                     </td>
                                     <td className="px-6 py-5 text-center">
-                                        <Link 
+                                        <Link
                                             href={route('tickets.show', ticket.id)}
                                             className="inline-flex items-center gap-2 bg-white border border-gray-200 text-primary-600 px-4 py-2 rounded-xl text-xs font-black hover:bg-primary-600 hover:text-white hover:border-primary-600 hover:shadow-lg transition-all"
                                         >
@@ -186,24 +196,24 @@ export default function TicketsIndex({ tickets, filters, auth, flash }: Props) {
                                 <h3 className="font-bold text-lg text-gray-800">ارسال درخواست جدید</h3>
                                 <p className="text-[11px] text-gray-500">لطفاً جزئیات را به دقت وارد کنید.</p>
                             </div>
-                            <button 
-                                onClick={() => setShowModal(false)} 
+                            <button
+                                onClick={() => setShowModal(false)}
                                 className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        
+
                         <form onSubmit={submit} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-700 mb-1.5 mr-1">موضوع تیکت</label>
-                                <input 
-                                    type="text" 
-                                    value={data.subject} 
-                                    onChange={e => setData('subject', e.target.value)} 
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none" 
+                                <input
+                                    type="text"
+                                    value={data.subject}
+                                    onChange={e => setData('subject', e.target.value)}
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                                     placeholder="مثلا: سوال در مورد امتیازات محصول"
-                                    required 
+                                    required
                                 />
                                 {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject}</p>}
                             </div>
@@ -211,9 +221,9 @@ export default function TicketsIndex({ tickets, filters, auth, flash }: Props) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-gray-700 mb-1.5 mr-1">دپارتمان مربوطه</label>
-                                    <select 
-                                        value={data.department} 
-                                        onChange={e => setData('department', e.target.value)} 
+                                    <select
+                                        value={data.department}
+                                        onChange={e => setData('department', e.target.value)}
                                         className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none bg-white"
                                     >
                                         <option value="support">واحد پشتیبانی عمومی</option>
@@ -223,9 +233,9 @@ export default function TicketsIndex({ tickets, filters, auth, flash }: Props) {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-700 mb-1.5 mr-1">سطح اولویت</label>
-                                    <select 
-                                        value={data.priority} 
-                                        onChange={e => setData('priority', e.target.value)} 
+                                    <select
+                                        value={data.priority}
+                                        onChange={e => setData('priority', e.target.value)}
                                         className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none bg-white"
                                     >
                                         <option value="low">کم (عادی)</option>
@@ -237,11 +247,11 @@ export default function TicketsIndex({ tickets, filters, auth, flash }: Props) {
 
                             <div>
                                 <label className="block text-xs font-bold text-gray-700 mb-1.5 mr-1">شرح درخواست</label>
-                                <textarea 
-                                    value={data.message} 
-                                    onChange={e => setData('message', e.target.value)} 
-                                    rows={4} 
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none resize-none" 
+                                <textarea
+                                    value={data.message}
+                                    onChange={e => setData('message', e.target.value)}
+                                    rows={4}
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none resize-none"
                                     placeholder="جزئیات کامل درخواست خود را بنویسید..."
                                     required
                                 ></textarea>
@@ -256,16 +266,16 @@ export default function TicketsIndex({ tickets, filters, auth, flash }: Props) {
                             </div>
 
                             <div className="flex justify-end gap-3 pt-2">
-                                <button 
-                                    type="button" 
-                                    onClick={() => setShowModal(false)} 
+                                <button
+                                    type="button"
+                                    onClick={() => setShowModal(false)}
                                     className="px-5 py-2.5 text-gray-500 font-bold hover:bg-gray-100 rounded-xl transition-colors text-sm"
                                 >
                                     انصراف
                                 </button>
-                                <button 
-                                    type="submit" 
-                                    disabled={processing} 
+                                <button
+                                    type="submit"
+                                    disabled={processing}
                                     className="bg-primary-600 text-white px-6 py-2.5 rounded-xl hover:bg-primary-700 font-bold shadow-lg shadow-primary-500/20 transition-all transform active:scale-95 disabled:opacity-50 text-sm"
                                 >
                                     {processing ? 'در حال ارسال...' : 'ثبت تیکت'}

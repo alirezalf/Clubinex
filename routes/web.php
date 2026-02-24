@@ -38,11 +38,32 @@ Route::get('/fix-system', function () {
         Artisan::call('optimize:clear');
         Artisan::call('config:clear');
         Artisan::call('cache:clear');
-        
+
         if(Schema::hasTable('jobs')) DB::table('jobs')->truncate();
         if(Schema::hasTable('failed_jobs')) DB::table('failed_jobs')->truncate();
-        
-        return "System Optimized & Queue Cleared Successfully! <br> <a href='/'>Go Home</a>";
+
+        $smsSettings = \App\Models\SystemSetting::where('group', 'sms')->get();
+        $debugInfo = "<h3>SMS Settings (Group: sms):</h3><ul>";
+        foreach($smsSettings as $s) {
+            $val = is_string($s->value) ? substr($s->value, 0, 50) : json_encode($s->value);
+            $debugInfo .= "<li><strong>{$s->key}</strong>: {$val} (Type: {$s->type})</li>";
+        }
+        $debugInfo .= "</ul>";
+
+        // Check for orphaned settings
+        $orphaned = \App\Models\SystemSetting::where('key', 'like', 'sms_%')->where('group', '!=', 'sms')->get();
+        if ($orphaned->count() > 0) {
+             $debugInfo .= "<h3>Orphaned SMS Settings (Wrong Group):</h3><ul>";
+             foreach($orphaned as $s) {
+                $debugInfo .= "<li><strong>{$s->key}</strong>: {$s->value} (Group: {$s->group})</li>";
+            }
+            $debugInfo .= "</ul>";
+        }
+
+        $debugInfo .= "<p>Env SMSIR_API_KEY: " . (env('SMSIR_API_KEY') ? 'Set' : 'Not Set') . "</p>";
+        $debugInfo .= "<p>Env SMSIR_TEMPLATE_ID: " . (env('SMSIR_TEMPLATE_ID') ? 'Set' : 'Not Set') . "</p>";
+
+        return "System Optimized & Queue Cleared Successfully! <br> {$debugInfo} <br> <a href='/'>Go Home</a>";
     } catch (\Exception $e) {
         return "Error: " . $e->getMessage();
     }

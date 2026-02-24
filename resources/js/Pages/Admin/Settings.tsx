@@ -1,3 +1,4 @@
+
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import { Save, Globe, Smartphone, Palette, Share2, Phone, Mail, BellRing, Code, ShoppingBag, Headphones, Shield, User as UserIcon } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
@@ -85,8 +86,8 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
 
     // Prepare initial form data
     const initialValues = useMemo(() => {
-        // Use Active Theme (themeSettings) for theme values if available, otherwise fallback to DB settings
-        const theme = themeSettings || {};
+        // Use DB Settings (settings prop) for initial values, NOT active theme (themeSettings)
+        // This prevents overwriting System Settings with User Preferences
 
         return {
         // General & SEO
@@ -96,21 +97,19 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         og_image: getSettingValue('seo', 'og_image', null) as File | string | null,
         footer_text: getSettingValue('general', 'footer_text', ''),
 
-        // Theme (Prioritize Active Theme)
-        primary_color: theme.primary_color || getSettingValue('theme', 'primary_color', '#0284c7'),
-        sidebar_bg: theme.sidebar_bg || getSettingValue('theme', 'sidebar_bg', '#ffffff'),
-        sidebar_text: theme.sidebar_text || getSettingValue('theme', 'sidebar_text', '#1f2937'),
-        sidebar_texture: theme.sidebar_texture || getSettingValue('theme', 'sidebar_texture', 'none'),
-        header_bg: theme.header_bg || getSettingValue('theme', 'header_bg', 'rgba(255,255,255,0.8)'),
-        radius_size: theme.radius_size || getSettingValue('theme', 'radius_size', '0.75rem'),
-        card_style: theme.card_style || getSettingValue('theme', 'card_style', 'default'),
-        card_shadow: theme.card_shadow || getSettingValue('theme', 'card_shadow', 'sm'),
-        card_opacity: theme.card_opacity || getSettingValue('theme', 'card_opacity', '1'),
-        sidebar_collapsed: theme.sidebar_collapsed !== undefined
-            ? theme.sidebar_collapsed
-            : getSettingValue('theme', 'sidebar_collapsed', '0') === '1',
+        // Theme (Use DB Settings directly)
+        primary_color: getSettingValue('theme', 'primary_color', '#0284c7'),
+        sidebar_bg: getSettingValue('theme', 'sidebar_bg', '#ffffff'),
+        sidebar_text: getSettingValue('theme', 'sidebar_text', '#1f2937'),
+        sidebar_texture: getSettingValue('theme', 'sidebar_texture', 'none'),
+        header_bg: getSettingValue('theme', 'header_bg', 'rgba(255,255,255,0.8)'),
+        radius_size: getSettingValue('theme', 'radius_size', '0.75rem'),
+        card_style: getSettingValue('theme', 'card_style', 'default'),
+        card_shadow: getSettingValue('theme', 'card_shadow', 'sm'),
+        card_opacity: getSettingValue('theme', 'card_opacity', '1'),
+        sidebar_collapsed: getSettingValue('theme', 'sidebar_collapsed', '0') === '1',
 
-        reset_personal_theme: true,
+        reset_personal_theme: false, // Do not reset by default
         logo_url: null as File | string | null,
         favicon_url: null as File | string | null,
 
@@ -126,10 +125,10 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         login_right_color: getSettingValue('login', 'login_right_color', '#ffffff'),
         login_right_gradient: getSettingValue('login', 'login_right_gradient', ''),
         login_title: getSettingValue('login', 'login_title', 'خوش آمدید'),
-        login_subtitle: getSettingValue('login', 'login_subtitle', 'به باشگاه مشتریان Clubinex وارد شوید'),
+        login_subtitle: getSettingValue('login', 'login_subtitle', 'به حساب کاربری خود وارد شوید'),
         login_copyright: getSettingValue('login', 'login_copyright', '© 2024 تمامی حقوق محفوظ است.'),
-        login_slogan_title: getSettingValue('login', 'login_slogan_title', 'تجربه ای متفاوت از وفاداری'),
-        login_slogan_text: getSettingValue('login', 'login_slogan_text', 'با پیوستن به باشگاه مشتریان، از تخفیف‌ها و جوایز ویژه بهره‌مند شوید.'),
+        login_slogan_title: getSettingValue('login', 'login_slogan_title', 'آینده وفاداری'),
+        login_slogan_text: getSettingValue('login', 'login_slogan_text', 'با پیوستن به باشگاه مشتریان ما، دنیایی از امکانات و جوایز را تجربه کنید.'),
         login_logo: getSettingValue('login', 'login_logo', null) as File | string | null,
         login_title_color: getSettingValue('login', 'login_title_color', '#111827'),
         login_subtitle_color: getSettingValue('login', 'login_subtitle_color', '#6b7280'),
@@ -154,6 +153,9 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         sms_api_key: getSettingValue('sms', 'sms_api_key', ''),
         sms_username: getSettingValue('sms', 'sms_username', ''),
         sms_password: getSettingValue('sms', 'sms_password', ''),
+        resend_interval: getSettingValue('sms', 'resend_interval', '120'),
+        sms_ir_template_id: getSettingValue('sms', 'sms_ir_template_id', ''),
+        sms_ir_parameter_name: getSettingValue('sms', 'sms_ir_parameter_name', 'Code'),
         mail_host: getSettingValue('email', 'mail_host', ''),
         mail_port: getSettingValue('email', 'mail_port', ''),
         mail_username: getSettingValue('email', 'mail_username', ''),
@@ -180,30 +182,64 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
 
     const { data, setData } = useForm(initialValues);
 
+    // Define fields per tab to prevent overwriting unrelated settings
+    const TAB_FIELDS: Record<string, string[]> = {
+        general: ['site_title', 'site_description', 'footer_text', 'meta_keywords', 'og_image'],
+        theme: ['primary_color', 'sidebar_bg', 'sidebar_text', 'sidebar_texture', 'header_bg', 'radius_size', 'card_style', 'card_shadow', 'card_opacity', 'sidebar_collapsed', 'reset_personal_theme', 'logo_url', 'favicon_url'],
+        login: ['login_theme', 'login_layout_reversed', 'login_left_bg_type', 'login_left_image', 'login_left_color', 'login_left_gradient', 'login_right_bg_type', 'login_right_image', 'login_right_color', 'login_right_gradient', 'login_title', 'login_subtitle', 'login_copyright', 'login_slogan_title', 'login_slogan_text', 'login_logo', 'login_title_color', 'login_subtitle_color', 'login_slogan_color', 'login_copyright_color', 'login_btn_bg', 'login_btn_text', 'login_card_bg'],
+        contact: ['admin_mobile', 'support_email', 'address'],
+        social: ['instagram', 'telegram', 'whatsapp', 'linkedin'],
+        sms: ['sms_provider', 'sms_sender', 'sms_api_key', 'sms_username', 'sms_password', 'resend_interval', 'sms_ir_template_id', 'sms_ir_parameter_name'],
+        email: ['mail_host', 'mail_port', 'mail_username', 'mail_password', 'mail_from_address', 'mail_from_name'],
+        wordpress: ['wp_url', 'wp_consumer_key', 'wp_consumer_secret'],
+        support: ['ticket_auto_close_hours', 'support_agents'],
+        security: ['max_login_attempts', 'lockout_time', 'session_timeout', 'captcha_enabled'],
+    };
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post(route('admin.settings.update'), {
-            _method: 'post',
-            ...data
-        }, {
+
+        // Filter data to only include fields for the active tab
+        const fieldsToSubmit = TAB_FIELDS[activeTab] || [];
+        const payload: any = { _method: 'post' };
+
+        // Always include _method
+        // Add only relevant fields
+        fieldsToSubmit.forEach(field => {
+            // @ts-ignore
+            if (data[field] !== undefined) {
+                // @ts-ignore
+                payload[field] = data[field];
+            }
+        });
+
+        // Special case for SEO which is mixed with General in UI but might be separate in logic,
+        // but here we grouped them in TAB_FIELDS.general if they are on the same tab.
+        // The UI shows GeneralSettings component for 'general' tab.
+        // Let's check GeneralSettings component to see if it includes SEO fields.
+        // Yes, usually.
+
+        router.post(route('admin.settings.update'), payload, {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => {
-                const root = document.documentElement;
-                // Apply all theme settings immediately
-                root.style.setProperty('--header-bg', String(data.header_bg));
-                root.style.setProperty('--sidebar-bg', String(data.sidebar_bg));
-                root.style.setProperty('--sidebar-text', String(data.sidebar_text));
-                root.style.setProperty('--sidebar-texture', String(data.sidebar_texture));
-                root.style.setProperty('--radius-xl', String(data.radius_size));
-                root.style.setProperty('--radius-2xl', `calc(${data.radius_size} + 0.25rem)`);
-                root.style.setProperty('--card-opacity', String(data.card_opacity));
+                // Apply theme settings immediately only if on theme tab
+                if (activeTab === 'theme') {
+                    const root = document.documentElement;
+                    root.style.setProperty('--header-bg', String(data.header_bg));
+                    root.style.setProperty('--sidebar-bg', String(data.sidebar_bg));
+                    root.style.setProperty('--sidebar-text', String(data.sidebar_text));
+                    root.style.setProperty('--sidebar-texture', String(data.sidebar_texture));
+                    root.style.setProperty('--radius-xl', String(data.radius_size));
+                    root.style.setProperty('--radius-2xl', `calc(${data.radius_size} + 0.25rem)`);
+                    root.style.setProperty('--card-opacity', String(data.card_opacity));
 
-                document.body.setAttribute('data-card-style', String(data.card_style));
-                document.body.setAttribute('data-card-shadow', String(data.card_shadow));
+                    document.body.setAttribute('data-card-style', String(data.card_style));
+                    document.body.setAttribute('data-card-shadow', String(data.card_shadow));
 
-                // Re-calculate primary colors if needed (simplified here, ideally import utils)
-                root.style.setProperty('--color-primary-500', String(data.primary_color));
+                    // Re-calculate primary colors if needed (simplified here, ideally import utils)
+                    root.style.setProperty('--color-primary-500', String(data.primary_color));
+                }
             }
         });
     };

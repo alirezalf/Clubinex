@@ -13,10 +13,15 @@ class SendOtpRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'mobile' => 'required|regex:/^09[0-9]{9}$/',
-            'captcha' => 'required|captcha'
         ];
+
+        if (\App\Models\SystemSetting::getValue('security', 'captcha_enabled', false)) {
+            $rules['captcha'] = 'required|captcha';
+        }
+
+        return $rules;
     }
 
     public function messages()

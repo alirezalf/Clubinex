@@ -15,15 +15,20 @@ class RegisterRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
             'mobile' => ['required', 'string', 'regex:/^09[0-9]{9}$/', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'captcha' => ['required', 'captcha'],
             'referral_code' => ['nullable', 'string', 'max:50'],
         ];
+
+        if (\App\Models\SystemSetting::getValue('security', 'captcha_enabled', false)) {
+            $rules['captcha'] = ['required', 'captcha'];
+        }
+
+        return $rules;
     }
 
     public function messages()

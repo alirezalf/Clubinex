@@ -50,4 +50,23 @@ class ProductRegistration extends Model
             default => $this->status
         };
     }
+
+    public function getEstimatedPointsAttribute()
+    {
+        // 1. Try exact match
+        $product = Product::where('title', trim($this->product_name))->first();
+
+        // 2. Try loose match (if exact fails)
+        if (!$product) {
+            $product = Product::where('title', 'like', '%' . trim($this->product_name) . '%')->first();
+        }
+
+        if ($product && $product->points_value > 0) {
+            return $product->points_value;
+        }
+
+        // Return default rule points
+        $defaultRule = PointRule::where('action_code', 'product_registration_default')->first();
+        return $defaultRule ? $defaultRule->points : 0;
+    }
 }

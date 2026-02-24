@@ -11,7 +11,7 @@ class NotificationBroadcast extends Model
     use HasFactory;
 
     protected $fillable = [
-        'admin_id', 'title', 'message', 'target_type', 'target_id', 'recipient_ids', 'channels', 'recipient_count'
+        'admin_id', 'title', 'message', 'target_type', 'target_id', 'recipient_ids', 'channels', 'recipient_count', 'email_theme_id'
     ];
 
     protected $casts = [
@@ -23,6 +23,11 @@ class NotificationBroadcast extends Model
     public function admin()
     {
         return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    public function emailTheme()
+    {
+        return $this->belongsTo(EmailTheme::class);
     }
 
     public function targetClub()

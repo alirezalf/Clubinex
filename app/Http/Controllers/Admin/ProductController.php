@@ -37,6 +37,7 @@ class ProductController extends Controller
         $registrations->getCollection()->transform(function ($reg) {
             $reg->created_at_jalali = $reg->created_at_jalali;
             $reg->status_farsi = $reg->status_farsi;
+            $reg->append('estimated_points'); // Explicitly append accessor
             return $reg;
         });
 
@@ -132,16 +133,16 @@ class ProductController extends Controller
         if (!$sample) {
             return response()->json(['error' => 'خطا در دریافت اطلاعات از وردپرس'], 500);
         }
-        
+
         $keys = array_keys($sample);
         $keys[] = 'images.0.src';
         $keys[] = 'categories.0.name';
-        $keys[] = 'categories'; 
+        $keys[] = 'categories';
         $keys[] = 'short_description';
         $keys[] = 'description';
         $keys[] = 'sku';
         $keys[] = 'price';
-        
+
         return response()->json(['keys' => array_values(array_unique($keys))]);
     }
 

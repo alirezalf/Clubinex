@@ -175,6 +175,31 @@ class RewardService
                 }
             }
 
+            // اگر وضعیت به "تایید شده" تغییر کرد و مربوط به گردونه شانس بود -> اعطای امتیاز معادل ارزش جایزه
+            if ($status === 'approved' && $redemption->lucky_wheel_spin_id) {
+                $spin = \App\Models\LuckyWheelSpin::with('prize')->find($redemption->lucky_wheel_spin_id);
+
+                if ($spin && $spin->prize && $spin->prize->value > 0) {
+                    // بررسی اینکه قبلاً امتیاز داده نشده باشد (مثلاً اگر قبلاً تایید شده بود)
+                    // اما چون وضعیت جدید 'approved' است و قبلی نبوده، فرض بر این است که داده نشده.
+                    // برای اطمینان بیشتر می‌توانیم چک کنیم.
+
+                    PointTransaction::awardPoints(
+                        $redemption->user_id,
+                        $spin->prize->value,
+                        null,
+                        "پاداش جایزه فیزیکی گردونه: " . $spin->prize->title,
+                        $redemption
+                    );
+
+                    ActivityLog::log(
+                        'reward.points_awarded',
+                        "امتیاز معادل جایزه فیزیکی گردونه ({$spin->prize->value}) به کاربر داده شد.",
+                        ['user_id' => $redemption->user_id, 'redemption_id' => $redemption->id]
+                    );
+                }
+            }
+
             $redemption->update([
                 'status' => $status,
                 'admin_note' => $adminNote,
@@ -184,8 +209,8 @@ class RewardService
 
             ActivityLog::log(
                 'reward.status_update',
-                "وضعیت درخواست جایزه #{$id} به {$status} تغییر کرد",
-                ['admin_id' => $adminId, 'redemption_id' => $id]
+                "وضعیت درخواست جایزه #{$redemption->id} به {$status} تغییر کرد",
+                ['admin_id' => $adminId, 'redemption_id' => $redemption->id]
             );
 
             return $redemption;

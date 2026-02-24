@@ -17,17 +17,67 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
     const [otpError, setOtpError] = useState('');
     const [captcha, setCaptcha] = useState('');
 
+    const [resendInterval, setResendInterval] = useState(0);
+    const [countdown, setCountdown] = useState(0);
+
+    // Timer effect
+    React.useEffect(() => {
+        if (countdown > 0) {
+            const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [countdown]);
+
     const handleSendOtp = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setOtpError('');
 
         try {
-            await axios.post(route('login.otp.send'), { mobile, captcha });
+            const response = await axios.post(route('login.otp.send'), { mobile, captcha });
             setStep('verify');
+            const interval = response.data.resend_interval || 120;
+            setResendInterval(interval);
+            setCountdown(interval);
         } catch (err: any) {
             setOtpError(err.response?.data?.message || err.response?.data?.errors?.captcha?.[0] || 'خطا در ارسال پیامک');
+            if (err.response?.data?.remaining) {
+                 // If throttled, maybe show timer?
+                 // For now just show error
+            }
             refreshCaptcha();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendOtp = async () => {
+        if (countdown > 0) return;
+        setLoading(true);
+        setOtpError('');
+        try {
+            const response = await axios.post(route('login.otp.send'), { mobile, captcha }); // Note: Captcha might be needed again if enabled?
+            // Usually resend doesn't require captcha if session is valid, but here it's a stateless API call.
+            // If captcha is enabled, we might need to go back to step 1 or handle captcha refresh here.
+            // For simplicity, if captcha is required, we might force user to go back.
+            // But let's assume for resend we might need a way to handle captcha.
+            // Actually, if captcha is enabled, the user MUST solve it again.
+            // So if captchaUrl is present, we probably can't just "Resend" without input.
+            // Let's check if we should redirect to input step if captcha is required.
+
+            if (captchaUrl) {
+                setStep('input');
+                refreshCaptcha();
+                setOtpError('لطفا کد امنیتی جدید را وارد کنید.');
+                return;
+            }
+
+            const interval = response.data.resend_interval || 120;
+            setResendInterval(interval);
+            setCountdown(interval);
+
+        } catch (err: any) {
+             setOtpError(err.response?.data?.message || 'خطا در ارسال مجدد');
         } finally {
             setLoading(false);
         }
@@ -127,6 +177,23 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
                             {loading && <Loader2 className="animate-spin" size={16} />}
                             ورود به حساب
                         </button>
+
+                        <div className="text-center mt-2">
+                            {countdown > 0 ? (
+                                <span className="text-xs text-gray-400">
+                                    ارسال مجدد کد تا {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')} دیگر
+                                </span>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={handleResendOtp}
+                                    disabled={loading}
+                                    className="text-xs text-primary-600 hover:text-primary-700 font-medium disabled:opacity-50"
+                                >
+                                    ارسال مجدد کد تایید
+                                </button>
+                            )}
+                        </div>
 
                         <button type="button" onClick={() => setStep('input')} className="w-full flex items-center justify-center gap-1 text-[10px] text-gray-500 hover:text-gray-700 transition-colors">
                             <ArrowLeft size={12} /> بازگشت

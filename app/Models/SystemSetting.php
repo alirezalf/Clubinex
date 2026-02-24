@@ -74,7 +74,7 @@ class SystemSetting extends Model
         if ($this->type === 'string') {
             // تلاش برای دیکد کردن (مثلاً اگر مقدار "تهران" با کوتیشن ذخیره شده باشد)
             $decoded = json_decode($value);
-            
+
             // اگر دیکد موفق بود و خروجی یک رشته سالم بود، آن را برگردان
             if (json_last_error() === JSON_ERROR_NONE && is_string($decoded)) {
                 return $decoded;
@@ -227,7 +227,7 @@ class SystemSetting extends Model
     public static function getSettingsArray($group = null)
     {
         $query = self::query();
-        
+
         if ($group) {
             $query->where('group', $group);
         }
@@ -304,6 +304,9 @@ class SystemSetting extends Model
                 'provider' => 'kavenegar',
                 'max_otp_attempts' => 3,
                 'otp_expiry_minutes' => 5,
+                'resend_interval' => 120,
+                'sms_ir_template_id' => '',
+                'sms_ir_parameter_name' => 'Code',
             ],
             'email' => [
                 'provider' => 'mail',
@@ -319,7 +322,7 @@ class SystemSetting extends Model
     public static function loadDefaults()
     {
         $defaults = self::getSystemDefaults();
-        
+
         foreach ($defaults as $group => $settings) {
             foreach ($settings as $key => $value) {
                 self::setValue($group, $key, $value);
@@ -341,7 +344,7 @@ class SystemSetting extends Model
         ];
 
         $validator = $validators[$this->type] ?? null;
-        
+
         if ($validator) {
             return gettype($this->value) === $validator;
         }

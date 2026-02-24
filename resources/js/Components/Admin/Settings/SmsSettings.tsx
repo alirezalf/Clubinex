@@ -41,48 +41,90 @@ export default function SmsSettings({ data, setData }: { data: any, setData: any
                 تنظیمات پیامک
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputGroup 
-                    label="درگاه (Provider)" 
-                    name="sms_provider" 
-                    value={data.sms_provider} 
-                    onChange={setData} 
-                    placeholder="مثلا: kavenegar, ippanel" 
+                <InputGroup
+                    label="درگاه (Provider)"
+                    name="sms_provider"
+                    value={data.sms_provider}
+                    onChange={setData}
+                    placeholder="مثلا: kavenegar, ippanel"
                 />
-                <InputGroup 
-                    label="شماره فرستنده" 
-                    name="sms_sender" 
-                    value={data.sms_sender} 
-                    onChange={setData} 
-                    dir="ltr" 
-                    placeholder="مثلا: 10002000" 
+                <InputGroup
+                    label="شماره فرستنده"
+                    name="sms_sender"
+                    value={data.sms_sender}
+                    onChange={setData}
+                    dir="ltr"
+                    placeholder="مثلا: 10002000"
                 />
             </div>
-            <InputGroup 
-                label="کلید API" 
-                name="sms_api_key" 
-                value={data.sms_api_key} 
-                onChange={setData} 
-                type="password" 
-                dir="ltr" 
-                placeholder="کلید اختصاصی پنل پیامک" 
+            <InputGroup
+                label="کلید API"
+                name="sms_api_key"
+                value={data.sms_api_key}
+                onChange={setData}
+                type="password"
+                dir="ltr"
+                placeholder="کلید اختصاصی پنل پیامک"
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputGroup 
-                    label="نام کاربری پنل" 
-                    name="sms_username" 
-                    value={data.sms_username} 
-                    onChange={setData} 
-                    dir="ltr" 
+                <InputGroup
+                    label="نام کاربری پنل"
+                    name="sms_username"
+                    value={data.sms_username}
+                    onChange={setData}
+                    dir="ltr"
                 />
-                <InputGroup 
-                    label="رمز عبور پنل" 
-                    name="sms_password" 
-                    value={data.sms_password} 
-                    onChange={setData} 
-                    type="password" 
-                    dir="ltr" 
+                <InputGroup
+                    label="رمز عبور پنل"
+                    name="sms_password"
+                    value={data.sms_password}
+                    onChange={setData}
+                    type="password"
+                    dir="ltr"
                 />
             </div>
+
+            <div className="border-t pt-4 mt-4">
+                <h4 className="text-sm font-bold text-gray-700 mb-3">تنظیمات پیشرفته</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputGroup
+                        label="فاصله ارسال مجدد (ثانیه)"
+                        name="resend_interval"
+                        value={data.resend_interval}
+                        onChange={setData}
+                        type="number"
+                        dir="ltr"
+                        placeholder="120"
+                    />
+                </div>
+            </div>
+
+            {['smsir', 'sms.ir', 'sms_ir'].includes(data.sms_provider?.toLowerCase()) && (
+                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-4 animate-in fade-in">
+                    <h4 className="text-sm font-bold text-blue-800 flex items-center gap-2">
+                        <Smartphone size={16} />
+                        تنظیمات اختصاصی SMS.ir
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <InputGroup
+                            label="شناسه قالب (Template ID)"
+                            name="sms_ir_template_id"
+                            value={data.sms_ir_template_id}
+                            onChange={setData}
+                            dir="ltr"
+                            placeholder="100000"
+                        />
+                        <InputGroup
+                            label="نام پارامتر (Parameter Name)"
+                            name="sms_ir_parameter_name"
+                            value={data.sms_ir_parameter_name}
+                            onChange={setData}
+                            dir="ltr"
+                            placeholder="Code"
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Test Connection Button */}
             <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">

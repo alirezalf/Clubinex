@@ -57,6 +57,9 @@ class SettingSeeder extends Seeder
             ['group' => 'sms', 'key' => 'sms_username', 'value' => '', 'type' => 'string', 'is_public' => false, 'label' => 'نام کاربری پنل پیامک'],
             ['group' => 'sms', 'key' => 'sms_password', 'value' => '', 'type' => 'string', 'is_public' => false, 'label' => 'رمز عبور پنل پیامک'],
             ['group' => 'sms', 'key' => 'sms_sender', 'value' => '10002000', 'type' => 'string', 'is_public' => false, 'label' => 'شماره فرستنده پیامک'],
+            ['group' => 'sms', 'key' => 'resend_interval', 'value' => 120, 'type' => 'number', 'is_public' => true, 'label' => 'فاصله ارسال مجدد (ثانیه)'],
+            ['group' => 'sms', 'key' => 'sms_ir_template_id', 'value' => '', 'type' => 'string', 'is_public' => false, 'label' => 'شناسه قالب SMS.ir'],
+            ['group' => 'sms', 'key' => 'sms_ir_parameter_name', 'value' => 'Code', 'type' => 'string', 'is_public' => false, 'label' => 'نام پارامتر SMS.ir'],
 
             // تنظیمات اتصال به وردپرس
             ['group' => 'wordpress', 'key' => 'wp_url', 'value' => '', 'type' => 'string', 'is_public' => false, 'label' => 'آدرس سایت وردپرس'],

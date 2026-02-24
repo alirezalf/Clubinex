@@ -16,7 +16,7 @@ class SettingController extends Controller
     {
         // دریافت تمام تنظیمات گروه‌بندی شده
         $settings = SystemSetting::all()->groupBy('group');
-        
+
         // دریافت قالب‌های پیام
         $notificationTemplates = NotificationTemplate::with('emailTheme')->get();
 
@@ -42,11 +42,11 @@ class SettingController extends Controller
             }
 
             if ($value === null && !$request->hasFile($key)) {
-                continue; 
+                continue;
             }
 
             SystemSetting::setValue(
-                'general', 
+                'general',
                 $key,
                 $value
             );
@@ -56,7 +56,7 @@ class SettingController extends Controller
 
         return back()->with('message', 'تنظیمات با موفقیت ذخیره شد.');
     }
-    
+
     // --- متدهای مدیریت تم‌های ایمیل ---
 
     public function storeTheme(Request $request)
@@ -75,7 +75,7 @@ class SettingController extends Controller
     public function updateTheme(Request $request, $id)
     {
         $theme = EmailTheme::findOrFail($id);
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'content' => 'required|string',
@@ -90,7 +90,7 @@ class SettingController extends Controller
     public function destroyTheme($id)
     {
         $theme = EmailTheme::findOrFail($id);
-        
+
         // بررسی وابستگی‌ها
         if ($theme->templates()->count() > 0) {
             return back()->with('error', 'این تم به برخی رویدادها متصل است و نمی‌توان آن را حذف کرد.');
@@ -100,8 +100,6 @@ class SettingController extends Controller
 
         return back()->with('message', 'تم ایمیل حذف شد.');
     }
-
-    // ------------------------------------
 
     public function logs(Request $request)
     {
@@ -119,7 +117,7 @@ class SettingController extends Controller
         }
 
         $logs = $query->latest()->paginate(20)->withQueryString();
-            
+
         return Inertia::render('Admin/Logs', [
             'logs' => $logs,
             'filters' => $request->only(['search'])

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Gift, CheckCircle2, Truck, Clock, XCircle, Package } from 'lucide-react';
+import { Gift, CheckCircle2, Truck, Clock, XCircle, Package, MessageSquare } from 'lucide-react';
 import clsx from 'clsx';
+import { Link } from '@inertiajs/react';
 
 interface Redemption {
     id: number;
@@ -93,6 +94,22 @@ export default function RedemptionHistory({ redemptions, onSwitchToStore }: Prop
                                             </div>
                                         )}
                                         {!item.tracking_code && !item.admin_note && <span className="text-gray-400 text-xs">-</span>}
+
+                                        {/* دکمه پیگیری - Updated to use tickets.index */}
+                                        <div className="pt-1">
+                                            {/* @ts-ignore */}
+                                            <Link
+                                                href={route('tickets.index', {
+                                                    create_ticket: true,
+                                                    subject: `پیگیری جایزه: ${item.reward?.title || 'جایزه'} (شناسه: ${item.id})`,
+                                                    message: `با سلام،\nمن در مورد جایزه "${item.reward?.title || 'جایزه'}" با شناسه درخواست ${item.id} سوال دارم.\nوضعیت فعلی: ${item.status_farsi}\nکد رهگیری: ${item.tracking_code || 'ندارد'}\n\nتوضیحات شما:`
+                                                })}
+                                                className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 transition flex items-center gap-1 w-fit"
+                                            >
+                                                <MessageSquare size={12} />
+                                                پیگیری
+                                            </Link>
+                                        </div>
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-gray-500 text-xs">

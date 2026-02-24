@@ -25,7 +25,7 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
         }
 
         if (confirm(status === 'approved' ? 'آیا از تایید این درخواست اطمینان دارید؟ امتیاز به کاربر داده می‌شود.' : 'آیا از رد این درخواست اطمینان دارید؟')) {
-            data.status = status; 
+            data.status = status;
             post(route('admin.products.registration_status', registration.id), {
                 onSuccess: () => {
                     onClose();
@@ -38,7 +38,7 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh]">
-                
+
                 <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
                     <h3 className="font-bold text-lg text-gray-800">بررسی درخواست ثبت محصول #{registration.id}</h3>
                     <button onClick={onClose}><X className="text-gray-400 hover:text-gray-600" /></button>
@@ -46,15 +46,15 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
 
                 <div className="flex-1 overflow-y-auto p-0">
                     <div className="flex flex-col lg:flex-row h-full">
-                        
+
                         {/* Left Column: Image Viewer */}
                         <div className="lg:w-1/2 bg-gray-100 p-6 flex flex-col justify-center border-r border-gray-200">
                             <div className="relative group rounded-xl overflow-hidden shadow-sm bg-white flex items-center justify-center h-full max-h-[500px]">
                                 {registration.invoice_image ? (
                                     <div className="relative w-full h-full flex items-center justify-center p-2">
-                                        <img 
-                                            src={registration.invoice_image} 
-                                            alt="Invoice" 
+                                        <img
+                                            src={registration.invoice_image}
+                                            alt="Invoice"
                                             className={`max-w-full max-h-full object-contain transition-transform duration-300 ${isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'}`}
                                             onClick={() => setIsZoomed(!isZoomed)}
                                         />
@@ -73,7 +73,7 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
                                     </div>
                                 )}
                             </div>
-                            
+
                             {registration.product_image && (
                                 <div className="mt-4 flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm">
                                      <span className="text-xs font-bold text-gray-600 whitespace-nowrap">تصویر محصول:</span>
@@ -108,7 +108,13 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
                                         <div className="flex justify-between"><span className="text-gray-500">مدل:</span> <span className="font-medium">{registration.product_model}</span></div>
                                         <div className="flex justify-between"><span className="text-gray-500">برند:</span> <span className="font-medium">{registration.product_brand || '-'}</span></div>
                                         <div className="flex justify-between items-center pt-2 mt-2 border-t border-gray-50">
-                                            <span className="text-gray-500">سریال:</span> 
+                                            <span className="text-gray-500">امتیاز تخمینی:</span>
+                                            <span className="font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-100">
+                                                {registration.estimated_points ?? 0} امتیاز
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center pt-2 mt-2 border-t border-gray-50">
+                                            <span className="text-gray-500">سریال:</span>
                                             <span className="font-mono bg-yellow-50 px-3 py-1 rounded text-yellow-800 font-bold border border-yellow-100 tracking-wider select-all">{registration.serial_code}</span>
                                         </div>
                                     </div>
@@ -118,15 +124,15 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
                                 {registration.status === 'pending' ? (
                                     <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                                         <label className="block text-sm font-bold text-gray-700 mb-2">یادداشت مدیر</label>
-                                        <textarea 
+                                        <textarea
                                             value={data.admin_note}
                                             onChange={e => setData('admin_note', e.target.value)}
                                             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 min-h-[80px]"
                                             placeholder="توضیحات تایید یا دلیل رد درخواست..."
                                         ></textarea>
-                                        
+
                                         <div className="flex gap-3 mt-4">
-                                            <button 
+                                            <button
                                                 onClick={() => handleSubmit('rejected')}
                                                 disabled={processing}
                                                 className="flex-1 bg-white text-red-600 border border-red-200 py-2.5 rounded-lg hover:bg-red-50 transition flex justify-center items-center gap-2 font-bold text-sm"
@@ -134,7 +140,7 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
                                                 <XCircle size={18} />
                                                 رد درخواست
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => handleSubmit('approved')}
                                                 disabled={processing}
                                                 className="flex-[2] bg-green-600 text-white py-2.5 rounded-lg hover:bg-green-700 transition flex justify-center items-center gap-2 font-bold text-sm shadow-lg shadow-green-500/20"
@@ -152,7 +158,7 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
                                         </div>
                                         {registration.admin_note && (
                                             <div className="text-sm bg-white/60 p-3 rounded-lg border border-black/5 text-right text-gray-800">
-                                                <span className="font-bold block text-xs mb-1 opacity-70">یادداشت:</span> 
+                                                <span className="font-bold block text-xs mb-1 opacity-70">یادداشت:</span>
                                                 {registration.admin_note}
                                             </div>
                                         )}

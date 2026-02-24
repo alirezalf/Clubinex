@@ -8,7 +8,7 @@ use App\Models\ProductSerial;
 use App\Models\ProductRegistration;
 use App\Models\Agent;
 use App\Services\ProductService;
-use App\Http\Requests\Product\RegisterProductRequest; 
+use App\Http\Requests\Product\RegisterProductRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -79,6 +79,7 @@ class ProductController extends Controller
             });
 
         $myRegistrations = ProductRegistration::where('user_id', Auth::id())
+            ->where('status', '!=', 'approved') // Exclude approved to avoid duplicates with ProductSerial
             ->latest()
             ->get()
             ->map(function ($reg) {
@@ -182,7 +183,7 @@ class ProductController extends Controller
     public function registerProduct(RegisterProductRequest $request)
     {
         $user = Auth::user();
-        
+
         if ($request->has('serial_code') && !$request->has('tool_name')) {
              try {
                 $result = $this->productService->registerBySerial($user, trim($request->serial_code));
@@ -197,12 +198,12 @@ class ProductController extends Controller
 
         try {
             $this->productService->createRegistrationRequest(
-                $user, 
-                $request->validated(), 
-                $request->file('tool_pic_file'), 
+                $user,
+                $request->validated(),
+                $request->file('tool_pic_file'),
                 $request->file('invoice_file')
             );
-            
+
             return redirect()->route('products.index')->with('message', 'درخواست ثبت محصول شما با موفقیت ارسال شد.');
         } catch (\Exception $e) {
             return back()->with('error', 'خطا در ثبت درخواست: ' . $e->getMessage());
@@ -252,19 +253,19 @@ class ProductController extends Controller
     public function updateRegistration(Request $request, $id)
     {
         $rules = (new RegisterProductRequest)->rules();
-        $rules['invoice_file'] = 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120'; 
-        
+        $rules['invoice_file'] = 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120';
+
         $validated = $request->validate($rules);
 
         try {
             $this->productService->updateRegistrationRequest(
-                Auth::user(), 
-                $id, 
+                Auth::user(),
+                $id,
                 $validated,
                 $request->file('tool_pic_file'),
                 $request->file('invoice_file')
             );
-            
+
             return redirect()->route('products.index')->with('message', 'درخواست ثبت محصول با موفقیت بروزرسانی شد.');
         } catch (\Exception $e) {
             return back()->with('error', 'خطا در بروزرسانی: ' . $e->getMessage());

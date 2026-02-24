@@ -14,11 +14,12 @@ return new class extends Migration
             $table->string('title');
             $table->text('message');
             $table->string('target_type'); // all, club, manual
-            $table->unsignedBigInteger('target_id')->nullable(); 
+            $table->unsignedBigInteger('target_id')->nullable();
             $table->json('recipient_ids')->nullable(); // ذخیره لیست ID کاربران در انتخاب دستی
-            $table->json('channels'); 
+            $table->json('channels');
             $table->integer('recipient_count')->default(0);
             $table->timestamps();
+            $table->foreignId('email_theme_id')->nullable()->constrained('email_themes')->nullOnDelete();
         });
     }
 

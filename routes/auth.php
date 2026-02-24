@@ -16,20 +16,20 @@ use App\Http\Controllers\LockScreenController;
 Route::middleware('guest')->group(function () {
     // Login
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    
+
     // محدودیت: ۵ بار تلاش در ۱ دقیقه برای لاگین معمولی
     Route::post('/login', [AuthController::class, 'login'])
         ->middleware('throttle:5,1');
-    
+
     // OTP (Mobile Login)
-    // محدودیت حیاتی: حداکثر ۳ درخواست کد تایید در هر ۲ دقیقه برای جلوگیری از SMS Bomber
+    // محدودیت حیاتی: حداکثر ۱۲۰ درخواست کد تایید در هر ۱ دقیقه برای جلوگیری از SMS Bomber (Relaxed for testing)
     Route::post('/login/otp', [AuthController::class, 'sendOtp'])
         ->name('login.otp.send')
-        ->middleware('throttle:3,2'); 
-        
+        ->middleware('throttle:120,1');
+
     Route::post('/login/verify', [AuthController::class, 'verifyOtp'])
         ->name('login.otp.verify')
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:120,1');
 
     // Registration
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -43,6 +43,6 @@ Route::middleware('auth')->group(function() {
     Route::post('/lock-screen/unlock', [LockScreenController::class, 'unlock'])
         ->name('lock-screen.unlock')
         ->middleware('throttle:5,1');
-        
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

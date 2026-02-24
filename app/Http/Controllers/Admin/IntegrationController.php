@@ -80,14 +80,14 @@ class IntegrationController extends Controller
             $config = [
                 'mail.default' => 'smtp',
                 'mail.mailers.smtp.transport' => 'smtp',
-                'mail.mailers.smtp.host' => $settings['mail_host'],
-                'mail.mailers.smtp.port' => $settings['mail_port'],
-                'mail.mailers.smtp.encryption' => (int)$settings['mail_port'] === 465 ? 'ssl' : 'tls',
-                'mail.mailers.smtp.username' => $settings['mail_username'],
-                'mail.mailers.smtp.password' => $settings['mail_password'],
+                'mail.mailers.smtp.host' => $settings['mail_host'] ?? $settings['host'] ?? '',
+                'mail.mailers.smtp.port' => $settings['mail_port'] ?? $settings['port'] ?? 587,
+                'mail.mailers.smtp.encryption' => (int)($settings['mail_port'] ?? $settings['port'] ?? 587) === 465 ? 'ssl' : 'tls',
+                'mail.mailers.smtp.username' => $settings['mail_username'] ?? $settings['username'] ?? '',
+                'mail.mailers.smtp.password' => $settings['mail_password'] ?? $settings['password'] ?? '',
                 'mail.mailers.smtp.timeout' => 60,
-                'mail.from.address' => $settings['mail_from_address'],
-                'mail.from.name' => $settings['mail_from_name'],
+                'mail.from.address' => $settings['from_address'] ?? $settings['mail_from_address'] ?? 'noreply@example.com',
+                'mail.from.name' => $settings['from_name'] ?? $settings['mail_from_name'] ?? 'Clubinex',
                 'mail.mailers.smtp.stream' => [
                     'ssl' => [
                         'allow_self_signed' => true,
@@ -166,16 +166,31 @@ class IntegrationController extends Controller
         }
 
         try {
-            // شبیه‌سازی بررسی اتصال موفق (در محیط واقعی از پکیج مربوطه استفاده شود)
             $isConnected = false;
             $details = '';
+            $credit = null;
 
-            if ($apiKey && strlen($apiKey) > 10) {
-                $isConnected = true;
-                $details = 'اتصال از طریق کلید API برقرار شد.';
-            } elseif ($username && $password) {
-                $isConnected = true;
-                $details = 'اتصال از طریق نام کاربری و رمز عبور برقرار شد.';
+            if (in_array($provider, ['smsir', 'sms.ir', 'sms_ir'])) {
+                $driver = new \App\Services\SMS\Drivers\SmsIrDriver($apiKey);
+                $credit = $driver->getCredit();
+
+                if ($credit !== null) {
+                    $isConnected = true;
+                    $details = 'اتصال موفقیت‌آمیز بود. اعتبار: ' . $credit . ' ریال';
+                } else {
+                    // Fallback if credit check fails but API key seems valid (maybe endpoint changed)
+                    // But for now, assume failure if credit check fails.
+                    throw new \Exception('عدم امکان دریافت اعتبار. کلید API را بررسی کنید.');
+                }
+            } else {
+                // Fallback for other providers (simulation for now)
+                if ($apiKey && strlen($apiKey) > 10) {
+                    $isConnected = true;
+                    $details = 'اتصال شبیه‌سازی شده (درایور هنوز کامل نیست).';
+                } elseif ($username && $password) {
+                    $isConnected = true;
+                    $details = 'اتصال شبیه‌سازی شده با نام کاربری.';
+                }
             }
 
             if ($isConnected) {
@@ -185,7 +200,7 @@ class IntegrationController extends Controller
                     'info' => [
                         'provider' => $provider,
                         'details' => $details,
-                        'credit' => 'اطلاعات حساب معتبر است'
+                        'credit' => $credit ?? 'نامشخص'
                     ]
                 ]);
             } else {

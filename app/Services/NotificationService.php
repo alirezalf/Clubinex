@@ -33,7 +33,7 @@ class NotificationService
         if ($template->sms_active && $user->mobile) {
             try {
                 $message = self::replaceVariables($template->sms_pattern, $data);
-                
+
                 // دیسپچ کردن جاب به جای ارسال مستقیم
                 SendSms::dispatch($user->mobile, $message, $user->id);
 
@@ -47,7 +47,7 @@ class NotificationService
             try {
                 $subject = self::replaceVariables($template->email_subject, $data);
                 $rawBody = self::replaceVariables($template->email_body, $data);
-                
+
                 $finalBody = $rawBody;
                 if ($template->emailTheme) {
                     $themeContent = str_replace('{content}', $rawBody, $template->emailTheme->content);
@@ -55,10 +55,31 @@ class NotificationService
                 }
 
                 // استفاده از queue() به جای send() برای ارسال در صف
-                Mail::html($finalBody, function ($message) use ($user, $subject) {
-                    $message->to($user->email)->subject($subject);
+                $settings = \App\Models\SystemSetting::getAllGroupSettings('email');
+
+                config([
+                    'mail.default' => 'smtp',
+                    'mail.mailers.smtp.transport' => 'smtp',
+                    'mail.mailers.smtp.host' => $settings['mail_host'] ?? $settings['host'] ?? config('mail.mailers.smtp.host'),
+                    'mail.mailers.smtp.port' => $settings['mail_port'] ?? $settings['port'] ?? config('mail.mailers.smtp.port'),
+                    'mail.mailers.smtp.encryption' => (int)($settings['mail_port'] ?? $settings['port'] ?? 587) === 465 ? 'ssl' : 'tls',
+                    'mail.mailers.smtp.username' => $settings['mail_username'] ?? $settings['username'] ?? config('mail.mailers.smtp.username'),
+                    'mail.mailers.smtp.password' => $settings['mail_password'] ?? $settings['password'] ?? config('mail.mailers.smtp.password'),
+                    'mail.from.address' => $settings['from_address'] ?? $settings['mail_from_address'] ?? config('mail.from.address'),
+                    'mail.from.name' => $settings['from_name'] ?? $settings['mail_from_name'] ?? config('mail.from.name'),
+                ]);
+
+                \Illuminate\Support\Facades\Mail::purge('smtp');
+
+                $fromAddress = config('mail.from.address');
+                $fromName = config('mail.from.name');
+
+                Mail::html($finalBody, function ($message) use ($user, $subject, $fromAddress, $fromName) {
+                    $message->to($user->email)
+                            ->subject($subject)
+                            ->from($fromAddress, $fromName);
                 });
-                
+
                 \App\Models\EmailLog::logEmail([
                     'user_id' => $user->id,
                     'email' => $user->email,
@@ -86,7 +107,7 @@ class NotificationService
     private static function replaceVariables($text, $data)
     {
         if (empty($text)) return '';
-        
+
         foreach ($data as $key => $value) {
             $val = is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : (string)$value;
             $text = str_replace('{' . $key . '}', $val, $text);

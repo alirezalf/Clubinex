@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 
+use App\Models\EmailTheme;
+
 class NotificationController extends Controller
 {
     public function index(Request $request)
@@ -20,6 +22,7 @@ class NotificationController extends Controller
         $data = [
             'tab' => $tab,
             'clubs' => Club::select('id', 'name')->get(),
+            'emailThemes' => EmailTheme::select('id', 'name')->get(),
         ];
 
         if ($tab === 'history') {
@@ -30,11 +33,11 @@ class NotificationController extends Controller
                     $item->created_at_jalali = $item->created_at_jalali;
                     $item->target_label = $item->target_label;
                     $item->admin_name = $item->admin ? $item->admin->full_name : 'سیستم';
-                    
+
                     if ($item->target_type === 'manual') {
                         $item->recipients_list = $item->getRecipients();
                     }
-                    
+
                     return $item;
                 });
         }
@@ -56,6 +59,7 @@ class NotificationController extends Controller
             'selected_user_ids' => 'required_if:target_type,manual|array',
             'channels' => 'required|array|min:1',
             'channels.*' => 'in:database,sms,email',
+            'email_theme_id' => 'nullable|exists:email_themes,id',
             'title' => 'required|string|max:100',
             'message' => 'required|string|max:1000',
         ]);
@@ -85,7 +89,8 @@ class NotificationController extends Controller
                 'target_id' => $request->target_type === 'club' ? $request->club_id : null,
                 'recipient_ids' => $request->target_type === 'manual' ? $request->selected_user_ids : null,
                 'channels' => $request->channels,
-                'recipient_count' => $count
+                'recipient_count' => $count,
+                'email_theme_id' => $request->email_theme_id
             ]);
 
             // Dispatch Job

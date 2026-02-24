@@ -68,11 +68,12 @@ class AuthController extends Controller
                 'message' => 'کد تایید ارسال شد',
                 'step' => 'verify',
                 'mobile' => $request->mobile,
-                'dev_code' => app()->isLocal() ? $result['dev_code'] : null
+                'dev_code' => $result['dev_code'] ?? null,
+                'resend_interval' => $result['resend_interval'] ?? 120
             ]);
         }
 
-        return response()->json(['message' => 'خطا در ارسال پیامک'], 500);
+        return response()->json(['message' => $result['message']], 429);
     }
 
     // مرحله 2: تایید OTP و لاگین (ریفکتور شده)

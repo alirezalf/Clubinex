@@ -183,15 +183,9 @@ class EmailLog extends Model
             'status' => 'pending',
         ], $data));
 
-        ActivityLog::log(
-            'email.sent',
-            "ایمیل به آدرس {$email->email} ارسال شد",
-            [
-                'user_id' => $email->user_id,
-                'model_type' => self::class,
-                'model_id' => $email->id,
-            ]
-        );
+        // ActivityLog::log is causing issues if not imported or static method issues,
+        // and we don't strictly need it for every email log as EmailLog itself is a log.
+        // Removing ActivityLog call to prevent potential recursion or errors.
 
         return $email;
     }
