@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
@@ -30,7 +31,7 @@ interface Props extends PageProps {
 }
 
 export default function UserHistory({ user, stats, transactions, rewards, products, spins, from = 'rewards' }: Props) {
-    
+
     const backRoute = from === 'users' ? route('admin.users') : route('admin.rewards.index', {tab: 'redemptions'});
     const parentLabel = from === 'users' ? 'مدیریت کاربران' : 'مدیریت جوایز';
 
@@ -42,7 +43,7 @@ export default function UserHistory({ user, stats, transactions, rewards, produc
             <Head title={`سوابق: ${user.name}`} />
 
             <div className="space-y-6">
-                
+
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-4">
                     <Link href={backRoute} className="p-2 bg-white rounded-xl border border-gray-200 shadow-sm hover:bg-gray-50 transition text-gray-500 hover:text-gray-800">
@@ -56,18 +57,24 @@ export default function UserHistory({ user, stats, transactions, rewards, produc
 
                 {/* History Lists Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-8">
-                    
+
                     {/* 1. Rewards */}
                     <SimpleHistoryTable
                         title="جوایز دریافتی"
                         icon={ShoppingBag}
                         iconColorClass="text-blue-600"
                         headers={['جایزه', 'امتیاز', 'وضعیت', 'تاریخ']}
-                        data={rewards}
+                        data={rewards || []}
                         renderRow={(r, i) => (
                             <tr key={i} className="hover:bg-gray-50 transition">
                                 <td className="px-4 py-3 font-medium text-gray-800">{r.title}</td>
-                                <td className="px-4 py-3 text-red-500 font-bold dir-ltr text-right">{r.points.toLocaleString()}</td>
+                                <td className="px-4 py-3 font-bold dir-ltr text-right">
+                                    {r.status_raw === 'grant_points' ? (
+                                        <span className="text-green-600">+{r.reward_value?.toLocaleString() || 0}</span>
+                                    ) : (
+                                        <span className="text-red-500">-{(r.points || 0).toLocaleString()}</span>
+                                    )}
+                                </td>
                                 <td className="px-4 py-3 text-xs">
                                     <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded">{r.status}</span>
                                 </td>
@@ -83,7 +90,7 @@ export default function UserHistory({ user, stats, transactions, rewards, produc
                         icon={Package}
                         iconColorClass="text-orange-600"
                         headers={['محصول', 'سریال', 'تاریخ']}
-                        data={products}
+                        data={products || []}
                         renderRow={(p, i) => (
                             <tr key={i} className="hover:bg-gray-50 transition">
                                 <td className="px-4 py-3 font-medium text-gray-800">{p.title}</td>
@@ -100,7 +107,7 @@ export default function UserHistory({ user, stats, transactions, rewards, produc
                         icon={Award}
                         iconColorClass="text-amber-600"
                         headers={['عنوان', 'مقدار', 'تاریخ']}
-                        data={transactions.data}
+                        data={transactions?.data || []}
                         renderRow={(tx, i) => (
                             <tr key={tx.id} className="hover:bg-gray-50 transition">
                                 <td className="px-4 py-3 text-xs">
@@ -108,7 +115,7 @@ export default function UserHistory({ user, stats, transactions, rewards, produc
                                     <div className="text-gray-500 truncate max-w-[200px]" title={tx.description}>{tx.description}</div>
                                 </td>
                                 <td className={`px-4 py-3 font-black dir-ltr text-right ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
+                                    {tx.amount > 0 ? '+' : ''}{(tx.amount || 0).toLocaleString()}
                                 </td>
                                 <td className="px-4 py-3 text-gray-500 text-xs dir-ltr text-right">{tx.created_at_jalali}</td>
                             </tr>
@@ -122,7 +129,7 @@ export default function UserHistory({ user, stats, transactions, rewards, produc
                         icon={Dna}
                         iconColorClass="text-purple-600"
                         headers={['نتیجه', 'هزینه', 'تاریخ']}
-                        data={spins.data}
+                        data={spins?.data || []}
                         renderRow={(spin, i) => (
                             <tr key={i} className="hover:bg-gray-50 transition">
                                 <td className="px-4 py-3">

@@ -50,4 +50,9 @@ Route::middleware(['role:super-admin|admin'])->group(function () {
     Route::post('/email-themes', [EmailThemeController::class, 'store'])->name('email-themes.store');
     Route::put('/email-themes/{id}', [EmailThemeController::class, 'update'])->name('email-themes.update');
     Route::delete('/email-themes/{id}', [EmailThemeController::class, 'destroy'])->name('email-themes.destroy');
+
+    // SMS Templates
+    Route::post('/sms-templates', [\App\Http\Controllers\Admin\SmsTemplateController::class, 'store'])->name('sms-templates.store');
+    Route::put('/sms-templates/{smsTemplate}', [\App\Http\Controllers\Admin\SmsTemplateController::class, 'update'])->name('sms-templates.update');
+    Route::delete('/sms-templates/{smsTemplate}', [\App\Http\Controllers\Admin\SmsTemplateController::class, 'destroy'])->name('sms-templates.destroy');
 });

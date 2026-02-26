@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import { BellRing, Edit2 } from 'lucide-react';
@@ -7,6 +8,7 @@ interface Template {
     title_fa: string;
     sms_active: boolean;
     sms_pattern: string;
+    sms_template_id: number | null;
     database_active: boolean;
     database_message: string;
     email_active: boolean;
@@ -21,17 +23,25 @@ interface EmailTheme {
     name: string;
 }
 
-export default function TemplateEditor({ template, emailThemes }: { template: Template, emailThemes: EmailTheme[] }) {
+interface SmsTemplate {
+    id: number;
+    name: string;
+    content: string;
+    provider_template_id: string | null;
+}
+
+export default function TemplateEditor({ template, emailThemes, smsTemplates = [] }: { template: Template, emailThemes: EmailTheme[], smsTemplates?: SmsTemplate[] }) {
     const [editing, setEditing] = useState(false);
     const { data, setData, post, processing } = useForm({
         sms_active: Boolean(template.sms_active),
         sms_pattern: template.sms_pattern || '',
+        sms_template_id: template.sms_template_id || '',
         database_active: Boolean(template.database_active),
         database_message: template.database_message || '',
         email_active: Boolean(template.email_active),
         email_subject: template.email_subject || '',
         email_body: template.email_body || '',
-        email_theme_id: template.email_theme_id || '', 
+        email_theme_id: template.email_theme_id || '',
     });
 
     const handleSave = () => {
@@ -70,21 +80,53 @@ export default function TemplateEditor({ template, emailThemes }: { template: Te
             <div className="flex justify-between items-center border-b border-primary-100 pb-3">
                 <h4 className="font-bold text-primary-800 text-lg">{template.title_fa}</h4>
                 <div className="text-xs text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
-                    <span className="font-bold ml-1">متغیرها:</span> 
+                    <span className="font-bold ml-1">متغیرها:</span>
                     <span className="dir-ltr inline-block font-mono text-primary-600">{template.variables}</span>
                 </div>
             </div>
-            
+
             <div className="space-y-3">
                 <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={data.sms_active} onChange={e => setData('sms_active', e.target.checked)} className="rounded text-primary-600 w-5 h-5 focus:ring-primary-500" />
                     <span className="font-bold text-gray-700">ارسال پیامک</span>
                 </label>
                 {data.sms_active && (
-                    <textarea value={data.sms_pattern} onChange={e => setData('sms_pattern', e.target.value)} className="w-full text-sm border border-gray-300 rounded-xl focus:ring-1 focus:ring-primary-500 px-4 py-3" rows={2} />
+                    <div className="space-y-3">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-600 mb-1">انتخاب قالب پیامک</label>
+                            <select
+                                value={data.sms_template_id || ''}
+                                onChange={e => setData('sms_template_id', e.target.value)}
+                                className="w-full text-sm border border-gray-300 rounded-xl px-4 py-2 bg-white"
+                            >
+                                <option value="">-- انتخاب قالب (یا استفاده از متن دلخواه) --</option>
+                                {smsTemplates.map(t => (
+                                    <option key={t.id} value={t.id}>
+                                        {t.name} {t.provider_template_id ? `(ID: ${t.provider_template_id})` : ''}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {!data.sms_template_id && (
+                            <div className="animate-in fade-in">
+                                <label className="block text-xs font-bold text-gray-600 mb-1">متن پیامک دلخواه (پیشرفته)</label>
+                                <textarea
+                                    value={data.sms_pattern}
+                                    onChange={e => setData('sms_pattern', e.target.value)}
+                                    className="w-full text-sm border border-gray-300 rounded-xl focus:ring-1 focus:ring-primary-500 px-4 py-3"
+                                    rows={2}
+                                    placeholder="متن پیامک یا شناسه قالب (برای sms.ir)"
+                                />
+                                <p className="text-[10px] text-gray-500 mt-1 mr-1">
+                                    نکته: اگر قالبی انتخاب نکنید، این متن ارسال می‌شود. برای sms.ir می‌توانید شناسه قالب را اینجا وارد کنید.
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
-            
+
             <div className="space-y-3 pt-3 border-t border-gray-200">
                 <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={data.email_active} onChange={e => setData('email_active', e.target.checked)} className="rounded text-primary-600 w-5 h-5" />
@@ -101,7 +143,7 @@ export default function TemplateEditor({ template, emailThemes }: { template: Te
                     </div>
                 )}
             </div>
-            
+
             <div className="space-y-3 pt-3 border-t border-gray-200">
                 <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={data.database_active} onChange={e => setData('database_active', e.target.checked)} className="rounded text-primary-600 w-5 h-5" />

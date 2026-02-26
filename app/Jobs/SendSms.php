@@ -3,12 +3,12 @@
 namespace App\Jobs;
 
 use App\Models\SmsLog;
+use App\Services\SMS\SmsManager;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class SendSms implements ShouldQueue
@@ -18,77 +18,121 @@ class SendSms implements ShouldQueue
     protected $mobile;
     protected $message;
     protected $userId;
+    protected $templateId;
+    protected $parameters;
 
     /**
      * تعداد تلاش مجدد در صورت خطا
      */
     public $tries = 3;
 
-    public function __construct($mobile, $message, $userId = null)
+    public function __construct($mobile, $message, $userId = null, $templateId = null, $parameters = [])
     {
         $this->mobile = $mobile;
         $this->message = $message;
         $this->userId = $userId;
+        $this->templateId = $templateId;
+        $this->parameters = $parameters;
     }
 
-    public function handle(): void
+    public function handle(SmsManager $smsManager): void
     {
-        // دریافت تنظیمات از دیتابیس یا کش
-        $settings = cache()->remember('global_settings', 3600, function () {
-            return \App\Models\SystemSetting::getSettingsArray();
-        });
+        $provider = \App\Models\SystemSetting::getValue('sms', 'sms_provider', 'smsir');
+        $provider = strtolower(trim($provider, '/'));
 
-        $provider = $settings['sms.sms_provider'] ?? 'kavenegar';
-        $apiKey = $settings['sms.sms_api_key'] ?? '';
-        $sender = $settings['sms.sms_sender'] ?? '';
-
-        // ثبت لاگ اولیه (در حال ارسال)
+        // ثبت لاگ اولیه
         $log = SmsLog::logSms([
             'user_id' => $this->userId,
             'mobile' => $this->mobile,
             'message' => $this->message,
             'status' => 'pending',
             'provider' => $provider,
-            'sms_type' => 'notification'
+            'sms_type' => $this->templateId ? 'verify' : 'notification'
         ]);
 
         try {
-            // ارسال واقعی پیامک
-            if ($provider === 'smsir') {
-                $response = Http::withHeaders([
-                    'X-API-KEY' => $apiKey,
-                    'Accept' => 'application/json',
-                ])->post('https://api.sms.ir/v1/send/bulk', [
-                    'lineNumber' => $sender,
-                    'MessageText' => $this->message,
-                    'Mobiles' => [$this->mobile],
-                ]);
+            $driver = $smsManager->driver($provider);
 
-                if (!$response->successful()) {
-                    throw new \Exception('SMS.ir Error: ' . $response->body());
-                }
-
-                $result = $response->json();
-                if (($result['status'] ?? 0) !== 1) {
-                     throw new \Exception('SMS.ir API Error: ' . ($result['message'] ?? 'Unknown error'));
-                }
-
-            } elseif ($provider === 'kavenegar') {
-                // $api = new \Kavenegar\KavenegarApi($apiKey);
-                // $api->Send($sender, $this->mobile, $this->message);
+            // اعتبارسنجی درایور
+            if (!$driver) {
+                throw new \Exception("SMS Driver not found: {$provider}");
             }
 
-            Log::info("SMS Sent to {$this->mobile}: {$this->message}");
+            // بررسی اعتبار حساب قبل از ارسال
+            $credit = $driver->getCredit();
+            if ($credit === null) {
+                Log::warning('SMS: Could not retrieve credit', ['provider' => $provider]);
+            }
 
-            // آپدیت وضعیت به ارسال شده
-            $log->updateStatus('sent', ['cost' => 500]); // هزینه فرضی
+            $success = false;
 
+            if ($this->templateId) {
+                // ارسال پیام تأیید
+                if (!empty($this->parameters)) {
+                    $formattedParams = [];
+                    foreach ($this->parameters as $key => $value) {
+                        $formattedParams[] = [
+                            'name' => $key,
+                            'value' => (string)$value
+                        ];
+                    }
+                    $success = $driver->sendVerifyWithParams(
+                        $this->mobile,
+                        (int)$this->templateId,
+                        $formattedParams
+                    );
+                } else {
+                    $success = $driver->sendVerify(
+                        $this->mobile,
+                        $this->message,
+                        $this->templateId
+                    );
+                }
+            } else {
+                // ارسال پیام عادی
+                $success = $driver->sendBulk($this->mobile, $this->message);
+            }
+
+            if ($success) {
+                $log->updateStatus('sent', [
+                    'cost' => 0,
+                    'provider_response' => 'Success'
+                ]);
+
+                Log::info('SMS sent successfully', [
+                    'mobile' => $this->mobile,
+                    'type' => $this->templateId ? 'verify' : 'bulk'
+                ]);
+            } else {
+                throw new \Exception('SMS Provider returned false');
+            }
         } catch (\Exception $e) {
-            $log->updateStatus('failed', ['error_message' => $e->getMessage()]);
-            Log::error("SMS Job Failed: " . $e->getMessage());
+            // ثبت خطا
+            $log->updateStatus('failed', [
+                'error_message' => $e->getMessage(),
+                'provider' => $provider
+            ]);
 
-            // پرتاب خطا برای تلاش مجدد توسط صف لاراول
-            throw $e;
+            Log::error('SMS sending failed', [
+                'mobile' => $this->mobile,
+                'error' => $e->getMessage(),
+                'provider' => $provider
+            ]);
+
+            // اگر تعداد تلاش‌ها کمتر از حداکثر است، دوباره تلاش کن
+            if ($this->attempts() < $this->tries) {
+                $this->release(30); // 30 ثانیه بعد دوباره تلاش کن
+            } else {
+                throw $e;
+            }
         }
+    }
+
+    /**
+     * تعداد ثانیه‌های تاخیر بین تلاش‌های مجدد
+     */
+    public function backoff(): array
+    {
+        return [5, 10, 30]; // 5, 10, 30 ثانیه تاخیر بین تلاش‌ها
     }
 }

@@ -17,7 +17,7 @@ class NotificationService
      */
     public static function send(string $eventName, User $user, array $data = [])
     {
-        $template = NotificationTemplate::with('emailTheme')->where('event_name', $eventName)->first();
+        $template = NotificationTemplate::with(['emailTheme', 'smsTemplate'])->where('event_name', $eventName)->first();
 
         if (!$template) {
             return;
@@ -32,10 +32,36 @@ class NotificationService
         // 1. ارسال SMS (به صورت Async در صف)
         if ($template->sms_active && $user->mobile) {
             try {
-                $message = self::replaceVariables($template->sms_pattern, $data);
+                $templateId = null;
+                $parameters = [];
+                $message = '';
+
+                $provider = \App\Models\SystemSetting::getValue('sms', 'sms_provider');
+
+                // Priority 1: Use Linked SMS Template
+                if ($template->smsTemplate) {
+                    if (($provider === 'smsir' || $provider === 'sms.ir') && !empty($template->smsTemplate->provider_template_id)) {
+                        $templateId = $template->smsTemplate->provider_template_id;
+                        $parameters = $data;
+                        $message = "Template ID: $templateId (Linked)";
+                    } else {
+                        // For other providers or if provider_template_id is missing, use content
+                        $message = self::replaceVariables($template->smsTemplate->content, $data);
+                    }
+                }
+                // Priority 2: Use Legacy Pattern (if numeric and sms.ir)
+                elseif (($provider === 'smsir' || $provider === 'sms.ir') && is_numeric($template->sms_pattern)) {
+                    $templateId = $template->sms_pattern;
+                    $parameters = $data;
+                    $message = "Template ID: $templateId (Legacy)";
+                }
+                // Priority 3: Use Legacy Pattern (Text)
+                else {
+                    $message = self::replaceVariables($template->sms_pattern, $data);
+                }
 
                 // دیسپچ کردن جاب به جای ارسال مستقیم
-                SendSms::dispatch($user->mobile, $message, $user->id);
+                SendSms::dispatch($user->mobile, $message, $user->id, $templateId, $parameters);
 
             } catch (\Exception $e) {
                 Log::error("SMS Dispatch Failure [{$eventName}]: " . $e->getMessage());

@@ -13,6 +13,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
 
+use App\Jobs\SendSms;
+
 class SendBroadcastNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -43,14 +45,29 @@ class SendBroadcastNotification implements ShouldQueue
                 } elseif ($channel === 'sms') {
                     foreach ($users as $user) {
                         if ($user->mobile) {
-                            SmsLog::logSms([
-                                'user_id' => $user->id,
-                                'mobile' => $user->mobile,
-                                'message' => $this->broadcast->message,
-                                'status' => 'sent', // Initially sent to provider
-                                'sms_type' => 'bulk_notification'
-                            ]);
-                            // Real SMS sending logic via Provider Service would go here
+                            $templateId = null;
+                            $parameters = [];
+                            $message = $this->broadcast->message;
+
+                            if ($this->broadcast->sms_template_id) {
+                                $smsTemplate = $this->broadcast->smsTemplate;
+                                if ($smsTemplate) {
+                                    $provider = \App\Models\SystemSetting::getValue('sms', 'sms_provider');
+                                    if (($provider === 'smsir' || $provider === 'sms.ir') && !empty($smsTemplate->provider_template_id)) {
+                                        $templateId = $smsTemplate->provider_template_id;
+                                        $parameters = [
+                                            'name' => $user->first_name ?? 'کاربر',
+                                            'mobile' => $user->mobile,
+                                        ];
+                                    } else {
+                                        $message = $smsTemplate->content;
+                                        $message = str_replace('{name}', $user->first_name ?? 'کاربر', $message);
+                                        $message = str_replace('{mobile}', $user->mobile, $message);
+                                    }
+                                }
+                            }
+
+                            SendSms::dispatch($user->mobile, $message, $user->id, $templateId, $parameters);
                         }
                     }
                 } elseif ($channel === 'email') {

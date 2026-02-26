@@ -35,7 +35,7 @@
         @endif
 
         <!-- Fonts -->
-        <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+        <!-- Vazirmatn is imported via resources/css/app.css -->
 
         <!-- Dynamic Theme Styles -->
        <style>
@@ -84,7 +84,7 @@
     {!! json_encode($organizationData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
 </script>
 
-        
+
     </head>
     <body class="font-sans antialiased bg-gray-50 text-gray-800">
         @inertia

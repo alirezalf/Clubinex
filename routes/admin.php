@@ -9,7 +9,7 @@ Route::prefix('admin')
     ->name('admin.')
     ->middleware(['web', 'auth', 'active.user', 'role:super-admin|admin|staff'])
     ->group(function () {
-        
+
         // 1. مدیریت کاربران و دسترسی‌ها
         require __DIR__ . '/admin/users.php';
 

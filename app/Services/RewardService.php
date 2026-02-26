@@ -175,6 +175,39 @@ class RewardService
                 }
             }
 
+            // اگر وضعیت به "اعطای امتیاز" تغییر کرد
+            if ($status === 'grant_points' && $redemption->status !== 'grant_points') {
+                $pointsToGrant = 0;
+                $title = '';
+
+                if ($redemption->lucky_wheel_spin_id) {
+                    $spin = \App\Models\LuckyWheelSpin::with('prize')->find($redemption->lucky_wheel_spin_id);
+                    if ($spin && $spin->prize && $spin->prize->value > 0) {
+                        $pointsToGrant = $spin->prize->value;
+                        $title = $spin->prize->title;
+                    }
+                } elseif ($redemption->reward && $redemption->reward->points_cost > 0) {
+                    $pointsToGrant = $redemption->reward->points_cost;
+                    $title = $redemption->reward->title;
+                }
+
+                if ($pointsToGrant > 0) {
+                    PointTransaction::awardPoints(
+                        $redemption->user_id,
+                        $pointsToGrant,
+                        null,
+                        "معادل امتیازی جایزه: " . $title,
+                        $redemption
+                    );
+
+                    ActivityLog::log(
+                        'reward.points_granted',
+                        "امتیاز معادل جایزه ({$pointsToGrant}) به کاربر داده شد.",
+                        ['user_id' => $redemption->user_id, 'redemption_id' => $redemption->id]
+                    );
+                }
+            }
+
             // اگر وضعیت به "تایید شده" تغییر کرد و مربوط به گردونه شانس بود -> اعطای امتیاز معادل ارزش جایزه
             if ($status === 'approved' && $redemption->lucky_wheel_spin_id) {
                 $spin = \App\Models\LuckyWheelSpin::with('prize')->find($redemption->lucky_wheel_spin_id);

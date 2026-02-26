@@ -35,12 +35,37 @@ class RewardController extends Controller
         $myRedemptions = $user ? RewardRedemption::where('user_id', $user->id)
             ->with(['reward' => function($q) {
                 $q->withTrashed();
+            }, 'spin.prize' => function($q) {
+                $q->withTrashed();
             }])
             ->latest()
             ->get()
             ->map(function ($r) {
+                $value = 0;
+                // If reward is missing (null) but it's a wheel prize, populate reward data from spin prize
+                if (!$r->reward && $r->spin && $r->spin->prize) {
+                    $value = $r->spin->prize->value;
+                    $r->setRelation('reward', new Reward([
+                        'title' => $r->spin->prize->title . ' (گردونه)',
+                        'image' => $r->spin->prize->icon, // Map icon to image
+                        'points_cost' => 0,
+                        'description' => 'جایزه برنده شده در گردونه شانس'
+                    ]));
+                } elseif (!$r->reward && $r->spin) {
+                    // If prize is deleted but spin exists
+                    $r->setRelation('reward', new Reward([
+                        'title' => 'جایزه حذف شده (گردونه)',
+                        'image' => null,
+                        'points_cost' => 0,
+                        'description' => 'این آیتم از گردونه حذف شده است'
+                    ]));
+                } elseif ($r->reward) {
+                    $value = $r->reward->value ?? 0;
+                }
+
                 $r->status_farsi = $r->status_farsi;
                 $r->created_at_jalali = $r->created_at_jalali;
+                $r->reward_value = $value;
                 return $r;
             }) : [];
 

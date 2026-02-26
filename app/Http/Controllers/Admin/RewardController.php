@@ -38,7 +38,9 @@ class RewardController extends Controller
         if ($tab === 'list') {
             $rewards = Reward::with('club')->latest()->paginate(10)->withQueryString();
         } else {
-            $query = RewardRedemption::with(['user', 'reward', 'admin', 'spin.prize']);
+            $query = RewardRedemption::with(['user', 'reward', 'admin', 'spin.prize' => function($q) {
+                $q->withTrashed();
+            }]);
 
             if ($request->search) {
                 $search = $request->search;
@@ -79,12 +81,15 @@ class RewardController extends Controller
                 if ($item->reward) {
                     $item->reward_title = $item->reward->title;
                     $item->reward_type = $item->reward->type;
+                    $item->reward_value = $item->reward->points_cost;
                 } elseif ($item->spin && $item->spin->prize) {
-                    $item->reward_title = $item->spin->prize->title . ' (گردونه)';
+                    $item->reward_title = $item->spin->prize->title; // Removed (Wheel) suffix as per user feedback
                     $item->reward_type = 'item';
+                    $item->reward_value = $item->spin->prize->value;
                 } else {
-                    $item->reward_title = 'نامشخص / حذف شده';
+                    $item->reward_title = 'آیتم حذف شده';
                     $item->reward_type = 'unknown';
+                    $item->reward_value = 0;
                 }
 
                 return $item;
@@ -122,7 +127,7 @@ class RewardController extends Controller
 
         return back()->with('message', 'جایزه بروزرسانی شد.');
     }
-    
+
     public function destroy($id)
     {
         $this->rewardService->deleteReward($id);
@@ -132,20 +137,20 @@ class RewardController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,processing,completed,rejected',
+            'status' => 'required|in:pending,processing,completed,rejected,grant_points',
             'admin_note' => 'nullable|string',
             'tracking_code' => 'nullable|string'
         ]);
 
         try {
             $this->rewardService->updateRedemptionStatus(
-                $id, 
-                $request->status, 
-                $request->admin_note, 
-                $request->tracking_code, 
+                $id,
+                $request->status,
+                $request->admin_note,
+                $request->tracking_code,
                 auth()->id()
             );
-            
+
             return back()->with('message', 'وضعیت درخواست با موفقیت تغییر کرد.');
         } catch (\Exception $e) {
             return back()->with('error', 'خطا در تغییر وضعیت: ' . $e->getMessage());

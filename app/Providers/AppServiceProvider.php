@@ -34,6 +34,13 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
+            // Runtime Migration Fix for sms_template_id
+            if (Schema::hasTable('notification_broadcasts') && !Schema::hasColumn('notification_broadcasts', 'sms_template_id')) {
+                Schema::table('notification_broadcasts', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    $table->foreignId('sms_template_id')->nullable()->constrained('sms_templates')->nullOnDelete();
+                });
+            }
+
             // کش کردن تنظیمات برای جلوگیری از کوئری تکراری در هر درخواست
             $settings = cache()->remember('global_settings', 3600, function () {
                 return SystemSetting::getSettingsArray();

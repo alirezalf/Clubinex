@@ -55,8 +55,10 @@ class ProductController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('public/products');
-            $validated['image'] = Storage::url($path);
+            $file = $request->file('image');
+            $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/products'), $filename);
+            $validated['image'] = '/uploads/products/' . $filename;
         }
 
         Product::create($validated);

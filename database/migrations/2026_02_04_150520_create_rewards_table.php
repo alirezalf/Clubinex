@@ -29,25 +29,25 @@ return new class extends Migration {
         Schema::create('reward_redemptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            
+
             // ادغام شده: nullable برای جوایز گردونه
             $table->foreignId('reward_id')->nullable()->constrained('rewards');
-            
+
             // اصلاح شده: حذف قید constrained در اینجا چون جدول lucky_wheel_spins هنوز ساخته نشده است.
             // این ستون به صورت unsignedBigInteger ساخته می‌شود و قید آن در مایگریشن lucky_wheels اضافه خواهد شد.
             $table->unsignedBigInteger('lucky_wheel_spin_id')->nullable();
-            
+
             $table->integer('points_spent');                 // امتیاز خرج شده در لحظه ثبت
-            $table->enum('status', ['pending', 'processing', 'completed', 'rejected'])->default('pending');
-            
+            $table->enum('status', ['pending', 'processing', 'completed', 'rejected', 'grant_points'])->default('pending');
+
             // ادغام شده: ادمین تغییر دهنده وضعیت
             $table->foreignId('admin_id')->nullable()->constrained('users')->nullOnDelete();
-            
+
             $table->text('admin_note')->nullable();          // یادداشت ادمین
             $table->json('delivery_info')->nullable();       // اطلاعات ارسال (آدرس و ...)
             $table->string('tracking_code')->nullable();     // کد رهگیری پستی یا کد دیجیتال
             $table->timestamps();
-            
+
             $table->index(['user_id', 'status']);
         });
     }

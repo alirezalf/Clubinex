@@ -57,9 +57,9 @@ class SliderController extends Controller
     {
         foreach ($slider->slides as $slide) {
             if ($slide->image_path) {
-                $relativePath = str_replace('/storage/', '', $slide->image_path);
-                if (Storage::disk('public')->exists($relativePath)) {
-                    Storage::disk('public')->delete($relativePath);
+                $relativePath = str_replace('/uploads/sliders/', '', $slide->image_path);
+                if (file_exists(public_path('uploads/sliders/' . $relativePath))) {
+                    unlink(public_path('uploads/sliders/' . $relativePath));
                 }
             }
         }
@@ -87,8 +87,10 @@ class SliderController extends Controller
 
             $path = null;
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('sliders', 'public');
-                $path = Storage::url($path);
+                $file = $request->file('image');
+                $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/sliders'), $filename);
+                $path = '/uploads/sliders/' . $filename;
             }
 
             $data = $request->all();
@@ -157,14 +159,16 @@ class SliderController extends Controller
             $request->validate(['image' => 'image|max:2048']);
 
             if ($slide->image_path) {
-                $relativePath = str_replace('/storage/', '', $slide->image_path);
-                if (Storage::disk('public')->exists($relativePath)) {
-                    Storage::disk('public')->delete($relativePath);
+                $relativePath = str_replace('/uploads/sliders/', '', $slide->image_path);
+                if (file_exists(public_path('uploads/sliders/' . $relativePath))) {
+                    unlink(public_path('uploads/sliders/' . $relativePath));
                 }
             }
 
-            $path = $request->file('image')->store('sliders', 'public');
-            $data['image_path'] = Storage::url($path);
+            $file = $request->file('image');
+            $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/sliders'), $filename);
+            $data['image_path'] = '/uploads/sliders/' . $filename;
         }
 
         $slide->update($data);

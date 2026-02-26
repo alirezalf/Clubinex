@@ -12,6 +12,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\EmailTheme;
+use App\Models\SmsTemplate;
 
 class NotificationController extends Controller
 {
@@ -23,6 +24,7 @@ class NotificationController extends Controller
             'tab' => $tab,
             'clubs' => Club::select('id', 'name')->get(),
             'emailThemes' => EmailTheme::select('id', 'name')->get(),
+            'smsTemplates' => SmsTemplate::select('id', 'name')->get(),
         ];
 
         if ($tab === 'history') {
@@ -60,6 +62,7 @@ class NotificationController extends Controller
             'channels' => 'required|array|min:1',
             'channels.*' => 'in:database,sms,email',
             'email_theme_id' => 'nullable|exists:email_themes,id',
+            'sms_template_id' => 'nullable|exists:sms_templates,id',
             'title' => 'required|string|max:100',
             'message' => 'required|string|max:1000',
         ]);
@@ -90,7 +93,8 @@ class NotificationController extends Controller
                 'recipient_ids' => $request->target_type === 'manual' ? $request->selected_user_ids : null,
                 'channels' => $request->channels,
                 'recipient_count' => $count,
-                'email_theme_id' => $request->email_theme_id
+                'email_theme_id' => $request->email_theme_id,
+                'sms_template_id' => $request->sms_template_id
             ]);
 
             // Dispatch Job

@@ -11,7 +11,7 @@ class NotificationTemplate extends Model
 
     protected $fillable = [
         'event_name', 'title_fa', 'variables',
-        'sms_active', 'sms_pattern',
+        'sms_active', 'sms_pattern', 'sms_template_id',
         'email_active', 'email_subject', 'email_body', 'email_theme_id',
         'database_active', 'database_message'
     ];
@@ -25,5 +25,10 @@ class NotificationTemplate extends Model
     public function emailTheme()
     {
         return $this->belongsTo(EmailTheme::class);
+    }
+
+    public function smsTemplate()
+    {
+        return $this->belongsTo(SmsTemplate::class);
     }
 }

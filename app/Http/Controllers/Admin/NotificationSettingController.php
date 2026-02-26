@@ -12,14 +12,15 @@ class NotificationSettingController extends Controller
     public function update(Request $request, $id)
     {
         $template = NotificationTemplate::findOrFail($id);
-        
+
         $validated = $request->validate([
             'sms_active' => 'boolean',
             'sms_pattern' => 'nullable|string',
+            'sms_template_id' => 'nullable|exists:sms_templates,id',
             'email_active' => 'boolean',
             'email_subject' => 'nullable|string',
             'email_body' => 'nullable|string',
-            'email_theme_id' => 'nullable|exists:email_themes,id', // اضافه شد
+            'email_theme_id' => 'nullable|exists:email_themes,id',
             'database_active' => 'boolean',
             'database_message' => 'nullable|string',
         ]);

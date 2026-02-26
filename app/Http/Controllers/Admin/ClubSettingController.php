@@ -37,8 +37,8 @@ class ClubSettingController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'slug' => [
-                'required', 
-                'string', 
+                'required',
+                'string',
                 // نادیده گرفتن رکوردهای حذف شده هنگام بررسی یکتایی
                 Rule::unique('clubs')->whereNull('deleted_at')
             ],
@@ -48,14 +48,16 @@ class ClubSettingController extends Controller
             'color' => 'required|string',
             'icon' => 'nullable|string',
             'image' => 'nullable|image|max:2048', // اعتبارسنجی تصویر
-            'is_tier' => 'boolean', 
-            'benefits' => 'nullable|array', 
+            'is_tier' => 'boolean',
+            'benefits' => 'nullable|array',
             'benefits.*' => 'string|max:255'
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('public/clubs');
-            $validated['image'] = Storage::url($path);
+            $file = $request->file('image');
+            $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/clubs'), $filename);
+            $validated['image'] = '/uploads/clubs/' . $filename;
         }
 
         $club = Club::create($validated);
@@ -71,7 +73,7 @@ class ClubSettingController extends Controller
     public function updateClub(Request $request, $id)
     {
         $club = Club::findOrFail($id);
-        
+
         $validated = $request->validate([
             'name' => 'required|string',
             'min_points' => 'required|integer',
@@ -80,15 +82,15 @@ class ClubSettingController extends Controller
             'color' => 'required|string',
             'image' => 'nullable|image|max:2048',
             'is_active' => 'boolean',
-            'is_tier' => 'boolean', 
-            'benefits' => 'nullable|array', 
+            'is_tier' => 'boolean',
+            'benefits' => 'nullable|array',
             'benefits.*' => 'string|max:255'
         ]);
 
         if ($request->hasFile('image')) {
             // حذف تصویر قبلی اگر وجود دارد (اختیاری)
             // if ($club->image) { Storage::delete(...) }
-            
+
             $path = $request->file('image')->store('public/clubs');
             $validated['image'] = Storage::url($path);
         }
@@ -101,7 +103,7 @@ class ClubSettingController extends Controller
     public function destroyClub($id)
     {
         $club = Club::findOrFail($id);
-        
+
         // 1. بررسی اعضا
         // بررسی کاربرانی که این باشگاه سطح اصلی آن‌هاست
         $usersCount = $club->users()->count();
@@ -131,7 +133,7 @@ class ClubSettingController extends Controller
     public function updateRule(Request $request, $id)
     {
         $rule = PointRule::findOrFail($id);
-        
+
         $validated = $request->validate([
             'points' => 'required|integer',
             'is_active' => 'boolean',

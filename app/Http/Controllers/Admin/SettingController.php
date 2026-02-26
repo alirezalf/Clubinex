@@ -12,6 +12,8 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use App\Services\ThemeService;
 
+use App\Models\SmsTemplate;
+
 class SettingController extends Controller
 {
     protected $themeService;
@@ -24,9 +26,10 @@ class SettingController extends Controller
     public function index()
     {
         $settings = SystemSetting::all()->groupBy('group');
-        $notificationTemplates = NotificationTemplate::with('emailTheme')->get();
+        $notificationTemplates = NotificationTemplate::with(['emailTheme', 'smsTemplate'])->get();
         $emailThemes = EmailTheme::latest()->get();
-
+        $smsTemplates = SmsTemplate::latest()->get();
+        
         $admins = User::whereHas('roles', function($q) {
             $q->whereIn('name', ['super-admin', 'admin', 'staff']);
         })->select('id', 'first_name', 'last_name', 'email', 'avatar')->get();
@@ -35,7 +38,8 @@ class SettingController extends Controller
             'settings' => $settings,
             'notificationTemplates' => $notificationTemplates,
             'emailThemes' => $emailThemes,
-            'admins' => $admins
+            'smsTemplates' => $smsTemplates,
+            'admins' => $admins 
         ]);
     }
 
@@ -61,12 +65,13 @@ class SettingController extends Controller
             // Handle File Uploads
             if ($request->hasFile($key)) {
                 $file = $request->file($key);
-                $path = $file->store('public/settings');
-                $value = Storage::url($path);
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('uploads/settings'), $filename);
+                $value = '/uploads/settings/' . $filename;
             }
 
             if ($value === null && !$request->hasFile($key)) {
-                continue;
+                continue; 
             }
 
             if (in_array($key, $themeKeys)) {
@@ -89,12 +94,12 @@ class SettingController extends Controller
                 $group = 'login';
             } elseif (str_starts_with($key, 'mail_')) {
                 $group = 'email';
-            } elseif (str_starts_with($key, 'sms_')) {
+            } elseif (str_starts_with($key, 'sms_') || $key === 'resend_interval') {
                 $group = 'sms';
             } else {
                 $group = $existingKeys[$key] ?? 'general';
             }
-
+            
             SystemSetting::setValue($group, $key, $value);
         }
 
@@ -113,7 +118,7 @@ class SettingController extends Controller
             \Illuminate\Support\Facades\Artisan::call('cache:clear');
             \Illuminate\Support\Facades\Artisan::call('route:clear');
             \Illuminate\Support\Facades\Artisan::call('view:clear');
-
+            
             return back()->with('message', 'کش سیستم با موفقیت پاکسازی شد.');
         } catch (\Exception $e) {
             return back()->with('error', 'خطا در پاکسازی کش: ' . $e->getMessage());
@@ -124,7 +129,7 @@ class SettingController extends Controller
     public function resetDefaults(Request $request)
     {
         $group = $request->input('group');
-
+        
         if (!in_array($group, ['theme', 'login', 'general'])) {
             return back()->with('error', 'گروه تنظیمات نامعتبر است.');
         }

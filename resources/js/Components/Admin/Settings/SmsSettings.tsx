@@ -99,32 +99,35 @@ export default function SmsSettings({ data, setData }: { data: any, setData: any
                 </div>
             </div>
 
-            {['smsir', 'sms.ir', 'sms_ir'].includes(data.sms_provider?.toLowerCase()) && (
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-4 animate-in fade-in">
-                    <h4 className="text-sm font-bold text-blue-800 flex items-center gap-2">
-                        <Smartphone size={16} />
-                        تنظیمات اختصاصی SMS.ir
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <InputGroup
-                            label="شناسه قالب (Template ID)"
-                            name="sms_ir_template_id"
-                            value={data.sms_ir_template_id}
-                            onChange={setData}
-                            dir="ltr"
-                            placeholder="100000"
-                        />
-                        <InputGroup
-                            label="نام پارامتر (Parameter Name)"
-                            name="sms_ir_parameter_name"
-                            value={data.sms_ir_parameter_name}
-                            onChange={setData}
-                            dir="ltr"
-                            placeholder="Code"
-                        />
-                    </div>
+            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-4 animate-in fade-in">
+                <h4 className="text-sm font-bold text-blue-800 flex items-center gap-2">
+                    <Smartphone size={16} />
+                    تنظیمات اختصاصی SMS.ir (ارسال سریع/Verify)
+                </h4>
+                <p className="text-xs text-blue-600">
+                    این تنظیمات تنها زمانی اعمال می‌شوند که درگاه پیامک روی <b>sms.ir</b> تنظیم شده باشد.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputGroup
+                        label="شناسه قالب پیش‌فرض (OTP Template ID)"
+                        name="sms_ir_template_id"
+                        value={data.sms_ir_template_id}
+                        onChange={setData}
+                        dir="ltr"
+                        placeholder="100000"
+                        description="این شناسه برای ارسال کدهای تایید (OTP) استفاده می‌شود."
+                    />
+                    <InputGroup
+                        label="نام پارامتر (Parameter Name)"
+                        name="sms_ir_parameter_name"
+                        value={data.sms_ir_parameter_name}
+                        onChange={setData}
+                        dir="ltr"
+                        placeholder="Code"
+                        description="نام متغیر در قالب تعریف شده در پنل sms.ir (مثلا Code یا VerificationCode). اگر قالب شما فقط عدد قبول می‌کند، ارسال متن فارسی باعث عدم دریافت پیامک می‌شود."
+                    />
                 </div>
-            )}
+            </div>
 
             {/* Test Connection Button */}
             <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">

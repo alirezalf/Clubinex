@@ -236,7 +236,7 @@ export default function LoginSettings({ data, setData }: LoginSettingsProps) {
                                 {data.login_left_bg_type === 'image' && (
                                     <FormFile
                                         label="آپلود تصویر ثابت"
-                                        onChange={(e) => setData('login_left_image', e.target.files?.[0])}
+                                        onChange={(file) => setData('login_left_image', file)}
                                         accept="image/*"
                                         previewUrl={typeof data.login_left_image === 'string' ? data.login_left_image : undefined}
                                     />
@@ -297,7 +297,7 @@ export default function LoginSettings({ data, setData }: LoginSettingsProps) {
                                 {data.login_right_bg_type === 'image' && (
                                     <FormFile
                                         label="آپلود تصویر پس‌زمینه فرم"
-                                        onChange={(e) => setData('login_right_image', e.target.files?.[0])}
+                                        onChange={(file) => setData('login_right_image', file)}
                                         accept="image/*"
                                         previewUrl={typeof data.login_right_image === 'string' ? data.login_right_image : undefined}
                                     />
@@ -376,7 +376,7 @@ export default function LoginSettings({ data, setData }: LoginSettingsProps) {
                         </div>
                         <FormFile
                             label="آیکون/لوگو صفحه ورود"
-                            onChange={(e) => setData('login_logo', e.target.files?.[0])}
+                            onChange={(file) => setData('login_logo', file)}
                             accept="image/*"
                             previewUrl={typeof data.login_logo === 'string' ? data.login_logo : undefined}
                         />

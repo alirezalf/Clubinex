@@ -11,13 +11,13 @@ class RewardRedemption extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 
+        'user_id',
         'reward_id',
-        'lucky_wheel_spin_id', // اضافه شده
-        'points_spent', 
-        'status', 
-        'admin_note', 
-        'delivery_info', 
+        'lucky_wheel_spin_id',
+        'points_spent',
+        'status',
+        'admin_note',
+        'delivery_info',
         'tracking_code',
         'admin_id'
     ];
@@ -57,10 +57,11 @@ class RewardRedemption extends Model
             'processing' => 'در حال آماده‌سازی',
             'completed' => 'تکمیل شده/ارسال شده',
             'rejected' => 'رد شده',
+            'grant_points' => 'امتیاز داده شد',
             default => $this->status,
         };
     }
-    
+
     public function getCreatedAtJalaliAttribute()
     {
         return Jalalian::fromDateTime($this->created_at)->format('Y/m/d H:i');

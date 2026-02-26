@@ -1,6 +1,6 @@
 
 import { Head, useForm, router, usePage } from '@inertiajs/react';
-import { Save, Globe, Smartphone, Palette, Share2, Phone, Mail, BellRing, Code, ShoppingBag, Headphones, Shield, User as UserIcon } from 'lucide-react';
+import { Save, Globe, Smartphone, Palette, Share2, Phone, Mail, BellRing, Code, ShoppingBag, Headphones, Shield, User as UserIcon, MessageSquare } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import clsx from 'clsx';
@@ -10,6 +10,7 @@ import SettingsSidebar from './Settings/Partials/SettingsSidebar';
 import ThemeCustomizer from '@/Components/Admin/Settings/ThemeCustomizer';
 import TemplateEditor from '@/Components/Admin/Settings/NotificationTemplates';
 import EmailThemesManager from '@/Components/Admin/Settings/EmailThemes';
+import SmsTemplatesManager from '@/Components/Admin/Settings/SmsTemplatesManager';
 import TicketSettings from '@/Components/Admin/Settings/TicketSettings';
 import WordPressSettings from '@/Components/Admin/Settings/WordPressSettings';
 import SecuritySettings from '@/Components/Admin/Settings/SecuritySettings';
@@ -51,10 +52,18 @@ interface EmailTheme {
     styles: string | null;
 }
 
+interface SmsTemplate {
+    id: number;
+    name: string;
+    content: string;
+    provider_template_id: string | null;
+}
+
 interface SettingsProps extends PageProps {
     settings: Record<string, SettingItem[]>;
     notificationTemplates: NotificationTemplate[];
     emailThemes?: EmailTheme[];
+    smsTemplates?: SmsTemplate[];
     admins?: User[];
 }
 
@@ -67,6 +76,7 @@ const TABS = [
     { id: 'contact', label: 'اطلاعات تماس', icon: Phone },
     { id: 'social', label: 'شبکه‌های اجتماعی', icon: Share2 },
     { id: 'sms', label: 'تنظیمات پیامک', icon: Smartphone },
+    { id: 'sms_templates', label: 'قالب‌های پیامک', icon: MessageSquare },
     { id: 'email', label: 'تنظیمات ایمیل', icon: Mail },
     { id: 'support', label: 'تیکت و پشتیبانی', icon: Headphones },
     { id: 'wordpress', label: 'فروشگاه (WordPress)', icon: ShoppingBag },
@@ -74,7 +84,7 @@ const TABS = [
     { id: 'templates', label: 'تنظیمات رویدادها', icon: BellRing },
 ];
 
-export default function AdminSettings({ settings, notificationTemplates, emailThemes = [], admins = [] }: SettingsProps) {
+export default function AdminSettings({ settings, notificationTemplates, emailThemes = [], smsTemplates = [], admins = [] }: SettingsProps) {
     const { themeSettings } = usePage<PageProps<{ themeSettings: any }>>().props;
     const [activeTab, setActiveTab] = useState('general');
 
@@ -282,12 +292,14 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
                             </div>
                             <div className="space-y-4">
                                 {notificationTemplates.map((template) => (
-                                    <TemplateEditor key={template.id} template={template} emailThemes={emailThemes} />
+                                    <TemplateEditor key={template.id} template={template} emailThemes={emailThemes} smsTemplates={smsTemplates} />
                                 ))}
                             </div>
                         </div>
                     ) : activeTab === 'email_themes' ? (
                         <EmailThemesManager themes={emailThemes} />
+                    ) : activeTab === 'sms_templates' ? (
+                        <SmsTemplatesManager templates={smsTemplates} />
                     ) : (
                         <form onSubmit={submit} className="space-y-6" encType="multipart/form-data">
 

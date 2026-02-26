@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
@@ -9,13 +10,14 @@ import UserSelectionTab from './Components/UserSelectionTab';
 import BroadcastHistory from './Components/BroadcastHistory';
 import { TargetTypeBtn, ChannelCheckbox } from './Components/FormElements';
 
-export default function AdminSendNotification({ clubs, emailThemes, tab = 'send', history }: any) {
+export default function AdminSendNotification({ clubs, emailThemes, smsTemplates = [], tab = 'send', history }: any) {
     const { data, setData, post, processing, errors, reset } = useForm({
         target_type: 'all', // all, club, manual
         club_id: '',
         selected_user_ids: [] as number[],
         channels: ['database'], // database, sms, email
         email_theme_id: '',
+        sms_template_id: '',
         title: '',
         message: '',
     });
@@ -164,6 +166,25 @@ export default function AdminSendNotification({ clubs, emailThemes, tab = 'send'
                                 />
                             </div>
                             {errors.channels && <p className="text-red-500 text-xs mt-1">{errors.channels}</p>}
+
+                            {data.channels.includes('sms') && (
+                                <div className="mt-4 animate-in fade-in slide-in-from-top-2">
+                                    <label className="block text-sm text-gray-600 mb-1">قالب پیامک</label>
+                                    <select
+                                        value={data.sms_template_id}
+                                        onChange={e => setData('sms_template_id', e.target.value)}
+                                        className="w-full border-gray-300 border rounded-xl focus:ring-primary-500 focus:border-primary-500 px-3 py-2.5"
+                                    >
+                                        <option value="">قالب پیش‌فرض (متن ساده)</option>
+                                        {/* @ts-ignore */}
+                                        {(smsTemplates || []).map((template: any) => (
+                                            <option key={template.id} value={template.id}>
+                                                {template.name} {template.provider_template_id ? `(ID: ${template.provider_template_id})` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
 
                             {data.channels.includes('email') && (
                                 <div className="mt-4 animate-in fade-in slide-in-from-top-2">

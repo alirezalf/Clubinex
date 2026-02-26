@@ -8,7 +8,7 @@ import { PaginatedData } from '@/types';
 interface Redemption {
     id: number;
     user: { id: number; first_name: string; last_name: string; mobile: string };
-    reward: { title: string; image: string | null } | null;
+    reward: { title: string; image: string | null; value?: number } | null;
     points_spent: number;
     status: string;
     status_farsi: string;
@@ -17,6 +17,7 @@ interface Redemption {
     created_at_jalali: string;
     admin_name: string | null;
     reward_title: string;
+    reward_value?: number;
     delivery_info: any;
 }
 
@@ -106,6 +107,7 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                         <option value="pending">در انتظار</option>
                         <option value="processing">در حال پردازش</option>
                         <option value="completed">تکمیل شده</option>
+                        <option value="grant_points">اعطای امتیاز</option>
                         <option value="rejected">رد شده</option>
                     </select>
                 </div>
@@ -152,12 +154,19 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="font-medium">{item.reward_title}</div>
-                                        <div className="text-xs text-gray-500">{item.points_spent > 0 ? item.points_spent + ' امتیاز' : 'بدون هزینه (گردونه)'}</div>
+                                        <div className="text-xs text-gray-500">
+                                            {item.points_spent > 0 ? (
+                                                <span className="text-red-600 font-bold">{item.points_spent} امتیاز</span>
+                                            ) : (
+                                                <span className="text-green-600 font-bold">برنده شده در گردونه</span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col gap-1">
                                             <span className={`px-2 py-1 rounded text-xs w-fit ${
                                                 item.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                                item.status === 'grant_points' ? 'bg-teal-100 text-teal-700' :
                                                 item.status === 'rejected' ? 'bg-red-100 text-red-700' :
                                                 'bg-yellow-100 text-yellow-700'
                                             }`}>
@@ -237,6 +246,7 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                                     <option value="pending">در انتظار بررسی</option>
                                     <option value="processing">در حال آماده‌سازی</option>
                                     <option value="completed">تکمیل / ارسال شده</option>
+                                    <option value="grant_points">اعطای امتیاز (تبدیل به امتیاز)</option>
                                     <option value="rejected">رد شده (برگشت امتیاز)</option>
                                 </select>
                                 {/* @ts-ignore */}
@@ -247,6 +257,17 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                                 <div className="bg-red-50 text-red-700 text-xs p-3 rounded-lg flex items-center gap-2">
                                     <AlertCircle size={16} />
                                     با انتخاب وضعیت "رد شده"، امتیاز کسر شده به حساب کاربر بازگردانده می‌شود.
+                                </div>
+                            )}
+
+                            {statusData.status === 'grant_points' && (
+                                <div className="bg-blue-50 text-blue-700 text-xs p-3 rounded-lg flex items-center gap-2">
+                                    <UserCheck size={16} />
+                                    <span>
+                                        با انتخاب این گزینه،
+                                        {selectedRedemption?.reward_value ? <span className="font-bold mx-1">{selectedRedemption.reward_value} امتیاز</span> : ' معادل امتیازی کالا '}
+                                        به حساب کاربر واریز می‌شود و وضعیت به "اعطای امتیاز" تغییر می‌کند.
+                                    </span>
                                 </div>
                             )}
 
