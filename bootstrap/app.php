@@ -31,18 +31,18 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (Throwable $e, Request $request) {
-            
+
             // مدیریت خطاهای HTTP استاندارد برای درخواست‌های اینرشیا
             if ($e instanceof HttpException && $request->inertia()) {
                 $status = $e->getStatusCode();
-                
+
                 // هدایت به صفحه اختصاصی در پوشه Errors
                 if (in_array($status, [403, 404, 500, 503])) {
                     return Inertia::render("Errors/{$status}", ['status' => $status])
                         ->toResponse($request)
                         ->setStatusCode($status);
                 }
-                
+
                 // خطای انقضای نشست (419)
                 if ($status === 419) {
                     return redirect()->route('login')->with('error', 'نشست شما منقضی شد. لطفا دوباره وارد شوید.');
@@ -51,8 +51,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // مدیریت خطای اتصال به دیتابیس
             if (
-                $e instanceof QueryException || 
-                $e instanceof \PDOException || 
+                $e instanceof QueryException ||
+                $e instanceof \PDOException ||
                 $e instanceof \Illuminate\Database\ConnectionException
             ) {
                 // کدهای خطای رایج دیتابیس
@@ -65,7 +65,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     return response()->view('errors.database', [], 503);
                 }
             }
-            
-            return null; 
+
+            return null;
         });
     })->create();

@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import clsx from 'clsx';
-import { Settings, LogOut } from 'lucide-react';
-import React from 'react';
+import { Settings, LogOut, HelpCircle } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface Props {
     isCollapsed: boolean;
@@ -9,34 +9,87 @@ interface Props {
 }
 
 export default function SidebarFooter({ isCollapsed, isAdmin }: Props) {
+    const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
+    const items = [
+        {
+            key: 'settings',
+            icon: Settings,
+            label: 'تنظیمات',
+            href: isAdmin ? route('admin.settings') : route('profile'),
+            color: 'hover:text-amber-500 hover:bg-amber-500/10',
+            iconColor: 'text-amber-500'
+        },
+        {
+            key: 'help',
+            icon: HelpCircle,
+            label: 'پشتیبانی',
+            href: route('tickets.index'),
+            color: 'hover:text-blue-500 hover:bg-blue-500/10',
+            iconColor: 'text-blue-500'
+        },
+        {
+            key: 'logout',
+            icon: LogOut,
+            label: 'خروج از حساب',
+            href: route('logout'),
+            method: 'post',
+            as: 'button',
+            color: 'hover:text-red-500 hover:bg-red-500/10',
+            iconColor: 'text-red-500'
+        }
+    ];
+
     return (
-        <div className="p-3 border-t border-black/5 bg-black/5 backdrop-blur-sm shrink-0">
-            <div className={clsx("grid gap-2", isCollapsed ? "grid-cols-1" : "grid-cols-2")}>
-                <Link
-                    href={isAdmin ? route('admin.settings') : route('profile')}
-                    className={clsx(
-                        "flex items-center justify-center gap-2 rounded-xl transition-all duration-200 group opacity-70 hover:opacity-100 hover:bg-white/50",
-                        isCollapsed ? "p-2.5" : "py-2 px-3"
-                    )}
-                    title="تنظیمات"
-                >
-                    <Settings size={18} className="group-hover:rotate-45 transition-transform duration-500" />
-                    {!isCollapsed && <span className="text-xs font-medium">تنظیمات</span>}
-                </Link>
-                
-                <Link
-                    href={route('logout')}
-                    method="post"
-                    as="button"
-                    className={clsx(
-                        "flex items-center justify-center gap-2 rounded-xl transition-all duration-200 group text-red-600 hover:bg-red-50",
-                        isCollapsed ? "p-2.5" : "py-2 px-3"
-                    )}
-                    title="خروج"
-                >
-                    <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-                    {!isCollapsed && <span className="text-xs font-medium">خروج</span>}
-                </Link>
+        <div className="shrink-0 border-t px-2 py-2"
+             style={{ borderColor: 'color-mix(in srgb, var(--sidebar-text), transparent 85%)' }}>
+
+            <div className="flex items-center justify-between gap-1">
+
+                {items.map((item) => {
+                    const Icon = item.icon;
+                    const isHovered = hoveredItem === item.key;
+
+                    return (
+                        <div key={item.key} className="relative flex-1 flex justify-center">
+                            <Link
+                                href={item.href}
+                                method={item.method as any}
+                                as={item.as as any}
+                                onMouseEnter={() => setHoveredItem(item.key)}
+                                onMouseLeave={() => setHoveredItem(null)}
+                                className={clsx(
+                                    "relative flex items-center justify-center rounded-xl p-2.5 transition-all duration-200",
+                                    item.color
+                                )}
+                            >
+                                <Icon
+                                    size={18}
+                                    className={clsx(
+                                        "transition-all duration-200",
+                                        item.iconColor,
+                                        "group-hover:scale-110"
+                                    )}
+                                />
+
+                                {/* Tooltip */}
+                                <div
+                                    className={clsx(
+                                        "absolute bottom-full mb-2 px-2.5 py-1.5 text-xs rounded-lg whitespace-nowrap",
+                                        "bg-gray-900 text-white shadow-lg transition-all duration-200",
+                                        isHovered
+                                            ? "opacity-100 translate-y-0 visible"
+                                            : "opacity-0 translate-y-1 invisible"
+                                    )}
+                                >
+                                    {item.label}
+                                    <div className="absolute left-1/2 -bottom-1 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
+                                </div>
+                            </Link>
+                        </div>
+                    );
+                })}
+
             </div>
         </div>
     );

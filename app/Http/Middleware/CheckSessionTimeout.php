@@ -21,8 +21,10 @@ class CheckSessionTimeout
                 return redirect()->route('lock-screen');
             }
 
-            $timeout = (int) SystemSetting::getValue('security', 'session_timeout', 30); // دقیقه
-            
+            $timeout = (int) \Illuminate\Support\Facades\Cache::remember('security_session_timeout', 3600, function () {
+                return SystemSetting::getValue('security', 'session_timeout', 30);
+            }); // دقیقه
+
             // اگر تنظیم روی 0 باشد یعنی غیرفعال
             if ($timeout > 0) {
                 $lastActivity = session('last_activity_time');

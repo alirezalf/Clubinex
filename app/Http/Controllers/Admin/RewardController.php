@@ -81,12 +81,15 @@ class RewardController extends Controller
                 if ($item->reward) {
                     $item->reward_title = $item->reward->title;
                     $item->reward_type = $item->reward->type;
+                    $item->reward_value = $item->reward->points_cost;
                 } elseif ($item->spin && $item->spin->prize) {
                     $item->reward_title = $item->spin->prize->title; // Removed (Wheel) suffix as per user feedback
                     $item->reward_type = 'item';
+                    $item->reward_value = $item->spin->prize->value;
                 } else {
                     $item->reward_title = 'آیتم حذف شده';
                     $item->reward_type = 'unknown';
+                    $item->reward_value = 0;
                 }
 
                 return $item;
@@ -124,7 +127,7 @@ class RewardController extends Controller
 
         return back()->with('message', 'جایزه بروزرسانی شد.');
     }
-
+    
     public function destroy($id)
     {
         $this->rewardService->deleteReward($id);
@@ -141,13 +144,13 @@ class RewardController extends Controller
 
         try {
             $this->rewardService->updateRedemptionStatus(
-                $id,
-                $request->status,
-                $request->admin_note,
-                $request->tracking_code,
+                $id, 
+                $request->status, 
+                $request->admin_note, 
+                $request->tracking_code, 
                 auth()->id()
             );
-
+            
             return back()->with('message', 'وضعیت درخواست با موفقیت تغییر کرد.');
         } catch (\Exception $e) {
             return back()->with('error', 'خطا در تغییر وضعیت: ' . $e->getMessage());
@@ -175,14 +178,23 @@ class RewardController extends Controller
                 return $tx;
             });
 
-        $rewards = RewardRedemption::with('reward')
+        $rewards = RewardRedemption::with(['reward', 'spin.prize'])
             ->where('user_id', $id)
             ->latest()
             ->get()
             ->map(function ($r) {
+                $value = 0;
+                if ($r->reward) {
+                    $value = $r->reward->points_cost;
+                } elseif ($r->spin && $r->spin->prize) {
+                    $value = $r->spin->prize->value;
+                }
+
                 return [
-                    'title' => $r->reward ? $r->reward->title : 'جایزه گردونه',
+                    'title' => $r->reward ? $r->reward->title : ($r->spin && $r->spin->prize ? $r->spin->prize->title : 'جایزه گردونه'),
                     'points' => $r->points_spent,
+                    'reward_value' => $value,
+                    'status_raw' => $r->status,
                     'status' => $r->status_farsi,
                     'date' => $r->created_at_jalali,
                 ];

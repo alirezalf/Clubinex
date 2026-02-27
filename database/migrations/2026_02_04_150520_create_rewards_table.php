@@ -38,7 +38,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('lucky_wheel_spin_id')->nullable();
 
             $table->integer('points_spent');                 // امتیاز خرج شده در لحظه ثبت
-            $table->enum('status', ['pending', 'processing', 'completed', 'rejected', 'grant_points'])->default('pending');
+            $table->enum('status', ['pending', 'processing', 'completed', 'rejected', 'converted'])->default('pending');
 
             // ادغام شده: ادمین تغییر دهنده وضعیت
             $table->foreignId('admin_id')->nullable()->constrained('users')->nullOnDelete();

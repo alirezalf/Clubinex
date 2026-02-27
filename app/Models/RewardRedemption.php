@@ -57,7 +57,7 @@ class RewardRedemption extends Model
             'processing' => 'در حال آماده‌سازی',
             'completed' => 'تکمیل شده/ارسال شده',
             'rejected' => 'رد شده',
-            'converted' => 'تبدیل به امتیاز',
+            'converted' => 'امتیاز داده شد',
             default => $this->status,
         };
     }

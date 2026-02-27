@@ -9,7 +9,7 @@ import { PaginatedData } from '@/types';
 interface Redemption {
     id: number;
     user: { id: number; first_name: string; last_name: string; mobile: string };
-    reward: { title: string; image: string | null } | null;
+    reward: { title: string; image: string | null; value?: number } | null;
     points_spent: number;
     status: string;
     status_farsi: string;
@@ -18,6 +18,7 @@ interface Redemption {
     created_at_jalali: string;
     admin_name: string | null;
     reward_title: string;
+    reward_value?: number;
     delivery_info: any;
 }
 
@@ -107,8 +108,8 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                         <option value="pending">در انتظار</option>
                         <option value="processing">در حال پردازش</option>
                         <option value="completed">تکمیل شده</option>
+                        <option value="converted">اعطای امتیاز</option>
                         <option value="rejected">رد شده</option>
-                        <option value="converted">تبدیل به امتیاز</option>
                     </select>
                 </div>
 
@@ -166,8 +167,8 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                                         <div className="flex flex-col gap-1">
                                             <span className={`px-2 py-1 rounded text-xs w-fit ${
                                                 item.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                                item.status === 'converted' ? 'bg-teal-100 text-teal-700' :
                                                 item.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                item.status === 'converted' ? 'bg-blue-100 text-blue-700' :
                                                 'bg-yellow-100 text-yellow-700'
                                             }`}>
                                                 {item.status_farsi}
@@ -246,8 +247,8 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                                     <option value="pending">در انتظار بررسی</option>
                                     <option value="processing">در حال آماده‌سازی</option>
                                     <option value="completed">تکمیل / ارسال شده</option>
+                                    <option value="converted">اعطای امتیاز (تبدیل به امتیاز)</option>
                                     <option value="rejected">رد شده (برگشت امتیاز)</option>
-                                    <option value="converted">تبدیل به امتیاز (فقط جوایز گردونه)</option>
                                 </select>
                                 {/* @ts-ignore */}
                                 {statusData.errors?.status && <div className="text-red-500 text-xs mt-1">{statusData.errors.status}</div>}
@@ -262,8 +263,12 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
 
                             {statusData.status === 'converted' && (
                                 <div className="bg-blue-50 text-blue-700 text-xs p-3 rounded-lg flex items-center gap-2">
-                                    <AlertCircle size={16} />
-                                    با انتخاب این وضعیت، معادل ارزش امتیازی این جایزه به حساب کاربر واریز می‌شود.
+                                    <UserCheck size={16} />
+                                    <span>
+                                        با انتخاب این گزینه،
+                                        {selectedRedemption?.reward_value ? <span className="font-bold mx-1">{selectedRedemption.reward_value} امتیاز</span> : ' معادل امتیازی کالا '}
+                                        به حساب کاربر واریز می‌شود و وضعیت به "اعطای امتیاز" تغییر می‌کند.
+                                    </span>
                                 </div>
                             )}
 

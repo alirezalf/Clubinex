@@ -29,17 +29,50 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
-        $ticketBadges = ['user' => 0, 'admin' => 0, 'rewards' => 0];
         $user = $request->user();
 
         // 1. Theme Settings via Service
         $activeTheme = $this->themeService->getActiveTheme($user);
 
-        // 2. Badges & Notifications
-        $unreadNotificationsCount = 0;
-        if ($user) {
-            $unreadNotificationsCount = $user->unreadNotifications()->count();
+        return array_merge(parent::share($request), [
+            'auth' => [
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'mobile' => $user->mobile,
+                    'avatar' => $user->avatar,
+                    'roles' => $user->getRoleNames(),
+                    'points' => $user->current_points,
+                ] : null,
+            ],
+            // 2. Badges & Notifications (Lazy Evaluation)
+            'unreadNotificationsCount' => fn () => $user ? $user->unreadNotifications()->count() : 0,
+            'badges' => fn () => $this->getBadges($user),
+            'themeSettings' => $activeTheme,
+            // 4. Login Settings (Lazy Evaluation)
+            'loginSettings' => fn () => \Illuminate\Support\Facades\Cache::remember('login_settings', 3600, function () {
+                return SystemSetting::where('group', 'login')->pluck('value', 'key')->toArray();
+            }),
+            // 3. دریافت هوشمند اسلایدر برای صفحه جاری (Lazy Evaluation)
+            'pageSlider' => fn () => $this->getPageSlider($request),
+            'flash' => [
+                'message' => fn () => $request->session()->get('message'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
+            'ziggy' => function () use ($request) {
+                return array_merge((new Ziggy)->toArray(), [
+                    'location' => $request->url(),
+                ]);
+            },
+        ]);
+    }
 
+    private function getBadges($user)
+    {
+        $ticketBadges = ['user' => 0, 'admin' => 0, 'rewards' => 0];
+
+        if ($user) {
             $ticketBadges['user'] = Ticket::where('user_id', $user->id)
                 ->where('status', 'answered')
                 ->count();
@@ -56,49 +89,20 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
-        // 3. دریافت هوشمند اسلایدر برای صفحه جاری
-        // فقط برای درخواست‌های GET و صفحات اصلی اجرا شود
-        $pageSlider = null;
+        return $ticketBadges;
+    }
+
+    private function getPageSlider(Request $request)
+    {
         if ($request->isMethod('GET') && !$request->wantsJson()) {
             $currentRoute = Route::currentRouteName();
             if ($currentRoute) {
-                // تلاش برای یافتن اسلایدر متصل به این روت
-                $pageSlider = Slider::with('activeSlides')
+                return Slider::with('activeSlides')
                     ->where('location_key', $currentRoute)
                     ->where('is_active', true)
                     ->first();
             }
         }
-
-        // 4. Login Settings
-        $loginSettings = SystemSetting::where('group', 'login')->pluck('value', 'key')->toArray();
-
-        return array_merge(parent::share($request), [
-            'auth' => [
-                'user' => $user ? [
-                    'id' => $user->id,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'mobile' => $user->mobile,
-                    'avatar' => $user->avatar,
-                    'roles' => $user->getRoleNames(),
-                    'points' => $user->current_points,
-                ] : null,
-            ],
-            'unreadNotificationsCount' => $unreadNotificationsCount,
-            'themeSettings' => $activeTheme,
-            'loginSettings' => $loginSettings,
-            'badges' => $ticketBadges,
-            'pageSlider' => $pageSlider, // اسلایدر سراسری
-            'flash' => [
-                'message' => fn () => $request->session()->get('message'),
-                'error' => fn () => $request->session()->get('error'),
-            ],
-            'ziggy' => function () use ($request) {
-                return array_merge((new Ziggy)->toArray(), [
-                    'location' => $request->url(),
-                ]);
-            },
-        ]);
+        return null;
     }
 }

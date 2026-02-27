@@ -135,7 +135,6 @@ class IntegrationController extends Controller
                     'from' => $settings['mail_from_address'],
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error('Email Test Error: ' . $e->getMessage());
             return response()->json([
@@ -154,12 +153,13 @@ class IntegrationController extends Controller
     public function testSmsConnection(Request $request)
     {
         $provider = $request->input('sms_provider');
-        $provider = strtolower(str_replace(['https://', 'http://', 'www.'], '', $provider));
-        $provider = trim($provider, '/');
+        // $provider = strtolower(str_replace(['https://', 'http://', 'www.'], '', $provider));
+        // $provider = trim($provider, '/');
 
         $apiKey = $request->input('sms_api_key');
         $username = $request->input('sms_username');
         $password = $request->input('sms_password');
+
 
         if (empty($apiKey) && (empty($username) || empty($password))) {
             return response()->json([
@@ -173,13 +173,22 @@ class IntegrationController extends Controller
             $details = '';
             $credit = null;
 
-            if (in_array($provider, ['smsir', 'sms.ir', 'sms_ir'])) {
+            if (in_array($provider, [
+                'smsir',
+                'sms.ir',
+                'sms_ir',
+                'https://sms.ir',
+                'http://sms.ir',
+                'www.sms.ir',
+                'https://www.sms.ir'
+            ])) {
+
                 $driver = new \App\Services\SMS\Drivers\SmsIrDriver($apiKey);
                 $credit = $driver->getCredit();
-
+                 log::info($credit);
                 if ($credit !== null) {
                     $isConnected = true;
-                    $details = 'اتصال موفقیت‌آمیز بود. اعتبار: ' . $credit . ' ریال';
+                    $details = 'اتصال موفقیت‌آمیز بود. اعتبار: ' . $credit . ' واحد';
                 } else {
                     // Fallback if credit check fails but API key seems valid (maybe endpoint changed)
                     // But for now, assume failure if credit check fails.
@@ -189,7 +198,7 @@ class IntegrationController extends Controller
                 // Fallback for other providers (simulation for now)
                 if ($apiKey && strlen($apiKey) > 10) {
                     $isConnected = true;
-                    $details = 'اتصال شبیه‌سازی شده (درایور هنوز کامل نیست).';
+                    $details = 'اتصال شبیه‌سازی شده (درایور ندارد).';
                 } elseif ($username && $password) {
                     $isConnected = true;
                     $details = 'اتصال شبیه‌سازی شده با نام کاربری.';
@@ -209,7 +218,6 @@ class IntegrationController extends Controller
             } else {
                 throw new \Exception('اطلاعات وارد شده نامعتبر به نظر می‌رسند.');
             }
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

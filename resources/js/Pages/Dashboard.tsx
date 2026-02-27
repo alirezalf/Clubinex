@@ -14,7 +14,7 @@ type DashboardProps = PageProps<{
     latestUsers?: any[];
     chartData?: any;
     // User specific
-    userStats?: any; 
+    userStats?: any;
     recentTransactions?: any[];
 }>;
 
@@ -22,9 +22,22 @@ export default function Dashboard(props: DashboardProps) {
     const { isAdmin } = props;
 
     return (
-        <DashboardLayout breadcrumbs={[{ label: isAdmin ? 'داشبورد مدیریت' : 'داشبورد کاربری' }]}>
+        <DashboardLayout
+            breadcrumbs={[{
+                label: isAdmin ? 'داشبورد مدیریت' : 'داشبورد کاربری',
+                icon: isAdmin ? 'admin' : 'user'
+            }]}
+        >
             <Head title={isAdmin ? 'پنل مدیریت' : 'داشبورد'} />
-            {isAdmin ? <AdminDashboard {...props} /> : <UserDashboard {...props} />}
+
+            {/* محتوای داشبورد با انیمیشن */}
+            <div className="animate-in fade-in duration-500">
+                {isAdmin ? (
+                    <AdminDashboard {...props} />
+                ) : (
+                    <UserDashboard {...props} />
+                )}
+            </div>
         </DashboardLayout>
     );
 }

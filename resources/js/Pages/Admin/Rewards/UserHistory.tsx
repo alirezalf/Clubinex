@@ -69,7 +69,7 @@ export default function UserHistory({ user, stats, transactions, rewards, produc
                             <tr key={i} className="hover:bg-gray-50 transition">
                                 <td className="px-4 py-3 font-medium text-gray-800">{r.title}</td>
                                 <td className="px-4 py-3 font-bold dir-ltr text-right">
-                                    {r.status_raw === 'grant_points' ? (
+                                    {r.status_raw === 'converted' ? (
                                         <span className="text-green-600">+{r.reward_value?.toLocaleString() || 0}</span>
                                     ) : (
                                         <span className="text-red-500">-{(r.points || 0).toLocaleString()}</span>

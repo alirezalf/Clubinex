@@ -12,7 +12,7 @@ interface Redemption {
     };
     points_spent: number;
     reward_value?: number;
-    status: 'pending' | 'processing' | 'completed' | 'rejected' | 'grant_points';
+    status: 'pending' | 'processing' | 'completed' | 'rejected' | 'converted';
     status_farsi: string;
     tracking_code: string | null;
     admin_note: string | null;
@@ -66,7 +66,7 @@ export default function RedemptionHistory({ redemptions, onSwitchToStore }: Prop
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 font-bold text-gray-700">
-                                    {item.status === 'grant_points' ? (
+                                    {item.status === 'converted' ? (
                                         <span className="text-green-600">+{item.reward_value?.toLocaleString() || 0}</span>
                                     ) : (
                                         <span className="text-red-500">-{item.points_spent.toLocaleString()}</span>
@@ -76,12 +76,12 @@ export default function RedemptionHistory({ redemptions, onSwitchToStore }: Prop
                                     <div className={clsx(
                                         "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold",
                                         item.status === 'completed' && "bg-green-100 text-green-700",
-                                        item.status === 'grant_points' && "bg-teal-100 text-teal-700",
+                                        item.status === 'converted' && "bg-teal-100 text-teal-700",
                                         item.status === 'rejected' && "bg-red-100 text-red-700",
                                         item.status === 'processing' && "bg-blue-100 text-blue-700",
                                         item.status === 'pending' && "bg-yellow-100 text-yellow-700",
                                     )}>
-                                        {(item.status === 'completed' || item.status === 'grant_points') && <CheckCircle2 size={12} />}
+                                        {(item.status === 'completed' || item.status === 'converted') && <CheckCircle2 size={12} />}
                                         {item.status === 'rejected' && <XCircle size={12} />}
                                         {item.status === 'processing' && <Truck size={12} />}
                                         {item.status === 'pending' && <Clock size={12} />}

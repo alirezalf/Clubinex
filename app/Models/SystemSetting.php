@@ -40,6 +40,9 @@ class SystemSetting extends Model
             try {
                 if (Schema::hasTable('cache')) {
                      cache()->forget('global_settings');
+                     cache()->forget('global_settings_array');
+                     cache()->forget('login_settings');
+                     cache()->forget('security_session_timeout');
                 }
             } catch (\Exception $e) {
                 // در هنگام اجرای سیدرها یا مایگریشن‌ها اگر کش در دسترس نبود، خطا ندهد

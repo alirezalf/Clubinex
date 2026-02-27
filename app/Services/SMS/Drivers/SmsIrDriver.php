@@ -47,9 +47,9 @@ class SmsIrDriver implements SmsProviderInterface
 
         try {
             $response = Http::withHeaders([
+                'X-API-KEY' => $this->apiKey,
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-                'X-API-KEY' => $this->apiKey,
             ])->post('https://api.sms.ir/v1/send/verify', [
                 'Mobile' => $mobile,
                 'TemplateId' => $templateId,
@@ -99,44 +99,43 @@ class SmsIrDriver implements SmsProviderInterface
         return true;
     }
 
-public function sendBulk(string $mobile, string $message): bool
-{
-    if (empty($this->apiKey) || empty($this->sender)) {
-        return false;
-    }
-
-    try {
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-            'X-API-KEY' => $this->apiKey,
-        ])->post('https://api.sms.ir/v1/send/bulk', [
-            'lineNumber' => $this->sender,
-            'MessageText' => $message,
-            'Mobiles' => is_array($mobile) ? $mobile : [$mobile],
-        ]);
-
-        // فقط این یک لاگ رو نگه دار
-        Log::info('SMSIR RAW RESPONSE', [
-            'request' => [
-                'mobile' => $mobile,
-                'message' => $message,
-                'sender' => $this->sender
-            ],
-            'response_status' => $response->status(),
-            'response_body' => $response->body()
-        ]);
-
-        if (!$response->successful()) {
+    public function sendBulk(string $mobile, string $message): bool
+    {
+        if (empty($this->apiKey) || empty($this->sender)) {
             return false;
         }
 
-        $responseData = $response->json();
-        return isset($responseData['status']) && $responseData['status'] == 1;
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+                'X-API-KEY' => $this->apiKey,
+            ])->post('https://api.sms.ir/v1/send/bulk', [
+                'lineNumber' => $this->sender,
+                'MessageText' => $message,
+                'Mobiles' => is_array($mobile) ? $mobile : [$mobile],
+            ]);
 
-    } catch (\Exception $e) {
-        Log::error('SMSIR ERROR', ['error' => $e->getMessage()]);
-        return false;
+            // فقط این یک لاگ رو نگه دار
+            Log::info('SMSIR RAW RESPONSE', [
+                'request' => [
+                    'mobile' => $mobile,
+                    'message' => $message,
+                    'sender' => $this->sender
+                ],
+                'response_status' => $response->status(),
+                'response_body' => $response->body()
+            ]);
+
+            if (!$response->successful()) {
+                return false;
+            }
+
+            $responseData = $response->json();
+            return isset($responseData['status']) && $responseData['status'] == 1;
+        } catch (\Exception $e) {
+            Log::error('SMSIR ERROR', ['error' => $e->getMessage()]);
+            return false;
+        }
     }
-}
 }
