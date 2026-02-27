@@ -81,15 +81,12 @@ class RewardController extends Controller
                 if ($item->reward) {
                     $item->reward_title = $item->reward->title;
                     $item->reward_type = $item->reward->type;
-                    $item->reward_value = $item->reward->points_cost;
                 } elseif ($item->spin && $item->spin->prize) {
                     $item->reward_title = $item->spin->prize->title; // Removed (Wheel) suffix as per user feedback
                     $item->reward_type = 'item';
-                    $item->reward_value = $item->spin->prize->value;
                 } else {
                     $item->reward_title = 'آیتم حذف شده';
                     $item->reward_type = 'unknown';
-                    $item->reward_value = 0;
                 }
 
                 return $item;
@@ -137,7 +134,7 @@ class RewardController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,processing,completed,rejected,grant_points',
+            'status' => 'required|in:pending,processing,completed,rejected,converted',
             'admin_note' => 'nullable|string',
             'tracking_code' => 'nullable|string'
         ]);

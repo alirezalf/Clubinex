@@ -154,6 +154,9 @@ class IntegrationController extends Controller
     public function testSmsConnection(Request $request)
     {
         $provider = $request->input('sms_provider');
+        $provider = strtolower(str_replace(['https://', 'http://', 'www.'], '', $provider));
+        $provider = trim($provider, '/');
+
         $apiKey = $request->input('sms_api_key');
         $username = $request->input('sms_username');
         $password = $request->input('sms_password');

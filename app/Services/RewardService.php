@@ -175,61 +175,34 @@ class RewardService
                 }
             }
 
-            // اگر وضعیت به "اعطای امتیاز" تغییر کرد
-            if ($status === 'grant_points' && $redemption->status !== 'grant_points') {
-                $pointsToGrant = 0;
-                $title = '';
-
-                if ($redemption->lucky_wheel_spin_id) {
-                    $spin = \App\Models\LuckyWheelSpin::with('prize')->find($redemption->lucky_wheel_spin_id);
-                    if ($spin && $spin->prize && $spin->prize->value > 0) {
-                        $pointsToGrant = $spin->prize->value;
-                        $title = $spin->prize->title;
-                    }
-                } elseif ($redemption->reward && $redemption->reward->points_cost > 0) {
-                    $pointsToGrant = $redemption->reward->points_cost;
-                    $title = $redemption->reward->title;
-                }
-
-                if ($pointsToGrant > 0) {
-                    PointTransaction::awardPoints(
-                        $redemption->user_id,
-                        $pointsToGrant,
-                        null,
-                        "معادل امتیازی جایزه: " . $title,
-                        $redemption
-                    );
-
-                    ActivityLog::log(
-                        'reward.points_granted',
-                        "امتیاز معادل جایزه ({$pointsToGrant}) به کاربر داده شد.",
-                        ['user_id' => $redemption->user_id, 'redemption_id' => $redemption->id]
-                    );
-                }
-            }
-
-            // اگر وضعیت به "تایید شده" تغییر کرد و مربوط به گردونه شانس بود -> اعطای امتیاز معادل ارزش جایزه
-            if ($status === 'approved' && $redemption->lucky_wheel_spin_id) {
+            // اگر وضعیت به "تبدیل به امتیاز" تغییر کرد و مربوط به گردونه شانس بود -> اعطای امتیاز معادل ارزش جایزه
+            if ($status === 'converted' && $redemption->status !== 'converted' && $redemption->lucky_wheel_spin_id) {
                 $spin = \App\Models\LuckyWheelSpin::with('prize')->find($redemption->lucky_wheel_spin_id);
 
                 if ($spin && $spin->prize && $spin->prize->value > 0) {
-                    // بررسی اینکه قبلاً امتیاز داده نشده باشد (مثلاً اگر قبلاً تایید شده بود)
-                    // اما چون وضعیت جدید 'approved' است و قبلی نبوده، فرض بر این است که داده نشده.
-                    // برای اطمینان بیشتر می‌توانیم چک کنیم.
+                    // بررسی اینکه قبلاً امتیاز داده نشده باشد
+                    $alreadyAwarded = PointTransaction::where('reference_type', RewardRedemption::class)
+                        ->where('reference_id', $redemption->id)
+                        ->where('type', 'earn')
+                        ->exists();
 
-                    PointTransaction::awardPoints(
-                        $redemption->user_id,
-                        $spin->prize->value,
-                        null,
-                        "پاداش جایزه فیزیکی گردونه: " . $spin->prize->title,
-                        $redemption
-                    );
+                    if (!$alreadyAwarded) {
+                        PointTransaction::awardPoints(
+                            $redemption->user_id,
+                            $spin->prize->value,
+                            null,
+                            "تبدیل جایزه فیزیکی گردونه به امتیاز: " . $spin->prize->title,
+                            $redemption
+                        );
 
-                    ActivityLog::log(
-                        'reward.points_awarded',
-                        "امتیاز معادل جایزه فیزیکی گردونه ({$spin->prize->value}) به کاربر داده شد.",
-                        ['user_id' => $redemption->user_id, 'redemption_id' => $redemption->id]
-                    );
+                        ActivityLog::log(
+                            'reward.points_awarded',
+                            "امتیاز معادل جایزه فیزیکی گردونه ({$spin->prize->value}) به کاربر داده شد.",
+                            ['user_id' => $redemption->user_id, 'redemption_id' => $redemption->id]
+                        );
+                    }
+                } else {
+                    throw new Exception('این جایزه فیزیکی ارزش امتیازی برای تبدیل ندارد.');
                 }
             }
 

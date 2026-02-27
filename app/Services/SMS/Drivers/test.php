@@ -40,35 +40,21 @@ class SmsIrDriver implements SmsProviderInterface
 
     public function sendVerifyWithParams(string $mobile, int $templateId, array $parameters): bool
     {
-        if (empty($this->apiKey)) {
-            Log::error('SMSIR Verify: API Key is empty');
-            return false;
-        }
+        if (empty($this->apiKey)) return false;
 
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
+                'Accept' => 'text/plain',
                 'X-API-KEY' => $this->apiKey,
             ])->post('https://api.sms.ir/v1/send/verify', [
-                'Mobile' => $mobile,
-                'TemplateId' => $templateId,
-                'Parameters' => $parameters
-            ]);
-
-            Log::info('SMSIR Verify Response', [
-                'request' => [
-                    'mobile' => $mobile,
-                    'templateId' => $templateId,
-                    'parameters' => $parameters
-                ],
-                'response_status' => $response->status(),
-                'response_body' => $response->body()
+                'mobile' => $mobile,
+                'templateId' => $templateId,
+                'parameters' => $parameters
             ]);
 
             return $response->successful() && $response->json('status') == 1;
         } catch (\Exception $e) {
-            Log::error('SMSIR Verify Exception', ['error' => $e->getMessage()]);
             return false;
         }
     }
@@ -77,26 +63,14 @@ class SmsIrDriver implements SmsProviderInterface
     {
         $templateId = $templateId ?? $this->templateId;
 
-        if (empty($templateId)) {
-            Log::warning('SMSIR Verify: Template ID is empty, falling back to sendBulk');
-            $message = "کد تایید شما: {$code}";
-            return $this->sendBulk($mobile, $message);
-        }
+        if (empty($templateId)) return false;
 
-        $success = $this->sendVerifyWithParams($mobile, (int)$templateId, [
+        return $this->sendVerifyWithParams($mobile, (int)$templateId, [
             [
                 'name' => $this->parameterName,
                 'value' => $code
             ]
         ]);
-
-        if (!$success) {
-            Log::warning('SMSIR Verify failed, falling back to sendBulk');
-            $message = "کد تایید شما: {$code}";
-            return $this->sendBulk($mobile, $message);
-        }
-
-        return true;
     }
 
 public function sendBulk(string $mobile, string $message): bool

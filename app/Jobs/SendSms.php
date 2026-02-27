@@ -91,6 +91,11 @@ class SendSms implements ShouldQueue
             } else {
                 // ارسال پیام عادی
                 $success = $driver->sendBulk($this->mobile, $this->message);
+                Log::info('SMS BULK DEBUG', [
+                    'mobile' => $this->mobile,
+                    'message' => $this->message,
+                    'provider_response' => $success ? 'success' : 'failed'
+                ]);
             }
 
             if ($success) {

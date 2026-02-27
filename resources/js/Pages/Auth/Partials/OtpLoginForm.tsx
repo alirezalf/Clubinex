@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import axios from 'axios';
@@ -83,8 +84,8 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
         }
     };
 
-    const handleVerifyOtp = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleVerifyOtp = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         // Use manual inertia post to handle redirect properly
         router.post(route('login.otp.verify'), { mobile, code: otpCode }, {
             onStart: () => setLoading(true),
@@ -92,6 +93,13 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
             onError: () => setOtpError('کد وارد شده صحیح نیست')
         });
     };
+
+    // Auto-submit when OTP is 5 digits
+    React.useEffect(() => {
+        if (otpCode.length === 5 && step === 'verify') {
+            handleVerifyOtp();
+        }
+    }, [otpCode]);
 
     return (
         <div>
@@ -164,6 +172,7 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
                             maxLength={5}
                             autoFocus
                             placeholder="-----"
+                            autoComplete="one-time-code"
                             required
                         />
                          {otpError && <p className="text-red-500 text-[10px] mt-2 text-center">{otpError}</p>}

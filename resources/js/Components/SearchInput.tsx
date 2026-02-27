@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
+import { Search, X, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface SearchInputProps {
     value: string;
@@ -12,48 +12,54 @@ interface SearchInputProps {
     delay?: number;
 }
 
-export default function SearchInput({ 
-    value, 
-    onChange, 
-    onSearch, 
-    placeholder = 'جستجو...', 
-    className, 
+export default function SearchInput({
+    value,
+    onChange,
+    onSearch,
+    placeholder = 'جستجو...',
+    className,
     loading = false,
-    delay = 800 
+    delay = 800
 }: SearchInputProps) {
     const [localValue, setLocalValue] = useState(value || '');
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isFirstRender = useRef(true);
 
-    // همگام‌سازی با تغییرات خارجی (مثلاً وقتی فیلترها از بیرون پاک می‌شوند)
+    // فقط در رندر اول و وقتی مقدار از بیرون تغییر میکنه و کاربر در حال تایپ نیست
     useEffect(() => {
-        if (value !== localValue) {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
+        // اگه مقدار خارجی با مقدار محلی فرق داشت و timeout فعال نبود، مقدار محلی رو آپدیت کن
+        if (value !== localValue && !timeoutRef.current) {
             setLocalValue(value || '');
         }
-        // نکته مهم: خط clearTimeout که اینجا بود حذف شد.
-        // وجود آن باعث می‌شد وقتی کاربر تایپ می‌کند و Parent State آپدیت می‌شود،
-        // تایمر جستجو کنسل شود و جستجو انجام نشود.
     }, [value]);
 
     const handleClear = () => {
         setLocalValue('');
-        onChange(''); 
-        onSearch(''); 
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        onChange('');
+        onSearch('');
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newVal = e.target.value;
         setLocalValue(newVal);
-        onChange(newVal); // آپدیت وضعیت والد برای نگهداری مقدار
+        onChange(newVal);
 
-        // پاک کردن تایمر قبلی
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
         }
 
-        // تنظیم تایمر جدید برای جستجو
         timeoutRef.current = setTimeout(() => {
             onSearch(newVal);
+            timeoutRef.current = null;
         }, delay);
     };
 

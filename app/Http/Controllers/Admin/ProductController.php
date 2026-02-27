@@ -24,31 +24,60 @@ class ProductController extends Controller
         $this->productService = $productService;
     }
 
-    public function index()
-    {
-        $products = Product::with('category')->withCount(['serials', 'serials as used_serials_count' => function ($query) {
-            $query->where('is_used', true);
-        }])->latest()->paginate(10, ['*'], 'products_page');
+   public function index(Request $request)
+{
+    $search = $request->input('search');
 
-        $registrations = ProductRegistration::with(['user', 'category', 'admin'])
-            ->latest()
-            ->paginate(10, ['*'], 'registrations_page');
+    // --- محصولات ---
+    $productsQuery = Product::with('category')
+        ->withCount([
+            'serials',
+            'serials as used_serials_count' => function ($query) {
+                $query->where('is_used', true);
+            }
+        ])
+        ->latest();
 
-        $registrations->getCollection()->transform(function ($reg) {
-            $reg->created_at_jalali = $reg->created_at_jalali;
-            $reg->status_farsi = $reg->status_farsi;
-            $reg->append('estimated_points'); // Explicitly append accessor
-            return $reg;
+    // --- اعمال جستجو ---
+    if ($search) {
+        $productsQuery->where(function ($query) use ($search) {
+            foreach (['title', 'model_name', 'brand', 'description'] as $column) {
+                $query->orWhere($column, 'like', "%{$search}%");
+            }
+
+            $query->orWhereHas('serials', function ($q) use ($search) {
+                $q->where('serial_code', 'like', "%{$search}%");
+            });
         });
-
-        $categories = Category::all();
-
-        return Inertia::render('Admin/Products/Index', [
-            'products' => $products,
-            'registrations' => $registrations,
-            'categories' => $categories
-        ]);
     }
+
+    $products = $productsQuery->paginate(10, ['*'], 'products_page')
+        ->appends(['search' => $search]); // حفظ مقدار جستجو در pagination links
+
+    // --- درخواست‌ها ---
+    $registrations = ProductRegistration::with(['user', 'category', 'admin'])
+        ->latest()
+        ->paginate(10, ['*'], 'registrations_page');
+
+    $registrations->getCollection()->transform(function ($reg) {
+        $reg->created_at_jalali = $reg->created_at_jalali;
+        $reg->status_farsi = $reg->status_farsi;
+        $reg->append('estimated_points'); // Explicitly append accessor
+        return $reg;
+    });
+
+    $categories = Category::all();
+
+    // --- بازگشت به Inertia ---
+    return Inertia::render('Admin/Products/Index', [
+        'products' => $products,
+        'registrations' => $registrations,
+        'categories' => $categories,
+        'filters' => [
+            'search' => $search, // برای همگام‌سازی با GlobalSearch
+        ],
+    ]);
+}
 
     public function store(StoreProductRequest $request)
     {

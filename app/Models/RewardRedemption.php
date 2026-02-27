@@ -13,7 +13,7 @@ class RewardRedemption extends Model
     protected $fillable = [
         'user_id',
         'reward_id',
-        'lucky_wheel_spin_id',
+        'lucky_wheel_spin_id', // اضافه شده
         'points_spent',
         'status',
         'admin_note',
@@ -57,7 +57,7 @@ class RewardRedemption extends Model
             'processing' => 'در حال آماده‌سازی',
             'completed' => 'تکمیل شده/ارسال شده',
             'rejected' => 'رد شده',
-            'grant_points' => 'امتیاز داده شد',
+            'converted' => 'تبدیل به امتیاز',
             default => $this->status,
         };
     }

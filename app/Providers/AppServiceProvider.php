@@ -3,9 +3,8 @@
 namespace App\Providers;
 
 use App\Models\SystemSetting;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 
@@ -24,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS if APP_URL starts with https:// or if request is secure (Fixes Laragon SSL + VPN issues)
+        if (str_starts_with(config('app.url'), 'https://') || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Force Sync Queue in Local Environment
         if (app()->isLocal()) {
             config(['queue.default' => 'sync']);

@@ -17,6 +17,18 @@ class ClubSettingController extends Controller
 {
     public function index()
     {
+        // Ensure initial_registration rule exists
+        \App\Models\PointRule::firstOrCreate(
+            ['action_code' => 'initial_registration'],
+            [
+                'title' => 'امتیاز ثبت نام اولیه',
+                'points' => 10,
+                'type' => 'one_time',
+                'is_active' => true,
+                'description' => 'امتیازی که کاربر هنگام اولین ثبت نام و ورود به سیستم دریافت می‌کند.'
+            ]
+        );
+
         return Inertia::render('Admin/Club/Settings', [
             // مرتب‌سازی: اول سطوح (is_tier = 1) سپس اتاق‌ها (is_tier = 0)
             // درون هر گروه بر اساس حداقل امتیاز
@@ -54,10 +66,8 @@ class ClubSettingController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/clubs'), $filename);
-            $validated['image'] = '/uploads/clubs/' . $filename;
+            $path = $request->file('image')->store('public/clubs');
+            $validated['image'] = Storage::url($path);
         }
 
         $club = Club::create($validated);
