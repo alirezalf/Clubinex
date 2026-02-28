@@ -29,6 +29,23 @@ class UserStatus extends Model
         'is_active' => 'boolean', // تبدیل به بولین
     ];
 
+    protected static function booted()
+    {
+        $clearCache = function () {
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('cache')) {
+                     cache()->forget('active_user_status_id');
+                }
+            } catch (\Exception $e) {
+                // ignore
+            }
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
+        static::created($clearCache);
+    }
+
     // ==================== روابط ====================
 
     /**

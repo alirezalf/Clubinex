@@ -20,7 +20,7 @@ class UserController extends Controller
 {
     public function usersList(Request $request)
     {
-        $query = User::query()->with(['club', 'status', 'roles', 'permissions']);
+        $query = User::query()->with(['club', 'status', 'roles']);
 
         if ($request->search) {
             $query->where(function($q) use ($request) {

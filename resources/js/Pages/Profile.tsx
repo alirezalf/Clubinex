@@ -32,13 +32,20 @@ type Props = PageProps<{
 }>;
 
 export default function Profile({ user, provinces, initialCities }: Props) {
+
+    const formatDateForPicker = (date?: string) => {
+        if (!date) return '';
+        // تبدیل "2026-03-01T20:30:00.000000Z" به "2026-03-01 20:30:00"
+        return date.replace('T', ' ').replace('.000000Z', '');
+    };
+
     const { data, setData, post, processing, errors } = useForm({
         _method: 'POST',
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         email: user.email || '',
         national_code: user.national_code || '',
-        birth_date: user.birth_date || '',
+        birth_date: formatDateForPicker(user.birth_date) || '',
         gender: user.gender || 'male',
         job: user.job || '',
         province_id: user.province_id || '',
@@ -62,7 +69,7 @@ export default function Profile({ user, provinces, initialCities }: Props) {
             axios.get(route('api.cities', data.province_id))
                 .then(response => {
                     setCities(response.data);
-                    setData('city_id', ''); 
+                    setData('city_id', '');
                 })
                 .finally(() => setLoadingCities(false));
         } else if (!data.province_id) {
@@ -87,56 +94,62 @@ export default function Profile({ user, provinces, initialCities }: Props) {
         }
     };
 
-    const calculateProgress = () => {
-        const textFields = [
-            data.first_name, 
-            data.last_name, 
-            data.national_code, 
-            data.birth_date, 
-            data.job, 
-            data.province_id, 
-            data.city_id, 
-            data.address, 
-            data.postal_code
-        ];
-        
-        let filledCount = textFields.filter(f => f && f.toString().trim() !== '').length;
-        const hasAvatar = data.avatar !== null || (user.avatar && user.avatar.trim() !== '');
-        if (hasAvatar) filledCount++;
+   const calculateProgress = () => {
+    // فیلدهای متنی که باید بررسی شوند
+    const textFields = [
+        data.first_name,
+        data.last_name,
+        data.national_code,
+        data.birth_date,
+        data.job,
+        data.province_id,
+        data.city_id,
+        data.address,
+        data.postal_code
+    ];
 
-        const totalFields = textFields.length + 1;
-        return Math.round((filledCount / totalFields) * 100);
-    };
+    // تعداد فیلدهای پر شده
+    let filledCount = textFields.filter(field =>
+        field && field.toString().trim() !== ''
+    ).length;
+
+    // بررسی آواتار (اگر فایل جدید انتخاب شده یا قبلاً داشته)
+    const hasAvatar = data.avatar !== null || (user.avatar && user.avatar.trim() !== '');
+    if (hasAvatar) filledCount++;
+
+    const totalFields = textFields.length + 1; // +1 برای آواتار
+    return Math.round((filledCount / totalFields) * 100);
+};
 
     return (
         <DashboardLayout breadcrumbs={[{ label: 'پروفایل کاربری' }]}>
             <Head title="پروفایل کاربری" />
 
             <div className="max-w-5xl mx-auto space-y-6">
-                
+
                 <UpgradeAlert user={user} />
 
-                <ProfileHeader 
-                    user={user} 
-                    avatarData={data.avatar} 
-                    onFileChange={handleFileChange} 
-                    progress={calculateProgress()} 
+                <ProfileHeader
+                    user={user}
+                    avatarData={data.avatar}
+                    onFileChange={handleFileChange}
+                    progress={calculateProgress()}
                 />
 
-                {/* Inline Alerts Removed: Handled by global ToastContainer in Layout */}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
+
                     <div className="lg:col-span-2 space-y-6">
-                        <ProfileInfoForm 
-                            data={data} 
-                            setData={(field, value) => setData(field as any, value)} 
-                            submit={submitInfo} 
-                            processing={processing} 
+                        <ProfileInfoForm
+                            data={data}
+                            setData={(field, value) => setData(field as any, value)}
+                            submit={submitInfo}
+                            processing={processing}
                             errors={errors}
                             provinces={provinces}
                             cities={cities}
                             loadingCities={loadingCities}
+                            progress={calculateProgress()}
                         />
                     </div>
 

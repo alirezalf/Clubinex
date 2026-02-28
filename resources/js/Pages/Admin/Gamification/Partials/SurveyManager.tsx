@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useForm, router, Link } from '@inertiajs/react';
 import { Target, Plus, Trophy, Hash, Star, Clock, Edit2, ListChecks, Loader2, Copy, Power, Trash2, X } from 'lucide-react';
-import PersianDatePicker from '@/Components/PersianDatePicker';
+
+const PersianDatePicker = React.lazy(() => import('@/Components/PersianDatePicker'));
+
+import Pagination from '@/Components/Pagination';
+import { PaginatedData } from '@/types';
 
 interface Survey {
     id: number;
@@ -20,7 +24,7 @@ interface Survey {
 }
 
 interface Props {
-    surveys: Survey[];
+    surveys: Survey[];  // فقط آرایه ساده
 }
 
 export default function SurveyManager({ surveys }: Props) {
@@ -121,6 +125,7 @@ export default function SurveyManager({ surveys }: Props) {
             </div>
 
             <div className="card-base overflow-hidden">
+                {/* اینجا surveys.data رو برداشتم و فقط surveys گذاشتم چون آرایه ساده است */}
                 {(surveys && surveys.length > 0) ? surveys.map((survey) => (
                     <div key={survey.id} className="p-4 border-b border-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center last:border-0 hover:bg-gray-50 transition gap-4">
                         <div className="flex-1">
@@ -188,6 +193,8 @@ export default function SurveyManager({ surveys }: Props) {
                     <div className="p-6 text-center text-gray-500">مسابقه‌ای وجود ندارد.</div>
                 )}
             </div>
+
+            {/* حذف بخش Pagination چون داده‌ها صفحه‌بندی نشده‌اند */}
 
             {/* Survey Modal (Create / Edit) */}
             {showSurveyModal && (
@@ -259,22 +266,26 @@ export default function SurveyManager({ surveys }: Props) {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <PersianDatePicker
-                                        label="شروع از (تاریخ و ساعت)"
-                                        value={data.starts_at}
-                                        onChange={(date) => setData('starts_at', date)}
-                                        placeholder="انتخاب زمان"
-                                        withTime={true}
-                                    />
+                                    <Suspense fallback={<div className="h-10 bg-gray-100 rounded animate-pulse"></div>}>
+                                        <PersianDatePicker
+                                            label="شروع از (تاریخ و ساعت)"
+                                            value={data.starts_at}
+                                            onChange={(date) => setData('starts_at', date)}
+                                            placeholder="انتخاب زمان"
+                                            withTime={true}
+                                        />
+                                    </Suspense>
                                 </div>
                                 <div>
-                                    <PersianDatePicker
-                                        label="پایان در (تاریخ و ساعت)"
-                                        value={data.ends_at}
-                                        onChange={(date) => setData('ends_at', date)}
-                                        placeholder="انتخاب زمان"
-                                        withTime={true}
-                                    />
+                                    <Suspense fallback={<div className="h-10 bg-gray-100 rounded animate-pulse"></div>}>
+                                        <PersianDatePicker
+                                            label="پایان در (تاریخ و ساعت)"
+                                            value={data.ends_at}
+                                            onChange={(date) => setData('ends_at', date)}
+                                            placeholder="انتخاب زمان"
+                                            withTime={true}
+                                        />
+                                    </Suspense>
                                 </div>
                             </div>
 

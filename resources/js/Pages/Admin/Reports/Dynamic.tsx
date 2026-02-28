@@ -1,17 +1,19 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { PageProps } from '@/types';
 import { Search, FileSpreadsheet, Printer } from 'lucide-react';
-import PersianDatePicker from '@/Components/PersianDatePicker';
 import axios from 'axios';
 import clsx from 'clsx';
+
+const PersianDatePicker = React.lazy(() => import('@/Components/PersianDatePicker'));
 
 // Import Components
 import DataSourceSelector from './Components/DataSourceSelector';
 import FieldSelector from './Components/FieldSelector';
 import ReportTable from './Components/ReportTable';
-import ReportSettings from './Components/ReportSettings'; 
+import ReportSettings from './Components/ReportSettings';
 import AdvancedFilters from './Components/AdvancedFilters';
 
 interface Entity {
@@ -19,7 +21,7 @@ interface Entity {
 }
 
 interface Props extends PageProps {
-    entities: Record<string, Entity>; 
+    entities: Record<string, Entity>;
 }
 
 interface SiteSettings {
@@ -41,17 +43,17 @@ export default function DynamicReports({ entities }: Props) {
     const [selectedTable, setSelectedTable] = useState<string>('');
     const [availableFields, setAvailableFields] = useState<Record<string, string>>({}); // { col: label }
     const [selectedFields, setSelectedFields] = useState<string[]>([]);
-    
+
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
-    
+
     // Advanced Filters State
     const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilter[]>([]);
 
     // New States
     const [showRowNumber, setShowRowNumber] = useState(true);
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
-    
+
     // Print Config
     const [printConfig, setPrintConfig] = useState({
         title: 'گزارش خروجی',
@@ -80,11 +82,11 @@ export default function DynamicReports({ entities }: Props) {
 
     const handleTableChange = async (table: string) => {
         setSelectedTable(table);
-        setSelectedFields([]); 
+        setSelectedFields([]);
         setReportData([]);
         setAvailableFields({});
         setAdvancedFilters([]);
-        
+
         setFieldsLoading(true);
         try {
             const response = await axios.get(route('admin.reports.dynamic.columns', table));
@@ -135,7 +137,7 @@ export default function DynamicReports({ entities }: Props) {
                     advanced_filters: advancedFilters
                 }
             });
-            
+
             if (response.data.data) {
                 setReportData(response.data.data);
                 setPagination({
@@ -163,7 +165,7 @@ export default function DynamicReports({ entities }: Props) {
 
     const handleExport = () => {
         if (selectedFields.length === 0 || pagination.total === 0) return;
-        
+
         const params = new URLSearchParams();
         params.append('table', selectedTable);
         selectedFields.forEach(f => params.append('fields[]', f));
@@ -171,14 +173,14 @@ export default function DynamicReports({ entities }: Props) {
         if (dateTo) params.append('date_to', dateTo);
         params.append('sort_dir', sortDir);
         if (showRowNumber) params.append('show_row_number', '1');
-        
+
         // Serialize advanced filters
         advancedFilters.forEach((f, i) => {
             params.append(`advanced_filters[${i}][field]`, f.field);
             params.append(`advanced_filters[${i}][operator]`, f.operator);
             params.append(`advanced_filters[${i}][value]`, f.value);
         });
-        
+
         window.open(`${route('admin.reports.dynamic.export')}?${params.toString()}`, '_blank');
     };
 
@@ -194,17 +196,17 @@ export default function DynamicReports({ entities }: Props) {
             <Head title="گزارش‌ساز داینامیک" />
 
             <div className="space-y-6">
-                
+
                 {/* 1. Top Section: Data Source & Time Range & Actions */}
                 <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm no-print">
                     <div className="flex flex-col xl:flex-row items-end gap-6">
-                        
+
                         {/* Source Selector */}
                         <div className="w-full xl:w-1/3">
-                            <DataSourceSelector 
-                                entities={entities} 
-                                selectedTable={selectedTable} 
-                                onChange={handleTableChange} 
+                            <DataSourceSelector
+                                entities={entities}
+                                selectedTable={selectedTable}
+                                onChange={handleTableChange}
                             />
                         </div>
 
@@ -212,22 +214,22 @@ export default function DynamicReports({ entities }: Props) {
                         <div className="w-full xl:w-1/3">
                             <label className="block text-xs font-bold text-gray-500 mb-2 mr-1">محدوده زمانی (اختیاری)</label>
                             <div className="flex gap-2">
-                                <PersianDatePicker 
-                                    value={dateFrom} 
-                                    onChange={setDateFrom} 
-                                    placeholder="از تاریخ" 
+                                <PersianDatePicker
+                                    value={dateFrom}
+                                    onChange={setDateFrom}
+                                    placeholder="از تاریخ"
                                 />
-                                <PersianDatePicker 
-                                    value={dateTo} 
-                                    onChange={setDateTo} 
-                                    placeholder="تا تاریخ" 
+                                <PersianDatePicker
+                                    value={dateTo}
+                                    onChange={setDateTo}
+                                    placeholder="تا تاریخ"
                                 />
                             </div>
                         </div>
 
                         {/* Actions (Icon Buttons) */}
                         <div className="w-full xl:w-auto flex gap-3 h-[42px]">
-                            <button 
+                            <button
                                 onClick={() => fetchReport(1)}
                                 disabled={loading || selectedFields.length === 0}
                                 className="h-full aspect-square bg-primary-600 text-white rounded-xl hover:bg-primary-700 shadow-lg shadow-primary-500/20 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed transition active:scale-95"
@@ -239,8 +241,8 @@ export default function DynamicReports({ entities }: Props) {
                                     <Search size={22} />
                                 )}
                             </button>
-                            
-                            <button 
+
+                            <button
                                 onClick={handlePrint}
                                 disabled={pagination.total === 0}
                                 className="h-full aspect-square bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
@@ -249,7 +251,7 @@ export default function DynamicReports({ entities }: Props) {
                                 <Printer size={22} />
                             </button>
 
-                            <button 
+                            <button
                                 onClick={handleExport}
                                 disabled={pagination.total === 0}
                                 className="h-full aspect-square bg-green-600 text-white rounded-xl hover:bg-green-700 shadow-lg shadow-green-500/20 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
@@ -263,7 +265,7 @@ export default function DynamicReports({ entities }: Props) {
 
                 {/* 2. Main Content Grid */}
                 <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 no-print">
-                    
+
                     {/* Field Selection (Left Side - Wider) */}
                     <div className="xl:col-span-3 h-full">
                         {fieldsLoading ? (
@@ -271,7 +273,7 @@ export default function DynamicReports({ entities }: Props) {
                                 در حال بارگذاری ستون‌ها...
                             </div>
                         ) : (
-                            <FieldSelector 
+                            <FieldSelector
                                 fields={availableFields}
                                 selectedFields={selectedFields}
                                 onToggle={toggleField}
@@ -283,7 +285,7 @@ export default function DynamicReports({ entities }: Props) {
                     {/* Settings & Filters (Right Side - Narrower) */}
                     <div className="xl:col-span-1 flex flex-col gap-4">
                         {/* Report Settings */}
-                        <ReportSettings 
+                        <ReportSettings
                             showRowNumber={showRowNumber}
                             setShowRowNumber={setShowRowNumber}
                             sortDir={sortDir}
@@ -293,7 +295,7 @@ export default function DynamicReports({ entities }: Props) {
                         />
 
                         {/* Advanced Filters */}
-                        <AdvancedFilters 
+                        <AdvancedFilters
                             filters={advancedFilters}
                             setFilters={setAdvancedFilters}
                             availableFields={availableFields}
@@ -304,7 +306,7 @@ export default function DynamicReports({ entities }: Props) {
 
                 {/* 3. Result Table */}
                 <div ref={reportRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 scroll-mt-24">
-                    <ReportTable 
+                    <ReportTable
                         data={reportData}
                         loading={loading}
                         selectedFields={selectedFields}

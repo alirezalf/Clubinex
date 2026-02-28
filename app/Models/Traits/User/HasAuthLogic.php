@@ -23,6 +23,16 @@ trait HasAuthLogic
 
     public function isActive()
     {
+        // Cache the active status ID to prevent N+1 queries on every request
+        $activeStatusId = \Illuminate\Support\Facades\Cache::rememberForever('active_user_status_id', function () {
+            $status = \App\Models\UserStatus::where('slug', 'active')->first();
+            return $status ? $status->id : null;
+        });
+
+        if ($activeStatusId) {
+            return $this->status_id === $activeStatusId;
+        }
+
         return optional($this->status)->slug === 'active';
     }
 
@@ -84,6 +94,6 @@ trait HasAuthLogic
     {
         $this->update(['last_login_at' => now()]);
     }
-    
+
     public function hasVerifiedEmail() { return !is_null($this->email_verified_at); }
 }

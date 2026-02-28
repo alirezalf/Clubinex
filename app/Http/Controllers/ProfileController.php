@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Agent;
-use App\Models\PointTransaction;
-use App\Models\PointRule;
-use App\Models\ActivityLog;
 use App\Http\Requests\ProfileUpdateRequest; // Import Request
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Hash;
+use App\Models\ActivityLog;
+use App\Models\Agent;
+use App\Models\PointRule;
+use App\Models\PointTransaction;
+use App\Models\User;
 use App\Services\ThemeService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class ProfileController extends Controller
 {

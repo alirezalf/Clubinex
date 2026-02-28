@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
     Save,
     User,
@@ -15,6 +14,7 @@ import {
     AlertCircle,
     Info,
 } from 'lucide-react';
+import React, { useState } from 'react';
 import FormInput from '@/Components/Form/FormInput';
 import FormSelect from '@/Components/Form/FormSelect';
 import FormTextarea from '@/Components/Form/FormTextarea';
@@ -29,6 +29,7 @@ interface Props {
     provinces: { id: number; name: string }[];
     cities: { id: number; name: string }[];
     loadingCities: boolean;
+    progress: number;
 }
 
 export default function ProfileInfoForm({
@@ -40,36 +41,9 @@ export default function ProfileInfoForm({
     provinces,
     cities,
     loadingCities,
+    progress,
 }: Props) {
     const [activeTab, setActiveTab] = useState('personal'); // personal, location, agent
-
-    // محاسبه درصد تکمیل اطلاعات شخصی
-    // محاسبه درصد تکمیل اطلاعات شخصی
-    const calculatePersonalCompletion = () => {
-        const fields = [
-            data.first_name,
-            data.last_name,
-            data.national_code,
-            data.birth_date,
-            data.job,
-            data.province_id,
-            data.city_id,
-            data.address,
-            data.postal_code,
-        ];
-
-        let filledCount = fields.filter(
-            (f) => f && f.toString().trim() !== '',
-        ).length;
-
-        // آواتار رو هم حساب کن (اگه فایلی انتخاب شده یا قبلاً آواتار داشته)
-        const hasAvatar = data.avatar !== null;
-        if (hasAvatar) filledCount++;
-
-        const totalFields = fields.length + 1; // +1 برای آواتار
-
-        return Math.round((filledCount / totalFields) * 100);
-    };
 
     return (
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg transition-all duration-300 hover:shadow-xl">
@@ -98,7 +72,7 @@ export default function ProfileInfoForm({
                             تکمیل شده:
                         </span>
                         <span className="font-bold text-amber-600">
-                            {calculatePersonalCompletion()}%
+                            {progress}%
                         </span>
                     </div>
                 </div>
