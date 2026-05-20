@@ -1,3 +1,4 @@
+
 import { usePage, router } from '@inertiajs/react';
 import clsx from 'clsx';
 import type { ReactNode } from 'react';
@@ -27,14 +28,40 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+        const defaultCollapsed = themeSettings?.sidebar_collapsed === '1' || themeSettings?.sidebar_collapsed === true || themeSettings?.sidebar_collapsed === 'true';
         if (typeof window !== 'undefined') {
             const saved = sessionStorage.getItem('sidebarCollapsed');
+            const savedDefault = sessionStorage.getItem('sidebarDefaultCollapsed');
+            
+            // If the default setting from server changed, ignore the saved personal toggle
+            if (savedDefault !== null && JSON.parse(savedDefault) !== defaultCollapsed) {
+                sessionStorage.removeItem('sidebarCollapsed');
+                sessionStorage.setItem('sidebarDefaultCollapsed', JSON.stringify(defaultCollapsed));
+                return defaultCollapsed;
+            }
+            
+            if (savedDefault === null) {
+                sessionStorage.setItem('sidebarDefaultCollapsed', JSON.stringify(defaultCollapsed));
+            }
+
             if (saved !== null) return JSON.parse(saved);
         }
-        // تبدیل دقیق رشته به بولین اگر لازم باشد
-        const defaultCollapsed = themeSettings?.sidebar_collapsed;
-        return defaultCollapsed === '1' || defaultCollapsed === true || defaultCollapsed === 'true' ? true : false;
+        return defaultCollapsed;
     });
+
+    // Listen for themeSettings changes (e.g. after saving Theme Settings Panel)
+    useEffect(() => {
+        const defaultCollapsed = themeSettings?.sidebar_collapsed === '1' || themeSettings?.sidebar_collapsed === true || themeSettings?.sidebar_collapsed === 'true';
+        if (typeof window !== 'undefined') {
+            const savedDefault = sessionStorage.getItem('sidebarDefaultCollapsed');
+            if (savedDefault !== null && JSON.parse(savedDefault) !== defaultCollapsed) {
+                // Settings changed on the server! Updates local state & storage
+                sessionStorage.removeItem('sidebarCollapsed');
+                sessionStorage.setItem('sidebarDefaultCollapsed', JSON.stringify(defaultCollapsed));
+                setIsSidebarCollapsed(defaultCollapsed);
+            }
+        }
+    }, [themeSettings?.sidebar_collapsed]);
 
     useEffect(() => {
         const interval = setInterval(() => {

@@ -35,6 +35,12 @@ export default function SidebarFooter({ isCollapsed, isAdmin }: Props) {
             href: route('logout'),
             method: 'post',
             as: 'button',
+            onClick: () => {
+                if (typeof window !== 'undefined') {
+                    sessionStorage.removeItem('sidebarCollapsed');
+                    sessionStorage.removeItem('sidebarDefaultCollapsed');
+                }
+            },
             color: 'hover:text-red-500 hover:bg-red-50',
             iconColor: 'text-red-500'
         }

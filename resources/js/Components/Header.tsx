@@ -269,6 +269,7 @@ export default function Header({
                                     onClick={() => { 
                                         if (typeof window !== 'undefined') {
                                             sessionStorage.removeItem('sidebarCollapsed');
+                                            sessionStorage.removeItem('sidebarDefaultCollapsed');
                                         }
                                         setShowUserMenu(false); 
                                     }}
