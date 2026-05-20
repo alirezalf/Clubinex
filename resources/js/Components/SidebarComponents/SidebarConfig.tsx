@@ -74,12 +74,11 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         description: 'آخرین پیام‌ها'
     },
     {
-        name: 'پشتیبانی و تیکت',
-        icon: MessageSquare,
-        href: route('tickets.index'),
+        name: 'درباره ما',
+        icon: FileText,
+        href: route('about'),
         group: 'support',
-        badge: badgeCount,
-        description: 'ارسال تیکت پشتیبانی'
+        description: 'اطلاعات نرم افزار'
     },
 ];
 

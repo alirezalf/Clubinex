@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { Plus, Eye, Edit, CheckCircle, ShieldBan, User, Trash2 } from 'lucide-react';
@@ -188,20 +189,50 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
             key: 'mobile',
             label: 'موبایل',
             sortable: true,
-            className: 'text-left font-mono text-gray-600',
-            render: (user) => <span dir="ltr">{user.mobile}</span>
+            className: 'text-right text-gray-600',
+            render: (user) => {
+                const persianDigits = user.mobile?.toString().replace(/\d/g, (x: string) => '۰۱۲۳۴۵۶۷۸۹'[parseInt(x)]) || '---';
+                return (
+                    <span className="font-sans font-medium text-sm inline-block">
+                        {persianDigits}
+                    </span>
+                );
+            }
+        },
+        {
+            key: 'roles',
+            label: 'نقش',
+            render: (user) => (
+                <div className="flex flex-wrap gap-1">
+                    {user.roles && user.roles.length > 0 ? user.roles.map((role: any, idx: number) => (
+                        <span key={idx} className={`text-[10px] px-2 py-1 rounded-md whitespace-nowrap border ${
+                            role.name === 'super-admin' || role.name === 'admin' 
+                            ? 'bg-purple-50 text-purple-700 border-purple-200' 
+                            : role.name === 'agent' 
+                            ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                            : 'bg-gray-50 text-gray-600 border-gray-200'
+                        }`}>
+                            {role.name === 'super-admin' ? 'مدیر کل' : role.name === 'admin' ? 'مدیر' : role.name === 'agent' ? 'نماینده' : 'کاربر'}
+                        </span>
+                    )) : (
+                        <span className="text-[10px] px-2 py-1 rounded-md whitespace-nowrap border bg-gray-50 text-gray-600 border-gray-200">کاربر</span>
+                    )}
+                </div>
+            )
         },
         {
             key: 'club',
             label: 'باشگاه',
             render: (user) => user.club ? (
-                <span
-                    className="px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-sm"
-                    style={{ backgroundColor: user.club.color || '#9ca3af' }}
-                >
-                    {user.club.name}
-                </span>
-            ) : <span className="text-gray-400 text-xs">بدون عضویت</span>
+                <div className="flex justify-start">
+                    <span
+                        className="px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-sm whitespace-nowrap min-w-max"
+                        style={{ backgroundColor: user.club.color || '#9ca3af' }}
+                    >
+                        {user.club.name}
+                    </span>
+                </div>
+            ) : <span className="text-gray-400 text-xs whitespace-nowrap">بدون عضویت</span>
         },
         {
             key: 'current_points',

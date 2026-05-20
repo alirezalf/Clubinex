@@ -27,7 +27,7 @@ class AuthController extends Controller
     {
         // Fetch all settings flattened by key
         $settings = \App\Models\SystemSetting::all()->pluck('value', 'key')->toArray();
-
+        
         $captchaEnabled = filter_var($settings['captcha_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $captchaUrl = $captchaEnabled ? captcha_src('flat') : null;
 
@@ -44,10 +44,10 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-
+            
             session(['locked' => false]);
             session(['last_activity_time' => now()->timestamp]);
-
+            
             ActivityLog::log('user.login', 'ورود موفق با ایمیل', ['user_id' => Auth::id()]);
 
             return redirect()->intended('dashboard');
@@ -73,7 +73,12 @@ class AuthController extends Controller
             ]);
         }
 
-        return response()->json(['message' => $result['message']], 429);
+        // Check if it's a throttle error
+        if (isset($result['remaining'])) {
+            return response()->json(['message' => $result['message'], 'remaining' => $result['remaining']], 429);
+        }
+
+        return response()->json(['message' => $result['message']], 500);
     }
 
     // مرحله 2: تایید OTP و لاگین (ریفکتور شده)
@@ -84,10 +89,10 @@ class AuthController extends Controller
         if ($user) {
             Auth::login($user, true);
             $request->session()->regenerate();
-
+            
             session(['locked' => false]);
             session(['last_activity_time' => now()->timestamp]);
-
+            
             ActivityLog::log('user.login', 'ورود با موبایل (OTP)', ['user_id' => $user->id]);
 
             return redirect()->intended('dashboard');
@@ -99,13 +104,13 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         if (Auth::check()) {
-            ActivityLog::log('user.logout', 'خروج از حساب', ['user_id' => Auth::id()]);
+            ActivityLog::log('user.logout', 'خروج', ['user_id' => Auth::id()]);
         }
-
+        
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/login');
+        return Inertia::location('/login');
     }
 
     public function showRegister()
@@ -124,11 +129,11 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'status_id' => 1, // Active
         ]);
-
+        
         $user->assignRole('user');
 
         Auth::login($user);
-
+        
         session(['locked' => false]);
         session(['last_activity_time' => now()->timestamp]);
 

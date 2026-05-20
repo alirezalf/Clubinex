@@ -11,6 +11,11 @@ interface Props {
     onStatusToggle: (user: any) => void;
 }
 
+const toPersianDigits = (str: string | number | undefined | null) => {
+    if (!str) return '';
+    return str.toString().replace(/\d/g, (x: string) => '۰۱۲۳۴۵۶۷۸۹'[parseInt(x)]);
+};
+
 export default function UsersTable({ users, filters, onSort, onEdit, onStatusToggle }: Props) {
     return (
         <div className="overflow-x-auto">
@@ -19,6 +24,7 @@ export default function UsersTable({ users, filters, onSort, onEdit, onStatusTog
                     <tr>
                         <SortableHeader label="کاربر" field="first_name" onSort={onSort} currentSort={filters.sort_by} dir={filters.sort_dir} />
                         <SortableHeader label="موبایل" field="mobile" onSort={onSort} currentSort={filters.sort_by} dir={filters.sort_dir} />
+                        <th className="px-6 py-4">نقش</th>
                         <th className="px-6 py-4">باشگاه</th>
                         <SortableHeader label="امتیاز" field="current_points" onSort={onSort} currentSort={filters.sort_by} dir={filters.sort_dir} />
                         <SortableHeader label="آخرین ورود" field="last_login_at" onSort={onSort} currentSort={filters.sort_by} dir={filters.sort_dir} />
@@ -39,12 +45,32 @@ export default function UsersTable({ users, filters, onSort, onEdit, onStatusTog
                                         )}
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="font-medium text-gray-800">{user.first_name} {user.last_name}</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium text-gray-800">{user.first_name} {user.last_name}</span>
+                                        </div>
                                         <span className="text-xs text-gray-400">{user.email}</span>
                                     </div>
                                 </div>
                             </td>
-                            <td className="px-6 py-4 text-gray-600 ltr text-right">{user.mobile}</td>
+                            <td className="px-6 py-4 text-gray-600 text-right">{toPersianDigits(user.mobile)}</td>
+                            <td className="px-6 py-4">
+                                <div className="flex flex-wrap gap-1">
+                                    {user.roles?.map((role: any, idx: number) => (
+                                        <span key={idx} className={`text-[10px] px-2 py-1 rounded-md whitespace-nowrap border ${
+                                            role.name === 'super-admin' || role.name === 'admin' 
+                                            ? 'bg-purple-50 text-purple-700 border-purple-200' 
+                                            : role.name === 'agent' 
+                                            ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                                            : 'bg-gray-50 text-gray-600 border-gray-200'
+                                        }`}>
+                                            {role.name === 'super-admin' ? 'مدیر کل' : role.name === 'admin' ? 'مدیر' : role.name === 'agent' ? 'نماینده' : 'کاربر'}
+                                        </span>
+                                    ))}
+                                    {(!user.roles || user.roles.length === 0) && (
+                                        <span className="text-[10px] px-2 py-1 rounded-md whitespace-nowrap border bg-gray-50 text-gray-600 border-gray-200">کاربر</span>
+                                    )}
+                                </div>
+                            </td>
                             <td className="px-6 py-4">
                                 {user.club ? (
                                     <span 

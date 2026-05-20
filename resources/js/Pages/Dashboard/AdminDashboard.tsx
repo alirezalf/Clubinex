@@ -8,6 +8,9 @@ interface AdminStats {
     new_users_today: number;
     pending_rewards: number;
     total_points_distributed: number;
+    avg_points: number;
+    busiest_hour: string;
+    retention_rate: number;
 }
 
 interface Props {
@@ -246,24 +249,24 @@ export default function AdminDashboard({ stats, recentActivities, latestUsers, q
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <QuickStatCard
                     title="میانگین امتیاز هر کاربر"
-                    value="۱,۲۵۰"
+                    value={stats.avg_points?.toLocaleString() || "0"}
                     icon={Award}
-                    trend="۸% افزایش"
+                    trend="مبتنی بر تراکنش‌ها"
                     trendUp={true}
                 />
                 <QuickStatCard
                     title="بیشترین فعالیت"
-                    value="ساعت ۱۰-۱۲"
+                    value={stats.busiest_hour || "نامشخص"}
                     icon={Clock}
-                    trend="صبح‌ها"
+                    trend="بر اساس لاگ‌ها"
                     trendUp={true}
                 />
                 <QuickStatCard
                     title="نرخ بازگشت کاربران"
-                    value="۶۸٪"
+                    value={`${stats.retention_rate || 0}٪`}
                     icon={TrendingUp}
-                    trend="۲% کاهش"
-                    trendUp={false}
+                    trend="۳۰ روز اخیر"
+                    trendUp={stats.retention_rate > 50}
                 />
             </div>
         </div>

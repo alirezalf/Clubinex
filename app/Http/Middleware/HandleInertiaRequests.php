@@ -22,6 +22,17 @@ class HandleInertiaRequests extends Middleware
         $this->themeService = $themeService;
     }
 
+    public function handle(Request $request, \Closure $next)
+    {
+        $response = parent::handle($request, $next);
+        
+        $response->headers->set('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');
+        
+        return $response;
+    }
+
     public function version(Request $request): ?string
     {
         return parent::version($request);
@@ -71,7 +82,7 @@ class HandleInertiaRequests extends Middleware
     private function getBadges($user)
     {
         $ticketBadges = ['user' => 0, 'admin' => 0, 'rewards' => 0];
-
+        
         if ($user) {
             $ticketBadges['user'] = Ticket::where('user_id', $user->id)
                 ->where('status', 'answered')
@@ -83,12 +94,12 @@ class HandleInertiaRequests extends Middleware
                     $query->where('assigned_to', $user->id);
                 }
                 $ticketBadges['admin'] = $query->count();
-
+                
                 // Count pending reward redemptions
                 $ticketBadges['rewards'] = \App\Models\RewardRedemption::where('status', 'pending')->count();
             }
         }
-
+        
         return $ticketBadges;
     }
 

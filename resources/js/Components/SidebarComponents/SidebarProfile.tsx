@@ -72,8 +72,8 @@ export default function SidebarProfile({ isCollapsed, user }: Props) {
                             <ChevronLeft size={14} className="opacity-0 -translate-x-2 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all" style={{ color: 'var(--sidebar-text)' }} />
                         </div>
 
-                        <div className="flex items-center justify-between mt-1.5">
-                            <div className="flex items-center gap-1.5">
+                        <div className="flex flex-col mt-1.5 gap-1.5">
+                            <div className="flex items-center gap-1.5 shrink-0">
                                 <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-1 rounded-full shadow-sm">
                                     <Award size={10} className="text-white" />
                                 </div>
@@ -82,9 +82,11 @@ export default function SidebarProfile({ isCollapsed, user }: Props) {
                             </div>
 
                             {/* نقش کاربر */}
-                            <span className="text-[8px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-full">
-                                {user.roles?.includes('agent') ? 'نماینده' : 'کاربر'}
-                            </span>
+                            <div className="flex justify-start">
+                                <span className="text-[9px] px-2 py-0.5 whitespace-nowrap bg-amber-100/50 text-amber-700 rounded-lg font-medium border border-amber-200/50 shrink-0 inline-block">
+                                    {user.roles?.includes('super-admin') || user.roles?.includes('admin') ? 'مدیریت سیستم' : user.roles?.includes('agent') ? 'نماینده فروش' : 'کاربر عادی'}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 )}

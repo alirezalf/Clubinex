@@ -15,6 +15,16 @@ interface Props {
     clubs: { id: number; name: string }[];
 }
 
+const translateRole = (role: string) => {
+    const roleNames: Record<string, string> = {
+        'super-admin': 'مدیر کل',
+        'admin': 'مدیر',
+        'agent': 'نماینده',
+        'user': 'کاربر'
+    };
+    return roleNames[role] || role;
+};
+
 export default function UserFilters({ 
     search, setSearch, onSearch, 
     roleFilter, setRoleFilter, 
@@ -41,7 +51,7 @@ export default function UserFilters({
                     <option value="all">همه نقش‌ها</option>
                     {roles.map((role) => (
                         <option key={role.id} value={role.name}>
-                            {role.name}
+                            {translateRole(role.name)}
                         </option>
                     ))}
                 </select>

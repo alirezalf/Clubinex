@@ -202,14 +202,14 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
                         {!isCollapsed && !searchTerm && (
                             <div className="flex items-center gap-2 px-2 mt-2 mb-2">
                                 {group.icon && (
-                                    <group.icon size={12} className="opacity-50" style={{ color: 'var(--sidebar-text)' }} />
+                                    <group.icon size={12} style={{ color: ['general', 'club', 'support'].includes(group.id) ? '#3b82f6' : 'var(--sidebar-text)', opacity: ['general', 'club', 'support'].includes(group.id) ? 1 : 0.5 }} />
                                 )}
-                                <span className="text-[9px] font-bold uppercase tracking-wider opacity-50" style={{ color: 'var(--sidebar-text)' }}>
+                                <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: ['general', 'club', 'support'].includes(group.id) ? '#3b82f6' : 'var(--sidebar-text)', opacity: ['general', 'club', 'support'].includes(group.id) ? 1 : 0.5 }}>
                                     {group.title}
                                 </span>
                                 <div className="h-px flex-1" style={{
-                                    background: `linear-gradient(90deg, ${'var(--sidebar-text)'} 0%, transparent 100%)`,
-                                    opacity: 0.2
+                                    background: `linear-gradient(90deg, ${['general', 'club', 'support'].includes(group.id) ? '#3b82f6' : 'var(--sidebar-text)'} 0%, transparent 100%)`,
+                                    opacity: ['general', 'club', 'support'].includes(group.id) ? 0.3 : 0.2
                                 }} />
                             </div>
                         )}

@@ -72,6 +72,9 @@ class UserSeeder extends Seeder
             $admin->assignRole('super-admin');
         } else {
             $admin = User::where('mobile', '09196600545')->first();
+            if (!$admin->hasRole('super-admin')) {
+                $admin->assignRole('super-admin');
+            }
         }
 
         // --- 2. ایجاد نماینده فروش (Agent) ---

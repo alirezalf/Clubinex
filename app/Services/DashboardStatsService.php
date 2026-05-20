@@ -85,11 +85,33 @@ class DashboardStatsService
     public function getAdminStats()
     {
         return cache()->remember('admin_dashboard_stats', 300, function () {
+            
+            // Average points
+            $avgPoints = User::avg('current_points') ?? 0;
+
+            // Most active hours (busiest hour)
+            $busiestHourData = DB::table('activity_logs')
+               ->select(DB::raw('HOUR(created_at) as hour'), DB::raw('count(*) as count'))
+               ->groupBy('hour')
+               ->orderByDesc('count')
+               ->first();
+            $busiestHourStr = $busiestHourData ? 'ساعت ' . $busiestHourData->hour . ' تا ' . ($busiestHourData->hour + 1) : 'نامشخص';
+
+            // Retention rate (Users returning after 1 day of creation)
+            $totalUsers = User::count();
+            // Count users active in last 30 days
+            $returningUsers = User::where('last_login_at', '>=', now()->subDays(30))->count();
+            
+            $retentionRate = $totalUsers > 0 ? round(($returningUsers / $totalUsers) * 100) : 0;
+
             return [
-                'total_users' => User::count(),
+                'total_users' => $totalUsers,
                 'new_users_today' => User::whereDate('created_at', today())->count(),
                 'pending_rewards' => RewardRedemption::where('status', 'pending')->count(),
                 'total_points_distributed' => PointTransaction::earned()->sum('amount'),
+                'avg_points' => round($avgPoints),
+                'busiest_hour' => $busiestHourStr,
+                'retention_rate' => $retentionRate,
             ];
         });
     }

@@ -19,7 +19,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, breadcrumbs }: DashboardLayoutProps) {
     // دریافت pageSlider از پراپ‌های سراسری
-    const { auth, themeSettings, flash, unreadNotificationsCount, pageSlider } =
+    const { auth, themeSettings, flash, unreadNotificationsCount, pageSlider } = 
         usePage<PageProps<{ themeSettings?: ThemeSettings, unreadNotificationsCount: number, pageSlider?: any }>>().props;
 
     // Apply Theme Globally
@@ -28,22 +28,20 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
         if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('sidebarCollapsed');
+            const saved = sessionStorage.getItem('sidebarCollapsed');
             if (saved !== null) return JSON.parse(saved);
         }
-        return themeSettings?.sidebar_collapsed ?? false;
+        // تبدیل دقیق رشته به بولین اگر لازم باشد
+        const defaultCollapsed = themeSettings?.sidebar_collapsed;
+        return defaultCollapsed === '1' || defaultCollapsed === true || defaultCollapsed === 'true' ? true : false;
     });
 
     useEffect(() => {
-        localStorage.setItem('sidebarCollapsed', JSON.stringify(isSidebarCollapsed));
-    }, [isSidebarCollapsed]);
-
-    useEffect(() => {
         const interval = setInterval(() => {
-            router.reload({
+            router.reload({ 
                 only: ['unreadNotificationsCount', 'badges']
             });
-        }, 60000);
+        }, 60000); 
 
         return () => clearInterval(interval);
     }, []);
@@ -70,7 +68,13 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
                 isOpen={isSidebarOpen}
                 setIsOpen={setIsSidebarOpen}
                 isCollapsed={isSidebarCollapsed}
-                toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                toggleCollapse={() => {
+                    const newVal = !isSidebarCollapsed;
+                    setIsSidebarCollapsed(newVal);
+                    if (typeof window !== 'undefined') {
+                        sessionStorage.setItem('sidebarCollapsed', JSON.stringify(newVal));
+                    }
+                }}
             />
 
             <div className={clsx(

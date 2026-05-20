@@ -266,7 +266,12 @@ export default function Header({
                                     method="post"
                                     as="button"
                                     className="flex w-full items-center gap-2 px-4 py-2.5 text-right text-sm text-red-600 transition-colors hover:bg-red-50"
-                                    onClick={() => setShowUserMenu(false)}
+                                    onClick={() => { 
+                                        if (typeof window !== 'undefined') {
+                                            sessionStorage.removeItem('sidebarCollapsed');
+                                        }
+                                        setShowUserMenu(false); 
+                                    }}
                                 >
                                     <LogOut size={16} />
                                     <span>خروج</span>
