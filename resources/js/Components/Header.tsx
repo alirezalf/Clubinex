@@ -42,7 +42,7 @@ export default function Header({
     const ticketCount = isAdmin ? badges.admin : badges.user;
 
     const getRoleLabel = () => {
-        const roles = auth.user.roles || [];
+        const roles = auth?.user?.roles || [];
         if (roles.includes('super-admin') || roles.includes('admin'))
             return 'مدیر کل';
         if (roles.includes('agent')) return 'نماینده فروش';
@@ -50,7 +50,7 @@ export default function Header({
     };
 
     const getRoleColor = () => {
-        const roles = auth.user.roles || [];
+        const roles = auth?.user?.roles || [];
         if (roles.includes('super-admin'))
             return 'from-purple-500 to-purple-600';
         if (roles.includes('admin')) return 'from-red-500 to-red-600';
@@ -81,7 +81,7 @@ export default function Header({
                     <Menu size={22} />
                 </button>
 
-                <a
+                <Link
                     href="/"
                     className="group relative rounded-xl p-2.5 transition-all duration-200 hover:scale-105 active:scale-95"
                     style={{
@@ -95,7 +95,7 @@ export default function Header({
                         className="transition-transform group-hover:rotate-[-5deg]"
                     />
                     <span className="absolute -right-1 -bottom-1 h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                </a>
+                </Link>
 
                 {/* جستجوی پیشرفته */}
                 <div className="group relative hidden w-full max-w-md md:block">
@@ -189,7 +189,7 @@ export default function Header({
                             className={`h-10 w-10 rounded-full bg-gradient-to-tr ${getRoleColor()} p-0.5 shadow-lg`}
                         >
                             <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white">
-                                {auth.user.avatar ? (
+                                {auth?.user?.avatar ? (
                                     <img
                                         src={auth.user.avatar}
                                         alt="User"
@@ -200,8 +200,8 @@ export default function Header({
                                         className="text-lg font-bold"
                                         style={{ color: 'var(--primary-600)' }}
                                     >
-                                        {auth.user.first_name?.[0]}
-                                        {auth.user.last_name?.[0]}
+                                        {auth?.user?.first_name?.[0]}
+                                        {auth?.user?.last_name?.[0]}
                                     </span>
                                 )}
                             </div>
@@ -213,7 +213,7 @@ export default function Header({
                                 className="flex items-center gap-1.5 text-sm font-bold"
                                 style={{ color: 'var(--header-text)' }}
                             >
-                                {auth.user.first_name} {auth.user.last_name}
+                                {auth?.user?.first_name} {auth?.user?.last_name}
                                 <ChevronDown
                                     size={16}
                                     className={clsx(

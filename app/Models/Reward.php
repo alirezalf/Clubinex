@@ -36,20 +36,20 @@ class Reward extends Model
     /**
      * بررسی اینکه آیا کاربر مجاز به دریافت این جایزه است
      */
-    public function canUserRedeem(User $user)
+    public function canUserRedeem(User $user, $userRedemptionsCount = null)
     {
         if (!$this->is_active) return false;
         if ($this->stock <= 0) return false;
         if ($user->current_points < $this->points_cost) return false;
         
         // بررسی سطح باشگاه
-        if ($this->required_club_id && (!$user->club_id || $user->club->min_points < $this->club->min_points)) {
+        if ($this->required_club_id && (!$user->club_id || ($user->club && $user->club->min_points < $this->club->min_points))) {
             return false;
         }
 
         // بررسی محدودیت تعداد برای کاربر
         if ($this->limit_per_user) {
-            $userRedemptions = $this->redemptions()->where('user_id', $user->id)->count();
+            $userRedemptions = $userRedemptionsCount ?? $this->redemptions()->where('user_id', $user->id)->count();
             if ($userRedemptions >= $this->limit_per_user) return false;
         }
 

@@ -86,7 +86,7 @@ class DashboardController extends Controller
         $request->validate(['items' => 'required|array']);
         
         $user = auth()->user();
-        $prefs = $user->dashboard_preferences ?? [];
+        $prefs = is_array($user->dashboard_preferences) ? $user->dashboard_preferences : [];
         $prefs['quick_access'] = $request->items;
         
         $user->dashboard_preferences = $prefs;

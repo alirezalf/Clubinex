@@ -109,9 +109,9 @@ export default function AdminReports({ data, filters, currentTab }: Props) {
                 <div className="flex flex-col items-center justify-between gap-4 xl:flex-row">
                     <div className="flex items-center gap-3">
                         <h1 className="text-2xl font-bold text-gray-800">گزارشات جامع</h1>
-                        <a href={route('admin.reports.dynamic')} className="flex items-center gap-1 rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-bold text-purple-700 transition hover:bg-purple-100">
+                        <Link href={route('admin.reports.dynamic')} className="flex items-center gap-1 rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-bold text-purple-700 transition hover:bg-purple-100">
                             <FileText size={14} /> گزارش‌ساز پیشرفته
-                        </a>
+                        </Link>
                     </div>
                     <div className="flex max-w-full overflow-x-auto rounded-xl border border-gray-100 bg-white p-1 shadow-sm hide-scrollbar">
                         <TabButton active={currentTab === 'transactions'} onClick={() => handleTabChange('transactions')} icon={TrendingUp} label="تراکنش‌ها" />

@@ -37,7 +37,7 @@ createInertiaApp({
     setup({ el, App, props }) {
         // راه‌اندازی تابع route سراسری با استفاده از کانفیگ دریافتی از بک‌اند
         // @ts-ignore
-        window.route = (name, params, absolute, config = props.initialPage.props.ziggy) => {
+        window.route = (name, params, absolute, config = (window as any).Ziggy) => {
             return routeFn(name, params, absolute, config);
         };
 

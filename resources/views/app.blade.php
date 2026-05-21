@@ -38,7 +38,7 @@
         <!-- Vazirmatn is imported via resources/css/app.css -->
 
         <!-- Dynamic Theme Styles -->
-       <style>
+        <style>
             :root {
                 /* محاسبات رنگ در AppServiceProvider انجام شده است */
                 --color-primary-50: rgb({{ $themeSettings['primary_rgb'] ?? '2 132 199' }} / 0.05);
@@ -62,6 +62,7 @@
             }
         </style>
 
+        @routes
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
         @inertiaHead
@@ -84,7 +85,7 @@
     {!! json_encode($organizationData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
 </script>
 
-
+        
     </head>
     <body class="font-sans antialiased bg-gray-50 text-gray-800">
         @inertia

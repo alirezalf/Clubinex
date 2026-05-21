@@ -53,7 +53,7 @@ export default function GeneralSettings({ data, setData }: { data: any, setData:
                     پاکسازی کش سیستم
                 </button>
             </div>
-            
+
             <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-4">
                 <p className="text-xs text-blue-800 leading-relaxed">
                     <b>نکته سئو:</b> عنوان و توضیحات سایت در نتایج گوگل نمایش داده می‌شوند. کلمات کلیدی برای موتورهای جستجوی قدیمی‌تر مفید هستند.
@@ -61,105 +61,105 @@ export default function GeneralSettings({ data, setData }: { data: any, setData:
                 </p>
             </div>
 
-            <InputGroup 
-                label="عنوان سایت (Page Title)" 
-                name="site_title" 
-                value={data.site_title} 
-                onChange={setData} 
-                placeholder="مثلا: باشگاه مشتریان وب‌کرفتر" 
+            <InputGroup
+                label="عنوان سایت (Page Title)"
+                name="site_title"
+                value={data.site_title}
+                onChange={setData}
+                placeholder="مثلا: باشگاه مشتریان وب‌کرفتر"
             />
-            
-            <InputGroup 
-                label="توضیحات متا (Meta Description)" 
-                name="site_description" 
-                value={data.site_description} 
-                onChange={setData} 
-                type="textarea" 
-                placeholder="توضیحاتی کوتاه (۱۵۰-۱۶۰ کاراکتر) درباره کسب‌وکار شما که در گوگل نمایش داده می‌شود..." 
+
+            <InputGroup
+                label="توضیحات متا (Meta Description)"
+                name="site_description"
+                value={data.site_description}
+                onChange={setData}
+                type="textarea"
+                placeholder="توضیحاتی کوتاه (۱۵۰-۱۶۰ کاراکتر) درباره کسب‌وکار شما که در گوگل نمایش داده می‌شود..."
             />
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputGroup 
-                    label="کلمات کلیدی (Meta Keywords)" 
-                    name="meta_keywords" 
-                    value={data.meta_keywords} 
-                    onChange={setData} 
-                    placeholder="کلمات کلیدی را با کاما جدا کنید..." 
+                <InputGroup
+                    label="کلمات کلیدی (Meta Keywords)"
+                    name="meta_keywords"
+                    value={data.meta_keywords}
+                    onChange={setData}
+                    placeholder="کلمات کلیدی را با کاما جدا کنید..."
                 />
-                
-                <InputGroup 
-                    label="متن فوتر" 
-                    name="footer_text" 
-                    value={data.footer_text} 
-                    onChange={setData} 
-                    placeholder="مثلا: تمامی حقوق محفوظ است © 1403" 
+
+                <InputGroup
+                    label="متن فوتر"
+                    name="footer_text"
+                    value={data.footer_text}
+                    onChange={setData}
+                    placeholder="مثلا: تمامی حقوق محفوظ است © 1403"
                 />
             </div>
 
             <div className="mt-8 mb-4 border-t pt-6">
                 <h4 className="text-md font-bold text-gray-800 mb-4">اطلاعات درباره ما (نمایش در صفحه پشتیبانی/درباره ما)</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                    <InputGroup 
-                        label="نام نرم افزار" 
-                        name="app_name" 
-                        value={data.app_name} 
-                        onChange={setData} 
-                        placeholder="سیستم باشگاه مشتریان (Clubinex)" 
+                    <InputGroup
+                        label="نام نرم افزار"
+                        name="app_name"
+                        value={data.app_name}
+                        onChange={setData}
+                        placeholder="سیستم باشگاه مشتریان (Clubinex)"
                     />
-                    <InputGroup 
-                        label="شماره موبایل پشتیبانی" 
-                        name="support_mobile" 
-                        value={data.support_mobile} 
-                        onChange={setData} 
-                        placeholder="09196600545" 
+                    <InputGroup
+                        label="شماره موبایل پشتیبانی"
+                        name="support_mobile"
+                        value={data.support_mobile}
+                        onChange={setData}
+                        placeholder="09196600545"
                         dir="ltr"
                     />
-                    <InputGroup 
-                        label="نویسنده / توسعه‌دهنده" 
-                        name="author" 
-                        value={data.author} 
-                        onChange={setData} 
-                        placeholder="علیرضا لباف" 
+                    <InputGroup
+                        label="نویسنده / توسعه‌دهنده"
+                        name="author"
+                        value={data.author}
+                        onChange={setData}
+                        placeholder="علیرضا لباف"
                     />
-                    <InputGroup 
-                        label="نسخه سیستم" 
-                        name="app_version" 
-                        value={data.app_version} 
-                        onChange={setData} 
-                        placeholder="1.0.0" 
+                    <InputGroup
+                        label="نسخه سیستم"
+                        name="app_version"
+                        value={data.app_version}
+                        onChange={setData}
+                        placeholder="4.3.0"
                         dir="ltr"
                     />
                 </div>
-                <InputGroup 
-                    label="توضیحات نرم افزار" 
-                    name="app_description" 
-                    value={data.app_description} 
-                    onChange={setData} 
-                    type="textarea" 
-                    placeholder="سیستم یکپارچه باشگاه مشتریان با امکانات..." 
+                <InputGroup
+                    label="توضیحات نرم افزار"
+                    name="app_description"
+                    value={data.app_description}
+                    onChange={setData}
+                    type="textarea"
+                    placeholder="سیستم یکپارچه باشگاه مشتریان با امکانات..."
                 />
             </div>
 
             {/* OG Image Upload */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">تصویر اشتراک‌گذاری (Open Graph Image)</label>
-                <div 
+                <div
                     className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center bg-gray-50 hover:bg-white hover:border-primary-400 transition cursor-pointer group"
                     onClick={() => fileInputRef.current?.click()}
                 >
-                    <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        onChange={handleImageChange} 
-                        className="hidden" 
-                        accept="image/*" 
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        className="hidden"
+                        accept="image/*"
                     />
-                    
+
                     {data.og_image ? (
                         <div className="relative w-full max-w-sm h-40 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                            <img 
-                                src={typeof data.og_image === 'string' ? data.og_image : URL.createObjectURL(data.og_image)} 
-                                alt="OG Preview" 
+                            <img
+                                src={typeof data.og_image === 'string' ? data.og_image : URL.createObjectURL(data.og_image)}
+                                alt="OG Preview"
                                 className="w-full h-full object-cover"
                             />
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">

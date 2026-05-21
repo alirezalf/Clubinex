@@ -19,13 +19,18 @@ class ClubController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $user->load('club'); // Ensure club relationship is loaded to prevent N+1
+
+        // Calculate next tier or first tier outside the loop to prevent N+1 queries
+        $nextTier = $user->club ? $user->club->getNextTier() : null;
+        $firstTier = !$user->club ? Club::tiers()->active()->orderBy('min_points')->first() : null;
 
         // 1. دریافت تمام سطوح اصلی (برای نمایش مسیر پیشرفت)
         $tiers = Club::tiers()
             ->active()
             ->orderBy('min_points')
             ->get()
-            ->map(function ($tier) use ($user) {
+            ->map(function ($tier) use ($user, $nextTier, $firstTier) {
                 // وضعیت کاربر نسبت به این سطح
                 $status = 'locked'; // قفل (هنوز نرسیده)
 
@@ -40,13 +45,11 @@ class ClubController extends Controller
                 $canUpgrade = false;
 
                 if ($user->club) {
-                    $nextTier = $user->club->getNextTier();
                     if ($nextTier && $nextTier->id == $tier->id) {
                         $isNext = true;
                         $canUpgrade = $user->current_points >= $tier->joining_cost;
                     }
                 } else {
-                    $firstTier = Club::tiers()->active()->orderBy('min_points')->first();
                     if ($firstTier && $firstTier->id == $tier->id) {
                         $isNext = true;
                         $canUpgrade = $user->current_points >= $tier->joining_cost;

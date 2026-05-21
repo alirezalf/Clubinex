@@ -22,6 +22,11 @@ class SurveyController extends Controller
                 $q->whereNull('required_club_id')
                   ->orWhere('required_club_id', '<=', $user->club_id);
             })
+            ->withCount('questions')
+            ->withSum('questions', 'points')
+            ->withCount(['answers as user_attempts_count' => function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            }])
             ->latest()
             ->get()
             ->map(function ($survey) use ($user) {
@@ -31,9 +36,9 @@ class SurveyController extends Controller
                     'slug' => $survey->slug,
                     'description' => $survey->description,
                     'type' => $survey->type,
-                    'questions_count' => $survey->questions()->count(),
-                    'total_points' => $survey->questions()->sum('points'),
-                    'is_participated' => $survey->getUserAttemptCount($user->id) > 0,
+                    'questions_count' => $survey->questions_count ?? 0,
+                    'total_points' => $survey->questions_sum_points ?? 0,
+                    'is_participated' => ($survey->user_attempts_count ?? 0) > 0,
                     'is_available' => $survey->isAvailable(), 
                     'status_text' => $this->getSurveyStatusText($survey), 
                     'starts_at_jalali' => $survey->starts_at_jalali,
@@ -42,7 +47,7 @@ class SurveyController extends Controller
             });
 
         // دریافت تاریخچه آزمون‌های شرکت شده کاربر
-        $history = SurveyAnswer::with('survey')
+        $history = SurveyAnswer::with(['survey', 'survey.questions'])
             ->where('user_id', $user->id)
             ->latest('submitted_at')
             ->get()
@@ -52,7 +57,7 @@ class SurveyController extends Controller
                 $survey = $firstAns->survey;
                 
                 $score = $answers->sum('score');
-                $maxScore = $survey ? $survey->questions()->sum('points') : 0;
+                $maxScore = $survey ? $survey->questions->sum('points') : 0;
                 $percentage = $maxScore > 0 ? round(($score / $maxScore) * 100) : 0;
 
                 return [

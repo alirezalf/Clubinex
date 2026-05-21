@@ -109,7 +109,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         app_name: getSettingValue('general', 'app_name', 'سیستم باشگاه مشتریان (Clubinex)'),
         support_mobile: getSettingValue('general', 'support_mobile', '09196600545'),
         author: getSettingValue('general', 'author', 'علیرضا لباف'),
-        app_version: getSettingValue('general', 'app_version', '1.0.0'),
+        app_version: getSettingValue('general', 'app_version', '4.3.0'),
         app_description: getSettingValue('general', 'app_description', 'سیستم یکپارچه باشگاه مشتریان با امکانات گیمیفیکیشن، ثبت سریال محصولات، گردونه شانس، نظرسنجی و مدیریت پیشرفته.'),
         
         // Theme (Use DB Settings directly)

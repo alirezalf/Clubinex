@@ -25,7 +25,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, toggleCollapse
     const [searchTerm, setSearchTerm] = useState('');
     const [isFocused, setIsFocused] = useState(false);
 
-    const isAdmin = auth.user.roles.includes('super-admin') || auth.user.roles.includes('admin');
+    const isAdmin = auth.user?.roles?.includes('super-admin') || auth.user?.roles?.includes('admin');
 
     // پاک کردن جستجو هنگام بسته شدن سایدبار
     useEffect(() => {

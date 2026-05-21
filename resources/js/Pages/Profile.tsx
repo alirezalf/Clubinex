@@ -94,31 +94,31 @@ export default function Profile({ user, provinces, initialCities }: Props) {
         }
     };
 
-   const calculateProgress = () => {
-    // فیلدهای متنی که باید بررسی شوند
-    const textFields = [
-        data.first_name,
-        data.last_name,
-        data.national_code,
-        data.birth_date,
-        data.job,
-        data.province_id,
-        data.city_id,
-        data.address,
-        data.postal_code
+   const getMissingFields = () => {
+    const fields = [
+        { value: data.first_name, label: 'نام' },
+        { value: data.last_name, label: 'نام خانوادگی' },
+        { value: data.national_code, label: 'کد ملی' },
+        { value: data.birth_date, label: 'تاریخ تولد' },
+        { value: data.job, label: 'شغل' },
+        { value: data.province_id, label: 'استان' },
+        { value: data.city_id, label: 'شهر' },
+        { value: data.address, label: 'آدرس' },
+        { value: data.postal_code, label: 'کد پستی' }
     ];
 
-    // تعداد فیلدهای پر شده
-    let filledCount = textFields.filter(field =>
-        field && field.toString().trim() !== ''
-    ).length;
+    let missing = fields.filter(f => !f.value || f.value.toString().trim() === '').map(f => f.label);
 
-    // بررسی آواتار (اگر فایل جدید انتخاب شده یا قبلاً داشته)
     const hasAvatar = data.avatar !== null || (user.avatar && user.avatar.trim() !== '');
-    if (hasAvatar) filledCount++;
+    if (!hasAvatar) missing.push('عکس پروفایل');
 
-    const totalFields = textFields.length + 1; // +1 برای آواتار
-    return Math.round((filledCount / totalFields) * 100);
+    return missing;
+};
+
+   const calculateProgress = () => {
+    const missingCount = getMissingFields().length;
+    const totalFields = 10; // 9 text fields + 1 avatar
+    return Math.round(((totalFields - missingCount) / totalFields) * 100);
 };
 
     return (
@@ -134,6 +134,7 @@ export default function Profile({ user, provinces, initialCities }: Props) {
                     avatarData={data.avatar}
                     onFileChange={handleFileChange}
                     progress={calculateProgress()}
+                    missingFields={getMissingFields()}
                 />
 
 

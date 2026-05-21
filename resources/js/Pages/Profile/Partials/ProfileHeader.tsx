@@ -11,9 +11,10 @@ interface Props {
     avatarData: File | null;
     onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     progress: number;
+    missingFields?: string[];
 }
 
-export default function ProfileHeader({ user, avatarData, onFileChange, progress }: Props) {
+export default function ProfileHeader({ user, avatarData, onFileChange, progress, missingFields = [] }: Props) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -190,9 +191,15 @@ export default function ProfileHeader({ user, avatarData, onFileChange, progress
                         {progress < 100 && (
                             <div className="flex items-start gap-2 mt-3 p-3 bg-amber-50/50 rounded-xl border border-amber-100">
                                 <Sparkles size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                                <p className="text-xs text-amber-700">
-                                    با تکمیل اطلاعات پروفایل، شانس دریافت جوایز ویژه را افزایش دهید
-                                </p>
+                                <div className="text-xs text-amber-700">
+                                    <p className="font-bold mb-1">برای تکمیل پروفایل موارد زیر را وارد کنید:</p>
+                                    <p className="leading-relaxed">
+                                        {missingFields.length > 5 
+                                            ? `${missingFields.slice(0, 5).join('، ')} و ${missingFields.length - 5} مورد دیگر`
+                                            : missingFields.join('، ')
+                                        }
+                                    </p>
+                                </div>
                             </div>
                         )}
                     </div>

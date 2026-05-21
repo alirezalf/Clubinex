@@ -35,7 +35,7 @@ class LuckyWheelController extends Controller
             ->first();
 
         // دریافت تاریخچه چرخش‌ها
-        $history = LuckyWheelSpin::with('prize')
+        $history = LuckyWheelSpin::with(['prize', 'redemption']) // Eager load redemption to prevent N+1
             ->where('user_id', $user->id)
             ->latest()
             ->take(10)

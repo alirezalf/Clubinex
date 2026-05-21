@@ -167,7 +167,8 @@ class DashboardStatsService
 
     public function getQuickAccessItems(User $user)
     {
-        $pinned = $user->dashboard_preferences['quick_access'] ?? [];
+        $prefs = is_array($user->dashboard_preferences) ? $user->dashboard_preferences : [];
+        $pinned = $prefs['quick_access'] ?? [];
         
         $frequent = cache()->remember("user_frequent_pages_{$user->id}", 3600, function () use ($user) {
             return UserSession::where('user_id', $user->id)

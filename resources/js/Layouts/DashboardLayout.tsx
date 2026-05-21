@@ -1,4 +1,3 @@
-
 import { usePage, router } from '@inertiajs/react';
 import clsx from 'clsx';
 import type { ReactNode } from 'react';
@@ -113,7 +112,7 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
                     toggleSidebar={() => setIsSidebarOpen(true)}
                     currentDate={currentDate}
                     unreadCount={unreadNotificationsCount}
-                    isAdmin={auth.user.roles.includes('super-admin') || auth.user.roles.includes('admin')}
+                    isAdmin={auth.user?.roles?.includes('super-admin') || auth.user?.roles?.includes('admin')}
                     onToggleThemePanel={() => setIsThemePanelOpen(true)}
                 />
 

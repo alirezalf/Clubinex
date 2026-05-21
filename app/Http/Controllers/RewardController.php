@@ -20,15 +20,24 @@ class RewardController extends Controller
     public function index()
     {
         $user = auth()->user();
+        if ($user) $user->load('club'); // Eager load user club to prevent N+1
+
         $points = $user ? (int) $user->current_points : 0;
 
-        $rewards = Reward::where('is_active', true)
+        $rewardsQuery = Reward::where('is_active', true)
             ->with('club')
-            ->orderBy('points_cost', 'asc')
-            ->get()
+            ->orderBy('points_cost', 'asc');
+
+        if ($user) {
+            $rewardsQuery->withCount(['redemptions as user_redemptions_count' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }]);
+        }
+
+        $rewards = $rewardsQuery->get()
             ->map(function ($reward) use ($user) {
                 return array_merge($reward->toArray(), [
-                    'can_redeem' => $user ? $reward->canUserRedeem($user) : false
+                    'can_redeem' => $user ? $reward->canUserRedeem($user, $reward->user_redemptions_count ?? 0) : false
                 ]);
             });
 
@@ -60,7 +69,7 @@ class RewardController extends Controller
                         'description' => 'این آیتم از گردونه حذف شده است'
                     ]));
                 } elseif ($r->reward) {
-                    $value = $r->reward->value ?? 0;
+                    $value = $r->reward->points_cost ?? 0;
                 }
 
                 $r->status_farsi = $r->status_farsi;
@@ -68,10 +77,10 @@ class RewardController extends Controller
                 $r->reward_value = $value;
                 return $r;
             }) : [];
-
+            
         return Inertia::render('Rewards/Index', [
             'rewards' => $rewards,
-            'current_points' => $points,
+            'current_points' => $points, 
             'myRedemptions' => $myRedemptions
         ]);
     }
@@ -80,8 +89,8 @@ class RewardController extends Controller
     {
         try {
             $this->rewardService->redeemReward(
-                auth()->user(),
-                $id,
+                auth()->user(), 
+                $id, 
                 $request->delivery_info
             );
 

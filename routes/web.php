@@ -33,7 +33,7 @@ Route::get('/', function () {
 // --- Utility Routes ---
 Route::get('/about', function() {
     return Inertia::render('AboutUs', [
-        'appVersion' => \App\Models\SystemSetting::getValue('general', 'app_version', '1.0.0'),
+        'appVersion' => \App\Models\SystemSetting::getValue('general', 'app_version', '4.3.0'),
         'author' => \App\Models\SystemSetting::getValue('general', 'author', 'علیرضا لباف'),
         'mobile' => \App\Models\SystemSetting::getValue('general', 'support_mobile', '09196600545'),
         'appName' => \App\Models\SystemSetting::getValue('general', 'app_name', 'سیستم باشگاه مشتریان (Clubinex)'),
@@ -47,10 +47,10 @@ Route::get('/fix-system', function () {
         Artisan::call('optimize:clear');
         Artisan::call('config:clear');
         Artisan::call('cache:clear');
-        
+
         if(Schema::hasTable('jobs')) DB::table('jobs')->truncate();
         if(Schema::hasTable('failed_jobs')) DB::table('failed_jobs')->truncate();
-        
+
         $smsSettings = \App\Models\SystemSetting::where('group', 'sms')->get();
         $debugInfo = "<h3>SMS Settings (Group: sms):</h3><ul>";
         foreach($smsSettings as $s) {
@@ -58,7 +58,7 @@ Route::get('/fix-system', function () {
             $debugInfo .= "<li><strong>{$s->key}</strong>: {$val} (Type: {$s->type})</li>";
         }
         $debugInfo .= "</ul>";
-        
+
         // Check for orphaned settings
         $orphaned = \App\Models\SystemSetting::where('key', 'like', 'sms_%')->where('group', '!=', 'sms')->get();
         if ($orphaned->count() > 0) {

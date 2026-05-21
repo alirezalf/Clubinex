@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import {
     ShieldCheck, CreditCard, ArrowUpRight, ArrowDownLeft,
-    AlertCircle, Copy, Check, User, Gift, TrendingUp,
+    AlertCircle, Copy, Check, User, Users, Gift, TrendingUp,
     Award, Sparkles, Clock, ChevronLeft, Zap, Star
 } from 'lucide-react';
 import clsx from 'clsx';
@@ -29,7 +29,7 @@ interface Props {
 export default function UserDashboard({ stats, recentTransactions, quickAccess }: Props) {
     const { auth } = usePage<PageProps>().props;
     const [copied, setCopied] = useState(false);
-    const referralLink = `${window.location.origin}/register?ref=${auth.user.mobile}`;
+    const referralLink = `${window.location.origin}/register?ref=${auth?.user?.mobile}`;
 
     const handleCopy = () => {
         navigator.clipboard.writeText(referralLink);
@@ -55,10 +55,10 @@ export default function UserDashboard({ stats, recentTransactions, quickAccess }
                             {/* آواتار */}
                             <div className="relative">
                                 <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-white/30 shadow-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-3xl font-bold backdrop-blur-sm overflow-hidden group-hover:scale-105 transition-transform">
-                                    {auth.user.avatar ? (
+                                    {auth?.user?.avatar ? (
                                         <img src={auth.user.avatar} className="w-full h-full object-cover" />
                                     ) : (
-                                        <span className="text-white">{auth.user.first_name?.[0]}</span>
+                                        <span className="text-white">{auth?.user?.first_name?.[0]}</span>
                                     )}
                                 </div>
                                 <div className="absolute -bottom-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-3 border-white shadow-lg" />
@@ -67,7 +67,7 @@ export default function UserDashboard({ stats, recentTransactions, quickAccess }
                             {/* متن خوش‌آمدگویی */}
                             <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <h1 className="text-2xl md:text-3xl font-bold">سلام، {auth.user.first_name}! 👋</h1>
+                                    <h1 className="text-2xl md:text-3xl font-bold">سلام، {auth?.user?.first_name}! 👋</h1>
                                     <span className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-lg text-xs flex items-center gap-1">
                                         <Sparkles size={12} />
                                         خوش آمدید
@@ -346,9 +346,9 @@ export default function UserDashboard({ stats, recentTransactions, quickAccess }
 }
 
 // کارت پیشنهادی
-const SuggestionCard = ({ icon: Icon, title, description, color, route }: any) => (
+const SuggestionCard = ({ icon: Icon, title, description, color, route: routeName }: any) => (
     <Link
-        href={route(route)}
+        href={route(routeName)}
         className="group relative bg-white rounded-2xl shadow-lg border border-gray-100 p-5 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
     >
         {/* پس‌زمینه گرادینت در هاور */}
