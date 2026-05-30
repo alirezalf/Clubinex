@@ -1,4 +1,5 @@
-import axios from 'axios';
+
+import { http as axios } from '@/Utils/http';
 import { Package, User, Loader2 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import FormInput from '@/Components/Form/FormInput';
@@ -49,13 +50,6 @@ export default function AdvancedForm({
         }
     }, [isAgent, data.seller_user, agentInfo, editingRegistration]);
 
-    // Effect: Auto-fill serial based on model when model changes
-    useEffect(() => {
-        if (data.tool_model && !data.tool_serial && !noSerial && !editingRegistration) {
-            setData('tool_serial', `${data.tool_model}-`);
-        }
-    }, [data.tool_model, data.tool_serial, noSerial, editingRegistration]);
-
     // Run lookup initially if editing
     useEffect(() => {
         if (editingRegistration) {
@@ -83,7 +77,7 @@ export default function AdvancedForm({
 
     const handleNoSerialChange = (checked: boolean) => {
         setNoSerial(checked);
-        setData('tool_serial', checked ? '' : (data.tool_model ? `${data.tool_model}-` : ''));
+        setData('tool_serial', '');
     };
 
     return (
@@ -126,7 +120,7 @@ export default function AdvancedForm({
                         error={errors.tool_model}
                         readOnly={!!prefilledProduct}
                     />
-                    
+
                     <div>
                         <div className="mb-1 flex items-center justify-between">
                             <label className="block text-sm font-medium text-gray-700">سریال ابزار <span className="text-red-500">*</span></label>
@@ -187,7 +181,7 @@ export default function AdvancedForm({
                         <option value="owner">مشتری خودم هستم</option>
                         <option value="other">مشتری فرد دیگری است</option>
                     </FormSelect>
-                    
+
                     {data.customer_user === 'other' && (
                         <div>
                             <FormInput
@@ -243,7 +237,7 @@ export default function AdvancedForm({
                         <option value="owner">معرف خودم هستم</option>
                         <option value="other">معرف فرد دیگری است</option>
                     </FormSelect>
-                    
+
                     {data.introducer_user === 'other' && (
                          <div>
                             <FormInput
@@ -280,7 +274,7 @@ export default function AdvancedForm({
                         </div>
                     </div>
                     <div>
-                         <FormFile 
+                         <FormFile
                             label="تصویر فاکتور خرید (الزامی) *"
                             onChange={(file) => setData('invoice_file', file)}
                             error={errors.invoice_file}

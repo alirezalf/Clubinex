@@ -127,7 +127,7 @@ class RewardController extends Controller
 
         return back()->with('message', 'جایزه بروزرسانی شد.');
     }
-    
+
     public function destroy($id)
     {
         $this->rewardService->deleteReward($id);
@@ -137,20 +137,20 @@ class RewardController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,processing,completed,rejected,converted',
+            'status' => 'required|in:pending,processing,shipped,delivered,completed,rejected,converted',
             'admin_note' => 'nullable|string',
             'tracking_code' => 'nullable|string'
         ]);
 
         try {
             $this->rewardService->updateRedemptionStatus(
-                $id, 
-                $request->status, 
-                $request->admin_note, 
-                $request->tracking_code, 
+                $id,
+                $request->status,
+                $request->admin_note,
+                $request->tracking_code,
                 auth()->id()
             );
-            
+
             return back()->with('message', 'وضعیت درخواست با موفقیت تغییر کرد.');
         } catch (\Exception $e) {
             return back()->with('error', 'خطا در تغییر وضعیت: ' . $e->getMessage());
@@ -225,6 +225,20 @@ class RewardController extends Controller
                 ];
             });
 
+        $referrals = \App\Models\ReferralNetwork::with('referred')
+            ->where('referrer_id', $id)
+            ->latest()
+            ->get()
+            ->map(function ($ref) {
+                return [
+                    'name' => $ref->referred ? $ref->referred->full_name : 'کاربر نامشخص',
+                    'mobile' => $ref->referred ? $ref->referred->mobile : '---',
+                    'level' => $ref->getLevelText(),
+                    'status' => $ref->getStatusText(),
+                    'date' => $ref->created_at_jalali,
+                ];
+            });
+
         return Inertia::render('Admin/Rewards/UserHistory', [
             'user' => [
                 'id' => $user->id,
@@ -240,6 +254,7 @@ class RewardController extends Controller
             'rewards' => $rewards,
             'products' => $products,
             'spins' => $spins,
+            'referrals' => $referrals,
             'from' => $from
         ]);
     }

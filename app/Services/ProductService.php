@@ -24,6 +24,10 @@ class ProductService
      */
     public function checkSerial(string $serialCode, ?int $userId = null)
     {
+        // تبدیل اعداد فارسی به انگلیسی و حروف به بزرگ برای مقایسه دقیق
+        $serialCode = strtr($serialCode, ['۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9', '١'=>'1','٢'=>'2','٣'=>'3','٤'=>'4','٥'=>'5','٦'=>'6','٧'=>'7','٨'=>'8','٩'=>'9','٠'=>'0']);
+        $serialCode = strtoupper($serialCode);
+
         $serial = ProductSerial::where('serial_code', $serialCode)
             ->with('product.category')
             ->first();
@@ -59,8 +63,21 @@ class ProductService
     /**
      * ثبت سریع محصول با استفاده از کد سریال
      */
+    private function mapWarrantyStatus($status)
+    {
+        return match($status) {
+            'reg_guarantee', 'request_activation' => 'request_activation',
+            'pre_guarantee', 'already_active' => 'already_active',
+            default => 'no_guarantee',
+        };
+    }
+
     public function registerBySerial(User $user, string $serialCode)
     {
+        // تبدیل اعداد فارسی به انگلیسی و حروف به بزرگ
+        $serialCode = strtr($serialCode, ['۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9', '١'=>'1','٢'=>'2','٣'=>'3','٤'=>'4','٥'=>'5','٦'=>'6','٧'=>'7','٨'=>'8','٩'=>'9','٠'=>'0']);
+        $serialCode = strtoupper($serialCode);
+
         return DB::transaction(function () use ($serialCode, $user) {
             $existingSerial = ProductSerial::where('serial_code', $serialCode)
                 ->lockForUpdate()
@@ -125,10 +142,8 @@ class ProductService
             $serialCode = $data['tool_serial'] ?? null;
 
             if (empty($serialCode)) {
-                $modelSlug = Str::slug($data['tool_model']);
-                $modelPrefix = strtoupper(substr($modelSlug, 0, 6));
-                $randomPart = strtoupper(Str::random(8));
-                $serialCode = $modelPrefix . '-' . $randomPart;
+                $randomPart = strtoupper(Str::random(10));
+                $serialCode = 'PROD-' . $randomPart;
             }
 
             $regData = [
@@ -144,7 +159,7 @@ class ProductService
                 'seller_mobile' => $data['seller_mobile_number'] ?? null,
                 'introducer_type' => $data['introducer_user'],
                 'introducer_mobile' => $data['introducer_mobile_number'] ?? null,
-                'warranty_status' => $data['guarantee_status'],
+                'warranty_status' => $this->mapWarrantyStatus($data['guarantee_status']),
                 'status' => 'pending',
             ];
 
@@ -200,7 +215,7 @@ class ProductService
             'seller_mobile' => $data['seller_mobile_number'] ?? null,
             'introducer_type' => $data['introducer_user'],
             'introducer_mobile' => $data['introducer_mobile_number'] ?? null,
-            'warranty_status' => $data['guarantee_status'],
+            'warranty_status' => $this->mapWarrantyStatus($data['guarantee_status']),
         ];
 
         if ($imageFile) {
@@ -264,11 +279,11 @@ class ProductService
 
     private function calculatePoints($product)
     {
-        if ($product->points_value > 0) {
+        if ($product && $product->points_value > 0) {
             return $product->points_value;
         }
         $defaultRule = PointRule::where('action_code', 'product_registration_default')->first();
-        return $defaultRule ? $defaultRule->points : 0;
+        return $defaultRule ? $defaultRule->points : 500;
     }
 
     private function notifyAdmins($title, $message)
@@ -292,7 +307,14 @@ class ProductService
     private function approveRegistrationLogic(ProductRegistration $reg)
     {
         $points = 50; // Default
-        $product = Product::where('title', 'like', $reg->product_name)->first();
+
+        // Try exact match first
+        $product = Product::where('title', trim($reg->product_name))->first();
+
+        // Try loose match if exact fails
+        if (!$product) {
+            $product = Product::where('title', 'like', '%' . trim($reg->product_name) . '%')->first();
+        }
 
         if ($product) {
             $points = $this->calculatePoints($product);
@@ -306,6 +328,15 @@ class ProductService
             "تایید ثبت محصول دستی: {$reg->product_name}",
             $reg
         );
+
+        // فعال‌سازی واریز پورسانت سیستم معرف در اولین خرید
+        $pendingReferrals = \App\Models\ReferralNetwork::where('referred_id', $reg->user_id)
+            ->where('status', 'pending')
+            ->get();
+
+        foreach ($pendingReferrals as $referral) {
+            $referral->activate();
+        }
 
         // 2. مدیریت پاداش معرف (اگر معرف دیگری در فرم ذکر شده باشد)
         if ($reg->introducer_type === 'other' && $reg->introducer_mobile) {
@@ -340,7 +371,7 @@ class ProductService
                 // خطا نادیده گرفته می‌شود (شاید قبلاً ثبت شده باشد)
             }
         }
-        
+
         // ارسال اعلان به کاربر
         try {
             NotificationService::send('product_registered', $reg->user, [

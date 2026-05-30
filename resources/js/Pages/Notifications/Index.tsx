@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { PageProps } from '@/types';
-import { Bell, Clock, Check, CheckCheck, Trash2, BookOpen, ChevronDown } from 'lucide-react';
+import { Bell, Clock, Check, CheckCheck, Trash2, BookOpen, ChevronDown, MessageSquare } from 'lucide-react';
 import clsx from 'clsx';
 
 interface Notification {
@@ -30,20 +30,20 @@ export default function NotificationsIndex({ notifications }: Props) {
 
     const toggleNotification = (notification: Notification) => {
         const isExpanding = expandedId !== notification.id;
-        
+
         if (isExpanding) {
             setExpandedId(notification.id);
-            
+
             // اگر پیام قبلاً خوانده نشده باشد
             if (!notification.read_at && !localReadIds.includes(notification.id)) {
                 // ۱. بلافاصله در ظاهر تیک دوم را بزن
                 setLocalReadIds(prev => [...prev, notification.id]);
-                
+
                 // ۲. ارسال درخواست به سرور
                 router.post(route('notifications.markAsRead', notification.id), {}, {
                     preserveScroll: true,
                     // بسیار مهم: درخواست فقط برای آپدیت عدد اعلان‌ها
-                    only: ['notifications', 'unreadNotificationsCount'], 
+                    only: ['notifications', 'unreadNotificationsCount'],
                     onSuccess: () => {
                         // سرور props جدید را می‌فرستد و Header خودکار آپدیت می‌شود
                     }
@@ -77,14 +77,25 @@ export default function NotificationsIndex({ notifications }: Props) {
         <DashboardLayout breadcrumbs={[{ label: 'پیام‌ها و اعلان‌ها' }]}>
             <Head title="صندوق پیام" />
 
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">صندوق پیام</h1>
-                <button 
-                    onClick={handleMarkAllRead}
-                    className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-800 bg-primary-50 px-4 py-2 rounded-xl transition shadow-sm border border-primary-100 font-bold"
-                >
-                    <BookOpen size={16} /> خواندن همه پیام‌ها
-                </button>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800">صندوق پیام و اعلانات</h1>
+                    <p className="text-gray-500 text-sm mt-1">آخرین اخبار، هشدارها و پیام‌های سیستم</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <Link
+                        href={route('tickets.index')}
+                        className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 bg-white px-4 py-2 rounded-xl transition shadow-sm border border-gray-200 font-bold"
+                    >
+                        <MessageSquare size={16} /> تیکت پشتیبانی
+                    </Link>
+                    <button
+                        onClick={handleMarkAllRead}
+                        className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-800 bg-primary-50 px-4 py-2 rounded-xl transition shadow-sm border border-primary-100 font-bold"
+                    >
+                        <BookOpen size={16} /> خواندن همه
+                    </button>
+                </div>
             </div>
 
             <div className="space-y-3">
@@ -93,13 +104,13 @@ export default function NotificationsIndex({ notifications }: Props) {
                     const isRead = !!notification.read_at || localReadIds.includes(notification.id);
 
                     return (
-                        <div 
-                            key={notification.id} 
+                        <div
+                            key={notification.id}
                             onClick={() => toggleNotification(notification)}
                             className={clsx(
                                 "rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden group relative select-none",
-                                isRead 
-                                    ? 'bg-white border-gray-100 hover:border-gray-200' 
+                                isRead
+                                    ? 'bg-white border-gray-100 hover:border-gray-200'
                                     : 'bg-primary-50/40 border-primary-100 shadow-sm ring-1 ring-primary-500/10'
                             )}
                         >
@@ -107,8 +118,8 @@ export default function NotificationsIndex({ notifications }: Props) {
                                 <div className="flex items-center gap-4">
                                     <div className={clsx(
                                         "p-2.5 rounded-xl shrink-0 transition-all duration-500",
-                                        isRead 
-                                            ? "bg-gray-100 text-gray-400 rotate-0" 
+                                        isRead
+                                            ? "bg-gray-100 text-gray-400 rotate-0"
                                             : "bg-primary-600 text-white shadow-lg shadow-primary-500/20 rotate-12"
                                     )}>
                                         <Bell size={20} />
@@ -122,13 +133,13 @@ export default function NotificationsIndex({ notifications }: Props) {
                                             )}>
                                                 {notification.data.title}
                                             </h3>
-                                            
+
                                             <div className="flex items-center gap-3 shrink-0">
                                                 <span className="text-[10px] text-gray-400 hidden sm:flex items-center gap-1 font-mono">
                                                     <Clock size={12} />
                                                     {notification.data.created_at_jalali}
                                                 </span>
-                                                
+
                                                 <div className="flex items-center transition-all duration-300">
                                                     {isRead ? (
                                                         <div className="flex items-center text-blue-500 animate-in zoom-in duration-300" title="خوانده شده">
@@ -141,16 +152,16 @@ export default function NotificationsIndex({ notifications }: Props) {
                                                     )}
                                                 </div>
 
-                                                <ChevronDown 
-                                                    size={18} 
+                                                <ChevronDown
+                                                    size={18}
                                                     className={clsx(
                                                         "text-gray-400 transition-transform duration-500",
                                                         isExpanded && "rotate-180 text-primary-500"
-                                                    )} 
+                                                    )}
                                                 />
                                             </div>
                                         </div>
-                                        
+
                                         {!isExpanded && (
                                             <p className="text-[11px] text-gray-400 truncate mt-1 max-w-[80%]">
                                                 {notification.data.message}
@@ -168,13 +179,13 @@ export default function NotificationsIndex({ notifications }: Props) {
                                             <p className="text-sm text-gray-700 leading-loose flex-1 w-full whitespace-pre-wrap bg-gray-50/50 p-4 rounded-xl border border-gray-100/50">
                                                 {notification.data.message}
                                             </p>
-                                            
+
                                             <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end shrink-0">
                                                 <span className="text-[10px] text-gray-400 sm:hidden flex items-center gap-1">
                                                     <Clock size={12} />
                                                     {notification.data.created_at_jalali}
                                                 </span>
-                                                <button 
+                                                <button
                                                     onClick={(e) => handleDelete(e, notification.id)}
                                                     className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100 flex items-center gap-1.5 text-xs font-bold"
                                                 >
@@ -208,8 +219,8 @@ export default function NotificationsIndex({ notifications }: Props) {
                             href={link.url || '#'}
                             className={clsx(
                                 "px-4 py-2 rounded-xl text-sm transition-all duration-300",
-                                link.active 
-                                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30 font-bold' 
+                                link.active
+                                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30 font-bold'
                                     : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50',
                                 !link.url && 'opacity-30 cursor-not-allowed pointer-events-none'
                             )}

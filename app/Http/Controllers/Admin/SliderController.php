@@ -57,9 +57,13 @@ class SliderController extends Controller
     {
         foreach ($slider->slides as $slide) {
             if ($slide->image_path) {
-                $relativePath = str_replace('/uploads/sliders/', '', $slide->image_path);
-                if (file_exists(public_path('uploads/sliders/' . $relativePath))) {
-                    unlink(public_path('uploads/sliders/' . $relativePath));
+                $relativePath = str_replace(['/uploads/sliders/', '/storage/sliders/'], 'sliders/', $slide->image_path);
+                Storage::disk('public')->delete($relativePath);
+
+                // Fallback for old local files
+                $oldPath = str_replace('/uploads/sliders/', '', $slide->image_path);
+                if (file_exists(public_path('uploads/sliders/' . $oldPath)) && !is_dir(public_path('uploads/sliders/' . $oldPath))) {
+                    @unlink(public_path('uploads/sliders/' . $oldPath));
                 }
             }
         }
@@ -89,8 +93,8 @@ class SliderController extends Controller
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
                 $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('uploads/sliders'), $filename);
-                $path = '/uploads/sliders/' . $filename;
+                $storedPath = $file->storeAs('sliders', $filename, 'public');
+                $path = Storage::url($storedPath);
             }
 
             $data = $request->all();
@@ -146,9 +150,12 @@ class SliderController extends Controller
         // Handle Image Removal
         if ($request->boolean('remove_image')) {
             if ($slide->image_path) {
-                $relativePath = str_replace('/storage/', '', $slide->image_path);
-                if (Storage::disk('public')->exists($relativePath)) {
-                    Storage::disk('public')->delete($relativePath);
+                $relativePath = str_replace(['/uploads/sliders/', '/storage/sliders/'], 'sliders/', $slide->image_path);
+                Storage::disk('public')->delete($relativePath);
+
+                $oldPath = str_replace('/uploads/sliders/', '', $slide->image_path);
+                if (file_exists(public_path('uploads/sliders/' . $oldPath)) && !is_dir(public_path('uploads/sliders/' . $oldPath))) {
+                    @unlink(public_path('uploads/sliders/' . $oldPath));
                 }
             }
             $data['image_path'] = null;
@@ -159,16 +166,19 @@ class SliderController extends Controller
             $request->validate(['image' => 'image|max:2048']);
 
             if ($slide->image_path) {
-                $relativePath = str_replace('/uploads/sliders/', '', $slide->image_path);
-                if (file_exists(public_path('uploads/sliders/' . $relativePath))) {
-                    unlink(public_path('uploads/sliders/' . $relativePath));
+                $relativePath = str_replace(['/uploads/sliders/', '/storage/sliders/'], 'sliders/', $slide->image_path);
+                Storage::disk('public')->delete($relativePath);
+
+                $oldPath = str_replace('/uploads/sliders/', '', $slide->image_path);
+                if (file_exists(public_path('uploads/sliders/' . $oldPath)) && !is_dir(public_path('uploads/sliders/' . $oldPath))) {
+                    @unlink(public_path('uploads/sliders/' . $oldPath));
                 }
             }
 
             $file = $request->file('image');
             $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/sliders'), $filename);
-            $data['image_path'] = '/uploads/sliders/' . $filename;
+            $storedPath = $file->storeAs('sliders', $filename, 'public');
+            $data['image_path'] = Storage::url($storedPath);
         }
 
         $slide->update($data);
@@ -179,9 +189,12 @@ class SliderController extends Controller
     public function destroySlide(Slide $slide)
     {
         if ($slide->image_path) {
-            $relativePath = str_replace('/storage/', '', $slide->image_path);
-            if (Storage::disk('public')->exists($relativePath)) {
-                Storage::disk('public')->delete($relativePath);
+            $relativePath = str_replace(['/uploads/sliders/', '/storage/sliders/'], 'sliders/', $slide->image_path);
+            Storage::disk('public')->delete($relativePath);
+
+            $oldPath = str_replace('/uploads/sliders/', '', $slide->image_path);
+            if (file_exists(public_path('uploads/sliders/' . $oldPath)) && !is_dir(public_path('uploads/sliders/' . $oldPath))) {
+                @unlink(public_path('uploads/sliders/' . $oldPath));
             }
         }
 

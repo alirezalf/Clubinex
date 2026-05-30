@@ -11,9 +11,10 @@ class SurveySeeder extends Seeder
     public function run(): void
     {
         // ایجاد یک مسابقه عمومی
-        $survey = Survey::create([
+        $survey = Survey::updateOrCreate(
+            ['slug' => 'general-knowledge-quiz'],
+            [
             'title' => 'مسابقه اطلاعات عمومی بزرگ',
-            'slug' => 'general-knowledge-quiz',
             'description' => 'به ۳۰ سوال اطلاعات عمومی پاسخ دهید و امتیاز بگیرید!',
             'type' => 'quiz',
             'is_active' => true,
@@ -24,7 +25,8 @@ class SurveySeeder extends Seeder
             'duration_minutes' => 15, // اضافه شده
         ]);
 
-        $questions = [
+        if ($survey->wasRecentlyCreated || $survey->questions()->count() == 0) {
+            $questions = [
             ['q' => 'پایتخت ایران کدام شهر است؟', 'opts' => ['اصفهان', 'تهران', 'شیراز', 'مشهد'], 'ans' => 1],
             ['q' => 'بزرگترین اقیانوس جهان کدام است؟', 'opts' => ['اطلس', 'هند', 'آرام', 'منجمد شمالی'], 'ans' => 2],
             ['q' => 'تعداد دندان‌های انسان بالغ چقدر است؟', 'opts' => ['30', '32', '28', '34'], 'ans' => 1],
@@ -48,6 +50,7 @@ class SurveySeeder extends Seeder
                 'is_required' => true,
                 'order' => $index + 1,
             ]);
+        }
         }
     }
 }

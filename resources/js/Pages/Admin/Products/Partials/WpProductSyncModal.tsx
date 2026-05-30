@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, RefreshCw, Loader2, StopCircle, ArrowLeft, AlertTriangle } from 'lucide-react';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 import { router } from '@inertiajs/react';
 
 export default function WpProductSyncModal({ isOpen, onClose }: any) {
@@ -56,29 +56,29 @@ export default function WpProductSyncModal({ isOpen, onClose }: any) {
         stopSyncRef.current = false;
         let page = 1;
         let finished = false;
-        
+
         let currentStats = { created: 0, updated: 0, total: 0, current_page: 0 };
         setSyncStats(currentStats);
         setSyncProgress(5);
 
         try {
             while (!finished && !stopSyncRef.current) {
-                const response = await axios.post(route('admin.products.wp_sync_mapped'), { 
-                    mapping, 
-                    page 
+                const response = await axios.post(route('admin.products.wp_sync_mapped'), {
+                    mapping,
+                    page
                 });
 
                 const resData = response.data;
-                
+
                 if (resData.success) {
                     currentStats.created += resData.processed_created;
                     currentStats.updated += resData.processed_updated;
                     currentStats.total = resData.total_remote;
                     currentStats.current_page = page;
-                    
+
                     setSyncStats({...currentStats});
-                    
-                    const processedSoFar = page * 20; 
+
+                    const processedSoFar = page * 20;
                     const percent = Math.min(Math.round((processedSoFar / Math.max(resData.total_remote, 1)) * 100), 95);
                     setSyncProgress(percent);
 
@@ -89,7 +89,7 @@ export default function WpProductSyncModal({ isOpen, onClose }: any) {
                     finished = true;
                 }
             }
-            
+
             if (!stopSyncRef.current) {
                 setSyncProgress(100);
                 setTimeout(() => {
@@ -112,7 +112,7 @@ export default function WpProductSyncModal({ isOpen, onClose }: any) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                     <h3 className="font-bold text-lg flex items-center gap-2">
@@ -123,7 +123,7 @@ export default function WpProductSyncModal({ isOpen, onClose }: any) {
                         <button onClick={onClose}><X className="text-gray-400 hover:text-gray-600" /></button>
                     )}
                 </div>
-                
+
                 <div className="p-6 overflow-y-auto flex-1">
                     {loadingWpSchema ? (
                         <div className="flex flex-col items-center justify-center py-20 text-gray-500">
@@ -142,7 +142,7 @@ export default function WpProductSyncModal({ isOpen, onClose }: any) {
                                 </div>
                                 <p className="text-center text-xs text-gray-500 mt-2">لطفاً صفحه را نبندید.</p>
                             </div>
-                            
+
                             <div className="grid grid-cols-3 gap-4 w-full max-w-lg text-center">
                                 <div className="bg-green-50 p-3 rounded-xl border border-green-100">
                                     <div className="text-2xl font-bold text-green-600">{syncStats.created}</div>
@@ -158,7 +158,7 @@ export default function WpProductSyncModal({ isOpen, onClose }: any) {
                                 </div>
                             </div>
 
-                            <button 
+                            <button
                                 onClick={stopSync}
                                 className="bg-red-50 text-red-600 px-6 py-2 rounded-xl hover:bg-red-100 flex items-center gap-2 border border-red-200 transition"
                             >
@@ -195,10 +195,10 @@ export default function WpProductSyncModal({ isOpen, onClose }: any) {
                                 <div className="divide-y">
                                     {clubinexFields.map((field) => (
                                         <div key={field.key} className="grid grid-cols-12 p-4 items-center hover:bg-gray-50 transition">
-                                            
+
                                             {/* WP Select (Source) */}
                                             <div className="col-span-5">
-                                                <select 
+                                                <select
                                                     value={(mapping as any)[field.key]}
                                                     onChange={(e) => setMapping({...mapping, [field.key]: e.target.value})}
                                                     className="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 bg-white dir-ltr text-left"
@@ -233,13 +233,13 @@ export default function WpProductSyncModal({ isOpen, onClose }: any) {
 
                 {!isSyncing && !loadingWpSchema && (
                     <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
-                        <button 
+                        <button
                             onClick={onClose}
                             className="px-6 py-2.5 border border-gray-200 rounded-xl text-gray-600 hover:bg-white transition font-medium"
                         >
                             انصراف
                         </button>
-                        <button 
+                        <button
                             onClick={startSyncProcess}
                             className="px-8 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 flex items-center gap-2 transition font-bold"
                         >

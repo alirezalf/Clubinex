@@ -107,6 +107,8 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                         <option value="all">همه</option>
                         <option value="pending">در انتظار</option>
                         <option value="processing">در حال پردازش</option>
+                        <option value="shipped">ارسال شده</option>
+                        <option value="delivered">تحویل داده شده</option>
                         <option value="completed">تکمیل شده</option>
                         <option value="converted">اعطای امتیاز</option>
                         <option value="rejected">رد شده</option>
@@ -167,6 +169,8 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                                         <div className="flex flex-col gap-1">
                                             <span className={`px-2 py-1 rounded text-xs w-fit ${
                                                 item.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                                item.status === 'delivered' ? 'bg-emerald-100 text-emerald-700' :
+                                                item.status === 'shipped' ? 'bg-violet-100 text-violet-700' :
                                                 item.status === 'converted' ? 'bg-teal-100 text-teal-700' :
                                                 item.status === 'rejected' ? 'bg-red-100 text-red-700' :
                                                 'bg-yellow-100 text-yellow-700'
@@ -246,7 +250,9 @@ export default function RedemptionsList({ redemptions, filters }: Props) {
                                 >
                                     <option value="pending">در انتظار بررسی</option>
                                     <option value="processing">در حال آماده‌سازی</option>
-                                    <option value="completed">تکمیل / ارسال شده</option>
+                                    <option value="shipped">ارسال شده (در مسیر تحویل)</option>
+                                    <option value="delivered">تحویل داده شده</option>
+                                    <option value="completed">تکمیل شده / خاتمه یافته</option>
                                     <option value="converted">اعطای امتیاز (تبدیل به امتیاز)</option>
                                     <option value="rejected">رد شده (برگشت امتیاز)</option>
                                 </select>

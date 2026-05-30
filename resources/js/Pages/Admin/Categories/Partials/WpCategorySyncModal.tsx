@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, RefreshCw, Loader2, StopCircle, ArrowLeft } from 'lucide-react';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 import { router } from '@inertiajs/react';
 
 export default function WpCategorySyncModal({ isOpen, onClose }: any) {

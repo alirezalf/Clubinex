@@ -18,7 +18,7 @@ use App\Models\Traits\User\HasSystemRelations;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes, HasRoles, TwoFactorAuthenticatable;
-    
+
     // Include split logic traits
     use HasProfileLogic, HasAuthLogic, HasGamificationLogic, HasSystemRelations;
 
@@ -28,14 +28,14 @@ class User extends Authenticatable
         'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at', 'email_verified_at',
         'profile_completed',
         'first_name', 'last_name', 'national_code', 'birth_date', 'gender',
-        'marital_status', 'job', 
+        'marital_status', 'job',
         'province_id', 'city_id',
         'postal_code', 'address',
         'email', 'avatar',
         'status_id', 'club_id', 'referral_code', 'referred_by', 'agent_id',
         'last_login_at', 'remember_token',
-        'theme_preferences', 
-        'dashboard_preferences', 
+        'theme_preferences',
+        'dashboard_preferences',
     ];
 
     protected $hidden = [
@@ -79,8 +79,43 @@ class User extends Authenticatable
         return $query->where('club_id', $clubId);
     }
 
+    public function getCachedPointsAttribute()
+    {
+        return \Illuminate\Support\Facades\Cache::remember('user_points_' . $this->id, now()->addDays(7), function () {
+            return (int) $this->current_points;
+        });
+    }
+
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'user_id');
+    }
+
     public function assignedTickets()
     {
         return $this->hasMany(Ticket::class, 'assigned_to');
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($user) {
+            if ($user->isForceDeleting()) {
+                $user->tickets()->forceDelete();
+                $user->assignedTickets()->update(['assigned_to' => null]);
+            } else {
+                $user->tickets()->delete();
+            }
+        });
+
+        static::restored(function ($user) {
+            $user->tickets()->restore();
+        });
     }
 }

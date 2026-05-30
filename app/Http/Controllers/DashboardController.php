@@ -34,7 +34,7 @@ class DashboardController extends Controller
         if ($user->hasRole('super-admin') || $user->hasRole('admin')) {
             $stats = $this->statsService->getAdminStats();
             $recent_activities = $this->statsService->getRecentActivities();
-            
+
             $latest_users = User::latest()->take(5)->get()->map(function($u) {
                 return [
                     'id' => $u->id,
@@ -45,11 +45,13 @@ class DashboardController extends Controller
                 ];
             });
 
-            $registration_chart = User::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
-                ->where('created_at', '>=', now()->subDays(7))
-                ->groupBy('date')
-                ->get()
-                ->pluck('count', 'date');
+            $registration_chart = \Illuminate\Support\Facades\Cache::remember('admin_registration_chart_7days', 3600, function() {
+                return User::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+                    ->where('created_at', '>=', now()->subDays(7))
+                    ->groupBy('date')
+                    ->get()
+                    ->pluck('count', 'date');
+            });
 
             return Inertia::render('Dashboard', array_merge($commonData, [
                 'isAdmin' => true,
@@ -62,6 +64,7 @@ class DashboardController extends Controller
 
         // --- USER DASHBOARD ---
         $stats = $this->statsService->getUserStats($user);
+        $leaderboard = $this->statsService->getLeaderboard(5);
 
         $recent_transactions = $user->pointTransactions()
             ->latest()
@@ -77,6 +80,7 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard', array_merge($commonData, [
             'isAdmin' => false,
             'stats' => $stats,
+            'leaderboard' => $leaderboard,
             'recentTransactions' => $recent_transactions,
         ]));
     }
@@ -84,11 +88,11 @@ class DashboardController extends Controller
     public function updateQuickAccess(Request $request)
     {
         $request->validate(['items' => 'required|array']);
-        
+
         $user = auth()->user();
         $prefs = is_array($user->dashboard_preferences) ? $user->dashboard_preferences : [];
         $prefs['quick_access'] = $request->items;
-        
+
         $user->dashboard_preferences = $prefs;
         $user->save();
 

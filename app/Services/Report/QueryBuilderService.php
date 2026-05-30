@@ -16,13 +16,17 @@ class QueryBuilderService
 
     public function buildQuery(Request $request): ?object
     {
-        $request->validate([
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'table' => 'required|string',
             'fields' => 'required|array|min:1',
             'date_from' => 'nullable|date',
             'date_to' => 'nullable|date',
             'advanced_filters' => 'nullable|array',
         ]);
+
+        if ($validator->fails()) {
+            throw new \Exception($validator->errors()->first());
+        }
 
         $table = $request->table;
         $fields = $request->fields;
@@ -33,9 +37,10 @@ class QueryBuilderService
             abort(403, 'دسترسی غیرمجاز به جدول');
         }
 
-        $validFields = array_filter($fields, function($field) use ($table) {
-            return Schema::hasColumn($table, $field);
-        });
+        $validFields = array_values(array_filter($fields, function($field) use ($table, $allowedTables) {
+            $allowedFields = $this->entityService->getEntities()[$table]['fields'] ?? [];
+            return array_key_exists($field, $allowedFields);
+        }));
 
         if (empty($validFields)) {
             return null;

@@ -92,7 +92,14 @@ class RewardService
      */
     public function redeemReward(User $user, int $rewardId, ?array $deliveryInfo)
     {
-        return DB::transaction(function () use ($user, $rewardId, $deliveryInfo) {
+        $lock = \Illuminate\Support\Facades\Cache::lock('reward_redeem_'.$user->id, 10);
+
+        if (!$lock->get()) {
+            throw new Exception('درخواست قبلی شما در حال پردازش است. لطفا چند لحظه شکیبا باشید.');
+        }
+
+        try {
+            return DB::transaction(function () use ($user, $rewardId, $deliveryInfo) {
             // قفل کردن رکورد جایزه برای مدیریت صحیح موجودی در درخواست‌های همزمان
             $reward = Reward::where('id', $rewardId)->lockForUpdate()->firstOrFail();
 
@@ -100,18 +107,33 @@ class RewardService
                 throw new Exception('شما شرایط دریافت این جایزه را ندارید یا موجودی تمام شده است.');
             }
 
-            // کسر امتیاز از کاربر
-            // نکته: متد deductPoints خودش قفل روی رکورد کاربر را مدیریت می‌کند
-            $transaction = PointTransaction::deductPoints(
-                $user->id,
-                $reward->points_cost,
-                null,
-                "دریافت جایزه: {$reward->title}",
-                $reward
-            );
+            // کسر امتیاز و موجودی کیف پول از کاربر
+            if ($reward->points_cost > 0) {
+                $transaction = PointTransaction::deductPoints(
+                    $user->id,
+                    $reward->points_cost,
+                    null,
+                    "دریافت جایزه: {$reward->title}",
+                    $reward
+                );
 
-            if (!$transaction) {
-                 throw new Exception('خطا در کسر امتیاز. موجودی کافی نیست.');
+                if (!$transaction) {
+                     throw new Exception('خطا در کسر امتیاز. موجودی امتیاز کافی نیست.');
+                }
+            }
+
+            if ($reward->cash_cost > 0) {
+                $wallet = $user->wallet()->firstOrCreate(['user_id' => $user->id], ['balance' => 0]);
+                if ($wallet->balance < $reward->cash_cost) {
+                    throw new Exception('موجودی کیف پول شما برای دریافت این جایزه کافی نیست.');
+                }
+                $wallet->decrement('balance', $reward->cash_cost);
+                $wallet->transactions()->create([
+                    'amount' => $reward->cash_cost,
+                    'type' => 'purchase',
+                    'status' => 'success',
+                    'description' => "دریافت جایزه: {$reward->title}",
+                ]);
             }
 
             // ثبت درخواست
@@ -119,6 +141,7 @@ class RewardService
                 'user_id' => $user->id,
                 'reward_id' => $reward->id,
                 'points_spent' => $reward->points_cost,
+                'cash_spent' => $reward->cash_cost,
                 'status' => 'pending',
                 'delivery_info' => $deliveryInfo,
                 'tracking_code' => 'RWD-' . strtoupper(Str::random(8)),
@@ -146,6 +169,9 @@ class RewardService
 
             return $redemption;
         });
+        } finally {
+            $lock->release();
+        }
     }
 
     /**
@@ -167,6 +193,17 @@ class RewardService
                         "برگشت امتیاز - رد درخواست جایزه: " . ($redemption->reward ? $redemption->reward->title : 'جایزه حذف شده'),
                         $redemption
                     );
+                }
+
+                if ($redemption->cash_spent > 0) {
+                    $wallet = $redemption->user->wallet()->firstOrCreate(['user_id' => $redemption->user_id], ['balance' => 0]);
+                    $wallet->increment('balance', $redemption->cash_spent);
+                    $wallet->transactions()->create([
+                        'amount' => $redemption->cash_spent,
+                        'type' => 'deposit',
+                        'status' => 'success',
+                        'description' => "برگشت وجه - رد درخواست جایزه: " . ($redemption->reward ? $redemption->reward->title : 'جایزه حذف شده'),
+                    ]);
                 }
 
                 // اگر جایزه وجود داشت، موجودی کالا را برگردان

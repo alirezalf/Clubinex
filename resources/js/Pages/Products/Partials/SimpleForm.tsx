@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Barcode, Search, CheckCircle, Package, AlertTriangle, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 import FormInput from '@/Components/Form/FormInput';
 
 interface Props {
@@ -38,9 +38,9 @@ export default function SimpleForm({ data, setData, errors }: Props) {
             });
             setCheckResult(response.data);
         } catch (error: any) {
-            setCheckResult({ 
-                valid: false, 
-                message: error.response?.data?.message || 'خطا در بررسی سریال.' 
+            setCheckResult({
+                valid: false,
+                message: error.response?.data?.message || 'خطا در بررسی سریال.'
             });
         } finally {
             setLoading(false);
@@ -68,7 +68,7 @@ export default function SimpleForm({ data, setData, errors }: Props) {
                                 value={data.serial_code}
                                 onChange={e => {
                                     setData('serial_code', e.target.value);
-                                    if (checkResult) setCheckResult(null); 
+                                    if (checkResult) setCheckResult(null);
                                 }}
                                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleCheckSerial())}
                                 placeholder="SN-123456789"
@@ -77,7 +77,7 @@ export default function SimpleForm({ data, setData, errors }: Props) {
                                 error={errors.serial_code}
                             />
                         </div>
-                        <button 
+                        <button
                             type="button"
                             onClick={handleCheckSerial}
                             disabled={loading || !data.serial_code}
@@ -108,7 +108,7 @@ export default function SimpleForm({ data, setData, errors }: Props) {
                                 </div>
                                 <div className="flex-1">
                                     <h5 className="font-bold text-gray-800 mb-1 text-sm">{checkResult.product.title}</h5>
-                                    <div className="text-xs text-gray-500 font-mono mb-2">{checkResult.product.model}</div>
+                                    <div className="text-xs text-gray-500 font-mono mb-2">{checkResult.product.model_name}</div>
                                     <div className="inline-block bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded-md">
                                         پاداش ثبت: {checkResult.product.points} امتیاز
                                     </div>

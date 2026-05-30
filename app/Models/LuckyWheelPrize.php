@@ -12,7 +12,7 @@ class LuckyWheelPrize extends Model
 
     protected $fillable = [
         'lucky_wheel_id', 'title', 'icon', 'color', 'text_color', 'font_size', 'text_orientation',
-        'type', 'value', 'probability', 'stock', 'is_active'
+        'type', 'value', 'probability', 'stock', 'daily_limit', 'is_active'
     ];
 
     public function wheel()

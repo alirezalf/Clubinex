@@ -21,7 +21,7 @@ class DashboardStatsService
     {
         // Cache checking to reduce DB hits on every page load
         $cacheKey = "daily_rewards_checked_{$user->id}_" . date('Y-m-d');
-        
+
         if (cache()->has($cacheKey)) {
             return;
         }
@@ -85,9 +85,20 @@ class DashboardStatsService
     public function getAdminStats()
     {
         return cache()->remember('admin_dashboard_stats', 300, function () {
-            
+
             // Average points
             $avgPoints = User::avg('current_points') ?? 0;
+
+            // Inflation calculation (Cash equivalent of points)
+            $totalDistributedPoints = PointTransaction::earned()->sum('amount');
+            $totalRedeemedPoints = RewardRedemption::whereIn('status', ['completed', 'shipped', 'delivered', 'processing'])->sum('points_spent');
+            $totalRedeemedRewardsCashValue = RewardRedemption::whereIn('reward_redemptions.status', ['completed', 'shipped', 'delivered', 'processing'])
+                ->join('rewards', 'reward_redemptions.reward_id', '=', 'rewards.id')
+                ->sum('rewards.cash_cost');
+
+            $pointRealValue = $totalDistributedPoints > 0
+                ? ($totalRedeemedRewardsCashValue > 0 ? round($totalRedeemedRewardsCashValue / $totalDistributedPoints, 2) : 0)
+                : 0;
 
             // Most active hours (busiest hour)
             $busiestHourData = DB::table('activity_logs')
@@ -101,18 +112,46 @@ class DashboardStatsService
             $totalUsers = User::count();
             // Count users active in last 30 days
             $returningUsers = User::where('last_login_at', '>=', now()->subDays(30))->count();
-            
+
             $retentionRate = $totalUsers > 0 ? round(($returningUsers / $totalUsers) * 100) : 0;
 
             return [
                 'total_users' => $totalUsers,
                 'new_users_today' => User::whereDate('created_at', today())->count(),
                 'pending_rewards' => RewardRedemption::where('status', 'pending')->count(),
-                'total_points_distributed' => PointTransaction::earned()->sum('amount'),
+                'total_points_distributed' => $totalDistributedPoints,
                 'avg_points' => round($avgPoints),
                 'busiest_hour' => $busiestHourStr,
                 'retention_rate' => $retentionRate,
+                'point_real_value' => $pointRealValue,
+                'total_redeemed_points' => $totalRedeemedPoints,
             ];
+        });
+    }
+
+    /**
+     * دریافت لیست برترین‌ها (لیدربورد) با کش دوره‌ای (مثلا یک ساعته)
+     */
+    public function getLeaderboard($limit = 10)
+    {
+        return cache()->remember("leaderboard_top_{$limit}", 3600, function () use ($limit) {
+            return User::active()
+                ->select('id', 'first_name', 'last_name', 'avatar', 'current_points', 'club_id')
+                ->with('club:id,name,color,icon')
+                ->orderBy('current_points', 'desc')
+                ->take($limit)
+                ->get()
+                ->map(function ($u) {
+                    return [
+                        'id' => $u->id,
+                        'name' => $u->full_name,
+                        'points' => $u->current_points, // We don't use cached property here for batch loading efficiency
+                        'avatar' => $u->avatar,
+                        'club_name' => $u->club ? $u->club->name : 'بدون سطح',
+                        'club_icon' => $u->club ? $u->club->icon : null,
+                        'club_color' => $u->club ? $u->club->color : null,
+                    ];
+                });
         });
     }
 
@@ -127,12 +166,12 @@ class DashboardStatsService
         if ($nextClub) {
             $minPoints = $currentClub ? $currentClub->min_points : 0;
             $range = $nextClub->min_points - $minPoints;
-            
+
             if ($range > 0) {
                 $currentInLevel = $user->current_points - $minPoints;
                 $progress = min(100, max(0, ($currentInLevel / $range) * 100));
             }
-            
+
             $pointsNeeded = max(0, $nextClub->min_points - $user->current_points);
         }
 
@@ -169,7 +208,7 @@ class DashboardStatsService
     {
         $prefs = is_array($user->dashboard_preferences) ? $user->dashboard_preferences : [];
         $pinned = $prefs['quick_access'] ?? [];
-        
+
         $frequent = cache()->remember("user_frequent_pages_{$user->id}", 3600, function () use ($user) {
             return UserSession::where('user_id', $user->id)
                 ->select('page_url', DB::raw('count(*) as total'))

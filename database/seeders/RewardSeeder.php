@@ -58,37 +58,40 @@ class RewardSeeder extends Seeder
         // 2. ایجاد درخواست‌های نمونه (Redemptions)
         // پیدا کردن یک ادمین برای اختصاص به درخواست‌های بررسی شده
         $admin = User::role('super-admin')->first() ?? User::first();
-        $users = User::where('id', '!=', $admin->id)->inRandomOrder()->take(5)->get();
+        $users = User::where('id', '!=', $admin->id)->inRandomOrder()->take(10)->get();
         $rewards = Reward::all();
 
         if ($users->count() > 0 && $rewards->count() > 0) {
-            foreach ($users as $index => $user) {
-                $reward = $rewards->random();
-                
-                // تعیین وضعیت تصادفی
-                $statuses = ['pending', 'processing', 'completed', 'rejected'];
-                $status = $statuses[rand(0, 3)];
-                
-                // اگر وضعیت در انتظار نباشد، یعنی ادمین آن را دیده است
-                $adminId = ($status !== 'pending') ? $admin->id : null;
-                $adminNote = ($status === 'rejected') ? 'امتیاز ناکافی بود یا اطلاعات ناقص است.' : null;
-                $trackingCode = ($status === 'completed' && $reward->type === 'physical') ? rand(10000000, 99999999) : null;
+            foreach ($users as $user) {
+                // Each user creates 1 to 3 redemptions
+                $numRedemptions = rand(1, 3);
+                for ($i = 0; $i < $numRedemptions; $i++) {
+                    $reward = $rewards->random();
 
-                RewardRedemption::create([
-                    'user_id' => $user->id,
-                    'reward_id' => $reward->id,
-                    'points_spent' => $reward->points_cost,
-                    'status' => $status,
-                    'admin_id' => $adminId, // تست فیلد جدید
-                    'admin_note' => $adminNote,
-                    'tracking_code' => $trackingCode,
-                    'delivery_info' => $reward->type === 'physical' ? [
-                        'address' => $user->address ?? 'آدرس پیش فرض',
-                        'postal_code' => $user->postal_code,
-                        'phone' => $user->mobile
-                    ] : null,
-                    'created_at' => now()->subDays(rand(1, 30)),
-                ]);
+                    // تعیین وضعیت تصادفی
+                    $statuses = ['pending', 'processing', 'completed', 'rejected', 'converted'];
+                    $status = $statuses[array_rand($statuses)];
+
+                    // اگر وضعیت در انتظار نباشد، یعنی ادمین آن را دیده است
+                    $adminId = ($status !== 'pending' && $status !== 'converted') ? $admin->id : null;
+                    $adminNote = ($status === 'rejected') ? 'امتیاز ناکافی بود یا اطلاعات ناقص است.' : null;
+                    $trackingCode = ($status === 'completed' && $reward->type === 'physical') ? rand(10000000, 99999999) : null;
+
+                    RewardRedemption::create([
+                        'user_id' => $user->id,
+                        'reward_id' => $reward->id,
+                        'points_spent' => $reward->points_cost,
+                        'status' => $status,
+                        'admin_id' => $adminId,
+                        'admin_note' => $adminNote,
+                        'tracking_code' => $trackingCode,
+                        'delivery_info' => $reward->type === 'physical' ? [
+                            'address' => $user->address ?? 'تهران، ایران',
+                            'phone' => $user->mobile
+                        ] : null,
+                        'created_at' => now()->subDays(rand(1, 40))->subHours(rand(1, 23)),
+                    ]);
+                }
             }
         }
     }

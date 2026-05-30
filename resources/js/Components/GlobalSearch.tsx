@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Loader2, Package, User, ChevronRight, Sparkles, Command, Users, ShoppingBag } from 'lucide-react';
 import clsx from 'clsx';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 import { router } from '@inertiajs/react';
 
 interface SearchResult {

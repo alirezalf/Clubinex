@@ -35,11 +35,12 @@ return new class extends Migration {
             $table->string('ip_address', 45)->nullable();    // آی‌پی بازکننده
             $table->string('email_type', 50)->default('notification'); // نوع ایمیل
             $table->timestamps();                            // زمان ایجاد و بروزرسانی
-            
+
             $table->index(['user_id', 'created_at']);        // ایندکس برای گزارش‌گیری
             $table->index(['email', 'status']);              // ایندکس برای پیگیری
             $table->index('email_type');                     // ایندکس برای تحلیل انواع ایمیل
             $table->index(['sent_at', 'delivered_at']);      // ایندکس برای محاسبه زمان ارسال
+            $table->index('created_at');                     // ایندکس برای بهینه سازی صفحه بندی
         });
     }
 

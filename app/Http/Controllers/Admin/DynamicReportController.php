@@ -69,21 +69,28 @@ class DynamicReportController extends Controller
 
             return response()->json($data);
 
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Report fetch error: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
+            return response()->json(['error' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], 500);
         }
     }
 
     /**
-     * خروجی اکسل گزارش
+     * درخواست خروجی اکسل گزارش در Background
      */
     public function export(Request $request)
     {
         try {
+            $allFields = $this->fieldService->getFieldsFor($request->table);
+            $selectedFields = [];
+            foreach ($request->fields ?? [] as $fieldKey) {
+                $selectedFields[$fieldKey] = $allFields[$fieldKey] ?? $fieldKey;
+            }
+
             $query = $this->queryBuilderService->buildQuery($request);
 
             if (!$query) {
-                return back()->with('error', 'دادهای برای خروجی یافت نشد.');
+                return response()->json(['error' => 'بدون داده'], 404);
             }
 
             $sortField = $request->input('sort_by', 'created_at');
@@ -95,21 +102,19 @@ class DynamicReportController extends Controller
                 $query->orderBy('id', $sortDir);
             }
 
-            $allFields = $this->fieldService->getFieldsFor($request->table);
-            $selectedFields = [];
-            foreach ($request->fields as $fieldKey) {
-                $selectedFields[$fieldKey] = $allFields[$fieldKey] ?? $fieldKey;
+            $showRowNumber = filter_var($request->input('show_row_number', false), FILTER_VALIDATE_BOOLEAN);
+
+            $fileName = 'custom_report_' . $request->table . '_' . date('Ymd_His') . '.xlsx';
+
+            if (ob_get_length()) {
+                ob_end_clean();
             }
 
-            $showRowNumber = $request->boolean('show_row_number');
-
-            return Excel::download(
-                new DynamicReportExport($query, $selectedFields, $showRowNumber),
-                'custom_report_' . date('Y-m-d_H-i') . '.xlsx'
-            );
+            return Excel::download(new DynamicReportExport($query, $selectedFields, $showRowNumber), $fileName);
 
         } catch (\Exception $e) {
-            return back()->with('error', 'خطا در تولید فایل اکسل: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Report export error: ' . $e->getMessage());
+            return response()->json(['error' => 'خطا در خروجی: ' . $e->getMessage()], 500);
         }
     }
 }

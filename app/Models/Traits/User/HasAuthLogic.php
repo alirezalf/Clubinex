@@ -69,11 +69,16 @@ trait HasAuthLogic
 
     public function verifyOtp($otp)
     {
-        if ($this->otp === $otp) {
+        if ($this->otp == $otp) {
+            $activeStatusId = \Illuminate\Support\Facades\Cache::rememberForever('active_user_status_id', function () {
+                $status = \App\Models\UserStatus::where('slug', 'active')->first();
+                return $status ? $status->id : 1;
+            });
+
             $this->update([
                 'otp_verified_at' => now(),
                 'otp' => null,
-                'status_id' => UserStatus::where('slug', 'active')->first()->id,
+                'status_id' => $activeStatusId,
             ]);
             return true;
         }
@@ -94,6 +99,6 @@ trait HasAuthLogic
     {
         $this->update(['last_login_at' => now()]);
     }
-
+    
     public function hasVerifiedEmail() { return !is_null($this->email_verified_at); }
 }

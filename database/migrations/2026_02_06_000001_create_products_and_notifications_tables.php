@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('icon')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         // 2. جدول محصولات
@@ -34,6 +35,7 @@ return new class extends Migration
             $table->integer('points_value')->default(0); // امتیازی که کاربر با ثبت این محصول می‌گیرد
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         // 3. جدول سریال‌های محصول (برای سریال‌های از پیش تعریف شده توسط ادمین/اکسل)
@@ -51,36 +53,36 @@ return new class extends Migration
         Schema::create('product_registrations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            
+
             // اطلاعات محصول
             $table->string('product_name');
             $table->string('product_model');
             $table->string('product_brand')->nullable();
             $table->string('serial_code');
             $table->foreignId('category_id')->nullable()->constrained('categories');
-            
+
             // تصاویر
             $table->string('product_image')->nullable();
             $table->string('invoice_image')->nullable(); // تصویر فاکتور
-            
+
             // نقش‌ها (مشتری، فروشنده، معرف)
             $table->enum('customer_type', ['owner', 'other'])->default('owner');
             $table->string('customer_mobile')->nullable();
-            
+
             $table->enum('seller_type', ['none', 'owner', 'other'])->default('none');
             $table->string('seller_mobile')->nullable();
-            
+
             $table->enum('introducer_type', ['none', 'owner', 'other'])->default('none');
             $table->string('introducer_mobile')->nullable();
-            
+
             // وضعیت گارانتی
             $table->enum('warranty_status', ['no_guarantee', 'request_activation', 'already_active'])->default('request_activation');
-            
+
             // وضعیت درخواست
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->text('admin_note')->nullable();
             $table->foreignId('admin_id')->nullable()->constrained('users');
-            
+
             $table->timestamps();
         });
 

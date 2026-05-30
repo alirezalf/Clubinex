@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingBag, RefreshCw, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { InputGroup } from './SharedInputs';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 import { router } from '@inertiajs/react';
 
 interface WpData {

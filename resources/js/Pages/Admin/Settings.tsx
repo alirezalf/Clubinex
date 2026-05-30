@@ -1,6 +1,6 @@
 
 import { Head, useForm, router, usePage } from '@inertiajs/react';
-import { Save, Globe, Smartphone, Palette, Share2, Phone, Mail, BellRing, Code, ShoppingBag, Headphones, Shield, User as UserIcon, MessageSquare } from 'lucide-react';
+import { Save, Globe, Smartphone, Palette, Share2, Phone, Mail, BellRing, Code, ShoppingBag, Headphones, Shield, User as UserIcon, MessageSquare, CreditCard } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import clsx from 'clsx';
@@ -20,6 +20,7 @@ import SocialSettings from '@/Components/Admin/Settings/SocialSettings';
 import SmsSettings from '@/Components/Admin/Settings/SmsSettings';
 import EmailSettings from '@/Components/Admin/Settings/EmailSettings';
 import LoginSettings from '@/Components/Admin/Settings/LoginSettings';
+import PaymentSettings from '@/Components/Admin/Settings/PaymentSettings';
 import type { PageProps, User } from '@/types/index';
 
 // Types
@@ -62,7 +63,7 @@ interface SmsTemplate {
 interface SettingsProps extends PageProps {
     settings: Record<string, SettingItem[]>;
     notificationTemplates: NotificationTemplate[];
-    emailThemes?: EmailTheme[]; 
+    emailThemes?: EmailTheme[];
     smsTemplates?: SmsTemplate[];
     admins?: User[];
 }
@@ -73,6 +74,7 @@ const TABS = [
     { id: 'theme', label: 'شخصی‌سازی ظاهر', icon: Palette },
     { id: 'login', label: 'تنظیمات ورود', icon: UserIcon }, // New Tab
     { id: 'security', label: 'امنیت', icon: Shield },
+    { id: 'payment', label: 'تنظیمات درگاه', icon: CreditCard }, // Payment tab
     { id: 'contact', label: 'اطلاعات تماس', icon: Phone },
     { id: 'social', label: 'شبکه‌های اجتماعی', icon: Share2 },
     { id: 'sms', label: 'تنظیمات پیامک', icon: Smartphone },
@@ -80,8 +82,8 @@ const TABS = [
     { id: 'email', label: 'تنظیمات ایمیل', icon: Mail },
     { id: 'support', label: 'تیکت و پشتیبانی', icon: Headphones },
     { id: 'wordpress', label: 'فروشگاه (WordPress)', icon: ShoppingBag },
-    { id: 'email_themes', label: 'قالب‌های ایمیل', icon: Code }, 
-    { id: 'templates', label: 'تنظیمات رویدادها', icon: BellRing }, 
+    { id: 'email_themes', label: 'قالب‌های ایمیل', icon: Code },
+    { id: 'templates', label: 'تنظیمات رویدادها', icon: BellRing },
 ];
 
 export default function AdminSettings({ settings, notificationTemplates, emailThemes = [], smsTemplates = [], admins = [] }: SettingsProps) {
@@ -98,7 +100,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
     const initialValues = useMemo(() => {
         // Use DB Settings (settings prop) for initial values, NOT active theme (themeSettings)
         // This prevents overwriting System Settings with User Preferences
-        
+
         return {
         // General & SEO
         site_title: getSettingValue('general', 'site_title', 'Clubinex'),
@@ -111,7 +113,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         author: getSettingValue('general', 'author', 'علیرضا لباف'),
         app_version: getSettingValue('general', 'app_version', '4.3.0'),
         app_description: getSettingValue('general', 'app_description', 'سیستم یکپارچه باشگاه مشتریان با امکانات گیمیفیکیشن، ثبت سریال محصولات، گردونه شانس، نظرسنجی و مدیریت پیشرفته.'),
-        
+
         // Theme (Use DB Settings directly)
         primary_color: getSettingValue('theme', 'primary_color', '#0284c7'),
         sidebar_bg: getSettingValue('theme', 'sidebar_bg', '#ffffff'),
@@ -123,7 +125,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         card_shadow: getSettingValue('theme', 'card_shadow', 'sm'),
         card_opacity: getSettingValue('theme', 'card_opacity', '1'),
         sidebar_collapsed: getSettingValue('theme', 'sidebar_collapsed', '0') === '1',
-            
+
         reset_personal_theme: false, // Do not reset by default
         logo_url: null as File | string | null,
         favicon_url: null as File | string | null,
@@ -161,6 +163,18 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         telegram: getSettingValue('social', 'telegram', ''),
         whatsapp: getSettingValue('social', 'whatsapp', ''),
         linkedin: getSettingValue('social', 'linkedin', ''),
+
+        // Payment & Finance
+        payment_gateway: getSettingValue('payment', 'payment_gateway', 'zarinpal'),
+        payment_merchant_id: getSettingValue('payment', 'payment_merchant_id', ''),
+        payment_username: getSettingValue('payment', 'payment_username', ''),
+        payment_password: getSettingValue('payment', 'payment_password', ''),
+        payment_api_key: getSettingValue('payment', 'payment_api_key', ''),
+        payment_sandbox: getSettingValue('payment', 'payment_sandbox', '1') === '1',
+        currency: getSettingValue('finance', 'currency', 'تومان'),
+        point_to_currency_rate: getSettingValue('finance', 'point_to_currency_rate', '100'),
+        allow_points_to_wallet: getSettingValue('finance', 'allow_points_to_wallet', '1') === '1' || getSettingValue('finance', 'allow_points_to_wallet', '1') === true,
+        allow_wallet_to_points: getSettingValue('finance', 'allow_wallet_to_points', '1') === '1' || getSettingValue('finance', 'allow_wallet_to_points', '1') === true,
 
         // SMS & Email
         sms_provider: getSettingValue('sms', 'sms_provider', 'kavenegar'),
@@ -204,6 +218,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         login: ['login_theme', 'login_layout_reversed', 'login_left_bg_type', 'login_left_image', 'login_left_color', 'login_left_gradient', 'login_right_bg_type', 'login_right_image', 'login_right_color', 'login_right_gradient', 'login_title', 'login_subtitle', 'login_copyright', 'login_slogan_title', 'login_slogan_text', 'login_logo', 'login_title_color', 'login_subtitle_color', 'login_slogan_color', 'login_copyright_color', 'login_btn_bg', 'login_btn_text', 'login_card_bg'],
         contact: ['admin_mobile', 'support_email', 'address'],
         social: ['instagram', 'telegram', 'whatsapp', 'linkedin'],
+        payment: ['payment_gateway', 'payment_merchant_id', 'payment_username', 'payment_password', 'payment_api_key', 'payment_sandbox', 'currency', 'point_to_currency_rate', 'allow_points_to_wallet', 'allow_wallet_to_points'],
         sms: ['sms_provider', 'sms_sender', 'sms_api_key', 'sms_username', 'sms_password', 'resend_interval', 'sms_ir_template_id', 'sms_ir_parameter_name'],
         email: ['mail_host', 'mail_port', 'mail_username', 'mail_password', 'mail_from_address', 'mail_from_name'],
         wordpress: ['wp_url', 'wp_consumer_key', 'wp_consumer_secret'],
@@ -213,11 +228,11 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Filter data to only include fields for the active tab
         const fieldsToSubmit = TAB_FIELDS[activeTab] || [];
         const payload: any = { _method: 'post' };
-        
+
         // Always include _method
         // Add only relevant fields
         fieldsToSubmit.forEach(field => {
@@ -228,12 +243,12 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
             }
         });
 
-        // Special case for SEO which is mixed with General in UI but might be separate in logic, 
+        // Special case for SEO which is mixed with General in UI but might be separate in logic,
         // but here we grouped them in TAB_FIELDS.general if they are on the same tab.
         // The UI shows GeneralSettings component for 'general' tab.
         // Let's check GeneralSettings component to see if it includes SEO fields.
         // Yes, usually.
-        
+
         router.post(route('admin.settings.update'), payload, {
             forceFormData: true,
             preserveScroll: true,
@@ -248,7 +263,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
                     root.style.setProperty('--radius-xl', String(data.radius_size));
                     root.style.setProperty('--radius-2xl', `calc(${data.radius_size} + 0.25rem)`);
                     root.style.setProperty('--card-opacity', String(data.card_opacity));
-                    
+
                     document.body.setAttribute('data-card-style', String(data.card_style));
                     document.body.setAttribute('data-card-shadow', String(data.card_shadow));
 
@@ -276,17 +291,17 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
             <Head title="تنظیمات سیستم" />
 
             <div className="flex flex-col lg:flex-row gap-6">
-                
+
                 {/* Sidebar Navigation */}
-                <SettingsSidebar 
-                    tabs={TABS} 
-                    activeTab={activeTab} 
-                    onChange={setActiveTab} 
+                <SettingsSidebar
+                    tabs={TABS}
+                    activeTab={activeTab}
+                    onChange={setActiveTab}
                 />
 
                 {/* Main Content Area */}
                 <div className="flex-1 card-base p-6 min-h-[600px]">
-                    
+
                     {activeTab === 'theme' ? (
                         <ThemeCustomizer data={data} setData={setData} submit={submit} handleFileChange={handleFileChange} />
                     ) : activeTab === 'templates' ? (
@@ -307,7 +322,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
                         <SmsTemplatesManager templates={smsTemplates} />
                     ) : (
                         <form onSubmit={submit} className="space-y-6" encType="multipart/form-data">
-                            
+
                             {activeTab === 'security' && (
                                 <SecuritySettings data={data} setData={setData} />
                             )}
@@ -326,6 +341,10 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
 
                             {activeTab === 'social' && (
                                 <SocialSettings data={data} setData={handleSettingChange} />
+                            )}
+
+                            {activeTab === 'payment' && (
+                                <PaymentSettings data={data} setData={handleSettingChange} />
                             )}
 
                             {activeTab === 'sms' && (

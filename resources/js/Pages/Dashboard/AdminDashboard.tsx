@@ -11,6 +11,8 @@ interface AdminStats {
     avg_points: number;
     busiest_hour: string;
     retention_rate: number;
+    point_real_value?: number;
+    total_redeemed_points?: number;
 }
 
 interface Props {
@@ -246,7 +248,14 @@ export default function AdminDashboard({ stats, recentActivities, latestUsers, q
             </div>
 
             {/* بخش آمار سریع */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                <QuickStatCard
+                    title="ارزش هر امتیاز"
+                    value={`${stats.point_real_value || 0} تومان`}
+                    icon={Sparkles}
+                    trend="مبتنی بر جوایز بازخریدشده"
+                    trendUp={true}
+                />
                 <QuickStatCard
                     title="میانگین امتیاز هر کاربر"
                     value={stats.avg_points?.toLocaleString() || "0"}

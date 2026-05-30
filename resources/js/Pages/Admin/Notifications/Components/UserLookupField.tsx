@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 import { Smartphone, User, Loader2, CheckCircle2 } from 'lucide-react';
 
 interface Props {

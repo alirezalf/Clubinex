@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { Plus, Eye, Edit, CheckCircle, ShieldBan, User, Trash2 } from 'lucide-react';
@@ -36,6 +35,7 @@ interface FilterParams {
     search?: string;
     role?: string;
     club?: string;
+    tag?: string;
     sort_by?: string;
     sort_dir?: string;
 }
@@ -53,6 +53,7 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
     const [search, setSearch] = useState(filters.search || '');
     const [roleFilter, setRoleFilter] = useState(filters.role || 'all');
     const [clubFilter, setClubFilter] = useState(filters.club || 'all');
+    const [tagFilter, setTagFilter] = useState(filters.tag || 'all');
 
     const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -75,6 +76,7 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
         setSearch(filters.search || '');
         setRoleFilter(filters.role || 'all');
         setClubFilter(filters.club || 'all');
+        setTagFilter(filters.tag || 'all');
     }, [filters]);
 
     const performSearch = (val: string) => {
@@ -84,6 +86,7 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
                 search: val,
                 role: roleFilter !== 'all' ? roleFilter : null,
                 club: clubFilter !== 'all' ? clubFilter : null,
+                tag: tagFilter !== 'all' ? tagFilter : null,
                 sort_by: filters.sort_by,
                 sort_dir: filters.sort_dir,
             },
@@ -98,6 +101,7 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
                 search,
                 role: roleFilter !== 'all' ? roleFilter : null,
                 club: clubFilter !== 'all' ? clubFilter : null,
+                tag: tagFilter !== 'all' ? tagFilter : null,
                 sort_by: filters.sort_by,
                 sort_dir: filters.sort_dir,
             },
@@ -114,6 +118,7 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
                 search,
                 role: roleFilter !== 'all' ? roleFilter : null,
                 club: clubFilter !== 'all' ? clubFilter : null,
+                tag: tagFilter !== 'all' ? tagFilter : null,
                 sort_by: field,
                 sort_dir: newDir,
             },
@@ -123,18 +128,18 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
 
     const handleStatusToggle = (user: AdminUser) => {
         const isBanned = user.status?.slug === 'banned';
-        
+
         setConfirmModal({
             isOpen: true,
             title: isBanned ? 'فعال‌سازی کاربر' : 'مسدودسازی کاربر',
-            message: isBanned 
-                ? 'آیا از رفع مسدودی این کاربر اطمینان دارید؟' 
+            message: isBanned
+                ? 'آیا از رفع مسدودی این کاربر اطمینان دارید؟'
                 : 'آیا از مسدود کردن این کاربر اطمینان دارید؟ دسترسی او به سیستم قطع خواهد شد.',
             type: isBanned ? 'warning' : 'danger',
             action: () => router.post(
                 route('admin.users.toggle-status', user.id),
                 {},
-                { 
+                {
                     preserveScroll: true,
                     onFinish: () => setConfirmModal(prev => ({...prev, isOpen: false}))
                 }
@@ -145,9 +150,9 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
     // --- Bulk Action Handlers ---
     const handleSelect = (id: number | string) => {
         const numericId = Number(id);
-        setSelectedIds(prev => 
-            prev.includes(numericId) 
-                ? prev.filter(item => item !== numericId) 
+        setSelectedIds(prev =>
+            prev.includes(numericId)
+                ? prev.filter(item => item !== numericId)
                 : [...prev, numericId]
         );
     };
@@ -206,10 +211,10 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
                 <div className="flex flex-wrap gap-1">
                     {user.roles && user.roles.length > 0 ? user.roles.map((role: any, idx: number) => (
                         <span key={idx} className={`text-[10px] px-2 py-1 rounded-md whitespace-nowrap border ${
-                            role.name === 'super-admin' || role.name === 'admin' 
-                            ? 'bg-purple-50 text-purple-700 border-purple-200' 
-                            : role.name === 'agent' 
-                            ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                            role.name === 'super-admin' || role.name === 'admin'
+                            ? 'bg-purple-50 text-purple-700 border-purple-200'
+                            : role.name === 'agent'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200'
                             : 'bg-gray-50 text-gray-600 border-gray-200'
                         }`}>
                             {role.name === 'super-admin' ? 'مدیر کل' : role.name === 'admin' ? 'مدیر' : role.name === 'agent' ? 'نماینده' : 'کاربر'}
@@ -288,6 +293,27 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
                     >
                         {user.status?.slug === 'banned' ? <CheckCircle size={16} /> : <ShieldBan size={16} />}
                     </button>
+                    <button
+                        onClick={() => {
+                            setConfirmModal({
+                                isOpen: true,
+                                title: 'حذف کاربر',
+                                message: 'آیا از حذف این کاربر اطمینان دارید؟ این عمل غیرقابل بازگشت است.',
+                                type: 'danger',
+                                action: () => router.delete(
+                                    route('admin.users.destroy', user.id),
+                                    {
+                                        preserveScroll: true,
+                                        onFinish: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+                                    }
+                                )
+                            });
+                        }}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition border border-transparent hover:border-red-100"
+                        title="حذف کاربر"
+                    >
+                        <Trash2 size={16} />
+                    </button>
                 </div>
             )
         }
@@ -318,6 +344,8 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
                     setRoleFilter={setRoleFilter}
                     clubFilter={clubFilter}
                     setClubFilter={setClubFilter}
+                    tagFilter={tagFilter}
+                    setTagFilter={setTagFilter}
                     onApply={applyFilters}
                     roles={roles}
                     clubs={clubs}
@@ -342,7 +370,7 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
 
             <Pagination links={users.links} />
 
-            <UserBulkFloatingBar 
+            <UserBulkFloatingBar
                 count={selectedIds.length}
                 onAction={setBulkActionType}
                 onClear={() => setSelectedIds([])}
@@ -373,7 +401,7 @@ export default function AdminUsers({ users, clubs, roles, statuses, allPermissio
                 onSuccess={() => setSelectedIds([])}
             />
 
-            <ConfirmModal 
+            <ConfirmModal
                 isOpen={confirmModal.isOpen}
                 onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
                 onConfirm={confirmModal.action}

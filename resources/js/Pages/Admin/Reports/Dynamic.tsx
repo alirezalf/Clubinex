@@ -4,7 +4,7 @@ import { Head, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { PageProps } from '@/types';
 import { Search, FileSpreadsheet, Printer } from 'lucide-react';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 import clsx from 'clsx';
 
 const PersianDatePicker = React.lazy(() => import('@/Components/PersianDatePicker'));
@@ -125,18 +125,18 @@ export default function DynamicReports({ entities }: Props) {
 
         setLoading(true);
         try {
-            const response = await axios.get(route('admin.reports.dynamic.fetch'), {
-                params: {
-                    table: selectedTable,
-                    fields: selectedFields,
-                    date_from: dateFrom,
-                    date_to: dateTo,
-                    page: page,
-                    per_page: pagination.per_page,
-                    sort_dir: sortDir,
-                    advanced_filters: advancedFilters
-                }
-            });
+            const payload: any = {
+                table: selectedTable,
+                fields: selectedFields,
+                page: page,
+                per_page: pagination.per_page,
+                sort_dir: sortDir,
+                advanced_filters: advancedFilters
+            };
+            if (dateFrom) payload.date_from = dateFrom;
+            if (dateTo) payload.date_to = dateTo;
+
+            const response = await axios.post(route('admin.reports.dynamic.fetch'), payload);
 
             if (response.data.data) {
                 setReportData(response.data.data);
@@ -155,33 +155,29 @@ export default function DynamicReports({ entities }: Props) {
             } else {
                 setReportData([]);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching report:', error);
-            alert('خطا در دریافت اطلاعات.');
+            const msg = error.response?.data?.error || error.response?.data?.message || 'خطا در دریافت اطلاعات.';
+            alert(msg);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleExport = () => {
+    const handleExport = async () => {
         if (selectedFields.length === 0 || pagination.total === 0) return;
 
-        const params = new URLSearchParams();
-        params.append('table', selectedTable);
-        selectedFields.forEach(f => params.append('fields[]', f));
-        if (dateFrom) params.append('date_from', dateFrom);
-        if (dateTo) params.append('date_to', dateTo);
-        params.append('sort_dir', sortDir);
-        if (showRowNumber) params.append('show_row_number', '1');
+        const payload: any = {
+            table: selectedTable,
+            fields: selectedFields,
+            sort_dir: sortDir,
+            advanced_filters: advancedFilters,
+            show_row_number: showRowNumber
+        };
+        if (dateFrom) payload.date_from = dateFrom;
+        if (dateTo) payload.date_to = dateTo;
 
-        // Serialize advanced filters
-        advancedFilters.forEach((f, i) => {
-            params.append(`advanced_filters[${i}][field]`, f.field);
-            params.append(`advanced_filters[${i}][operator]`, f.operator);
-            params.append(`advanced_filters[${i}][value]`, f.value);
-        });
-
-        window.open(`${route('admin.reports.dynamic.export')}?${params.toString()}`, '_blank');
+        window.location.href = route('admin.reports.dynamic.export', payload) as string;
     };
 
     const handlePrint = () => {

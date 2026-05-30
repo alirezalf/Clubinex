@@ -3,7 +3,7 @@ import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { PageProps } from '@/types';
-import { Award, ShoppingBag, Dna, Package, ArrowRight } from 'lucide-react';
+import { Award, ShoppingBag, Dna, Package, ArrowRight, Users } from 'lucide-react';
 import UserInfoCard from './Partials/UserInfoCard';
 import SimpleHistoryTable from './Partials/SimpleHistoryTable';
 
@@ -27,10 +27,11 @@ interface Props extends PageProps {
     rewards: any[];
     products: any[];
     spins: { data: any[] };
+    referrals: any[];
     from?: 'users' | 'rewards';
 }
 
-export default function UserHistory({ user, stats, transactions, rewards, products, spins, from = 'rewards' }: Props) {
+export default function UserHistory({ user, stats, transactions, rewards, products, spins, referrals, from = 'rewards' }: Props) {
 
     const backRoute = from === 'users' ? route('admin.users') : route('admin.rewards.index', {tab: 'redemptions'});
     const parentLabel = from === 'users' ? 'مدیریت کاربران' : 'مدیریت جوایز';
@@ -143,6 +144,27 @@ export default function UserHistory({ user, stats, transactions, rewards, produc
                         )}
                         emptyMessage="هنوز از گردونه استفاده نشده است."
                     />
+
+                    {/* 5. Referrals */}
+                    <div className="lg:col-span-2">
+                        <SimpleHistoryTable
+                            title="نفرات دعوت شده توسط این کاربر"
+                            icon={Users}
+                            iconColorClass="text-indigo-600"
+                            headers={['نام کاربر', 'موبایل', 'سطح', 'وضعیت', 'تاریخ']}
+                            data={referrals || []}
+                            renderRow={(ref, i) => (
+                                <tr key={i} className="hover:bg-gray-50 transition">
+                                    <td className="px-4 py-3 font-medium text-gray-800">{ref.name}</td>
+                                    <td className="px-4 py-3 font-mono text-xs text-gray-600">{ref.mobile}</td>
+                                    <td className="px-4 py-3 text-xs text-gray-600 font-bold">{ref.level}</td>
+                                    <td className="px-4 py-3 text-xs text-gray-600">{ref.status}</td>
+                                    <td className="px-4 py-3 text-gray-500 text-xs dir-ltr text-right">{ref.date}</td>
+                                </tr>
+                            )}
+                            emptyMessage="هنوز هیچ کاربری را دعوت نکرده است."
+                        />
+                    </div>
                 </div>
             </div>
         </DashboardLayout>

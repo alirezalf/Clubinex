@@ -10,13 +10,13 @@ return new class extends Migration {
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); // کاربر انجام‌دهنده
             $table->foreignId('admin_id')->nullable()->constrained('users')->nullOnDelete(); // مدیر انجام‌دهنده
             $table->string('action', 100);                   // نوع فعالیت (مثلا: user.login)
-            
+
             // لیست کامل گروه‌های فعالیت (ادغام شده و کامل)
             $table->enum('action_group', [
-                'user', 'point', 'survey', 'club', 'referral', 'wheel', 'system', 
+                'user', 'point', 'survey', 'club', 'referral', 'wheel', 'system',
                 'reward', 'product', 'sms', 'email', 'agent', 'ticket'
-            ]); 
-            
+            ]);
+
             $table->text('description');                     // توضیح کامل فعالیت (فارسی)
             $table->string('model_type', 100)->nullable();   // نوع مدل مرتبط
             $table->unsignedBigInteger('model_id')->nullable(); // شناسه مدل مرتبط
@@ -29,14 +29,15 @@ return new class extends Migration {
             $table->enum('severity', ['info', 'warning', 'error', 'critical'])->default('info'); // سطح اهمیت
             $table->timestamps();                            // زمان ایجاد و بروزرسانی
             $table->softDeletes();                           // حذف نرم
-            
+
             // ایندکس‌گذاری برای افزایش سرعت گزارش‌گیری
-            $table->index(['user_id', 'action_group', 'created_at']); 
-            $table->index(['action', 'created_at']);         
-            $table->index(['model_type', 'model_id']);       
-            $table->index('severity');                       
-            $table->index('device_type');                    
-            $table->index('ip_address');                     
+            $table->index(['user_id', 'action_group', 'created_at']);
+            $table->index(['action', 'created_at']);
+            $table->index(['model_type', 'model_id']);
+            $table->index('severity');
+            $table->index('device_type');
+            $table->index('ip_address');
+            $table->index('created_at');
         });
     }
 

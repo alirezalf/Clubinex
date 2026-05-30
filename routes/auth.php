@@ -19,7 +19,7 @@ Route::middleware('guest')->group(function () {
 
     // محدودیت: ۵ بار تلاش در ۱ دقیقه برای لاگین معمولی
     Route::post('/login', [AuthController::class, 'login'])
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:login');
 
     // OTP (Mobile Login)
     // محدودیت حیاتی: حداکثر ۱۲۰ درخواست کد تایید در هر ۱ دقیقه برای جلوگیری از SMS Bomber (Relaxed for testing)
@@ -34,7 +34,7 @@ Route::middleware('guest')->group(function () {
     // Registration
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])
-        ->middleware('throttle:3,1'); // جلوگیری از ثبت‌نام انبوه ربات‌ها
+        ->middleware('throttle:register'); // جلوگیری از ثبت‌نام انبوه ربات‌ها
 });
 
 // Logout & Lock Screen (Requires Auth)

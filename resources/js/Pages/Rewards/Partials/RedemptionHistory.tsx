@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Gift, CheckCircle2, Truck, Clock, XCircle, Package, MessageSquare } from 'lucide-react';
 import clsx from 'clsx';
@@ -69,7 +68,9 @@ export default function RedemptionHistory({ redemptions, onSwitchToStore }: Prop
                                     {item.status === 'converted' ? (
                                         <span className="text-green-600">+{item.reward_value?.toLocaleString() || 0}</span>
                                     ) : (
-                                        <span className="text-red-500">-{item.points_spent.toLocaleString()}</span>
+                                        <span className={item.points_spent === 0 ? "text-gray-500" : "text-red-500"}>
+                                            {item.points_spent === 0 ? "0 (رایگان)" : `-${item.points_spent.toLocaleString()}`}
+                                        </span>
                                     )}
                                 </td>
                                 <td className="px-6 py-4">

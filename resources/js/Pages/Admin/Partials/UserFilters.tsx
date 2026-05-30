@@ -10,6 +10,8 @@ interface Props {
     setRoleFilter: (val: string) => void;
     clubFilter: string;
     setClubFilter: (val: string) => void;
+    tagFilter: string;
+    setTagFilter: (val: string) => void;
     onApply: () => void;
     roles: { id: number; name: string }[];
     clubs: { id: number; name: string }[];
@@ -25,11 +27,12 @@ const translateRole = (role: string) => {
     return roleNames[role] || role;
 };
 
-export default function UserFilters({ 
-    search, setSearch, onSearch, 
-    roleFilter, setRoleFilter, 
-    clubFilter, setClubFilter, 
-    onApply, roles, clubs 
+export default function UserFilters({
+    search, setSearch, onSearch,
+    roleFilter, setRoleFilter,
+    clubFilter, setClubFilter,
+    tagFilter, setTagFilter,
+    onApply, roles, clubs
 }: Props) {
     return (
         <div className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-4 md:flex-row items-end md:items-center shadow-sm">
@@ -67,6 +70,18 @@ export default function UserFilters({
                             {club.name}
                         </option>
                     ))}
+                </select>
+
+                <select
+                    value={tagFilter}
+                    onChange={(e) => setTagFilter(e.target.value)}
+                    className="rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 flex-1 md:flex-none bg-white min-w-[120px]"
+                >
+                    <option value="all">همه دستجات (تگ‌ها)</option>
+                    <option value="active">فعال اخیر</option>
+                    <option value="inactive">غیرفعال بیش از ۳۰ روز</option>
+                    <option value="top_earner">پردرآمد (بالای ۱۰,۰۰۰ امتیاز)</option>
+                    <option value="discount_lover">علاقه‌مند به تخفیف</option>
                 </select>
 
                 <button

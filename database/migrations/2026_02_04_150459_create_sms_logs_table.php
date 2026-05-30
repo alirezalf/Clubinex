@@ -21,11 +21,12 @@ return new class extends Migration {
             $table->timestamp('sent_at')->nullable();        // زمان ارسال
             $table->timestamp('delivered_at')->nullable();   // زمان تحویل
             $table->timestamps();                            // زمان ایجاد و بروزرسانی
-            
+
             $table->index(['user_id', 'created_at']);        // ایندکس برای گزارش‌گیری
             $table->index(['mobile', 'status']);             // ایندکس برای پیگیری
             $table->index('sms_type');                       // ایندکس برای تحلیل انواع SMS
             $table->index(['sent_at', 'delivered_at']);      // ایندکس برای محاسبه زمان ارسال
+            $table->index('created_at');                     // ایندکس برای بهینه سازی صفحه بندی
         });
     }
 

@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\LuckyWheel;
 use App\Models\LuckyWheelPrize;
+use App\Models\LuckyWheelSpin;
+use App\Models\User;
 
 class LuckyWheelSeeder extends Seeder
 {
@@ -89,6 +91,34 @@ class LuckyWheelSeeder extends Seeder
                 ['lucky_wheel_id' => $wheel->id, 'title' => $prize['title']],
                 $prize
             );
+        }
+
+        // ایجاد تاریخچه چرخش برای کاربران تستی
+        $users = User::whereDoesntHave('roles', function($q) {
+            $q->where('name', 'super-admin');
+        })->get();
+
+        $allPrizes = LuckyWheelPrize::where('lucky_wheel_id', $wheel->id)->get();
+
+        if ($users->count() > 0 && $allPrizes->count() > 0) {
+            foreach ($users as $user) {
+                // هر کاربر بین ۲ تا ۶ بار چرخش می‌کند
+                $spinsCount = rand(2, 6);
+
+                for ($i = 0; $i < $spinsCount; $i++) {
+                    $randomPrize = $allPrizes->random();
+                    $isWin = !in_array($randomPrize->type, ['empty', 'retry']);
+
+                    LuckyWheelSpin::create([
+                        'user_id' => $user->id,
+                        'lucky_wheel_id' => $wheel->id,
+                        'prize_id' => $randomPrize->id,
+                        'cost_paid' => $wheel->cost_per_spin,
+                        'is_win' => $isWin,
+                        'created_at' => now()->subDays(rand(1, 30))->subHours(rand(1, 24)),
+                    ]);
+                }
+            }
         }
     }
 }

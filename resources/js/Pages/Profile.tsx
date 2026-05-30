@@ -1,8 +1,8 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, Link } from '@inertiajs/react';
 import React, { useRef, FormEvent, useState, useEffect } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import type { PageProps, User } from '@/types';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 
 // Partials
 import UpgradeAlert from './Profile/Partials/UpgradeAlert';
@@ -156,6 +156,21 @@ export default function Profile({ user, provinces, initialCities }: Props) {
 
                     <div className="space-y-6">
                         <PasswordForm />
+
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-800">دستگاه‌های فعال</h3>
+                            </div>
+                            <p className="text-sm text-gray-500 mb-6 font-medium leading-relaxed">
+                                نشست‌ها و دستگاه‌هایی که هم‌اکنون به حساب شما متصل هستند را مشاهده و مدیریت کنید.
+                            </p>
+                            <Link href={route('profile.sessions')} className="w-full h-11 flex items-center justify-center rounded-xl bg-gray-900 text-white font-bold text-sm hover:bg-gray-800 transition shadow-sm">
+                                مدیریت دستگاه‌ها
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

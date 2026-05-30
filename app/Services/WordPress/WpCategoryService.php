@@ -39,11 +39,35 @@ class WpCategoryService extends BaseWordPressService
                     ];
                 }
 
+                // Pre-load existing categories
+                $wpIds = [];
+                $slugs = [];
+                foreach ($categories as $cat) {
+                    if ($wpId = Arr::get($cat, $mapping['wp_id'] ?? 'id')) $wpIds[] = $wpId;
+
+                    $title = Arr::get($cat, $mapping['title'] ?? 'name');
+                    $slug = Arr::get($cat, $mapping['slug'] ?? 'slug');
+                    if (empty($slug) && $title) {
+                        $slug = Str::slug($title);
+                    }
+                    if ($slug) $slugs[] = $slug;
+                }
+
+                $existingCategories = Category::withTrashed()
+                    ->where(function($query) use ($wpIds, $slugs) {
+                        $query->whereIn('wp_id', array_filter(array_unique($wpIds)))
+                              ->orWhereIn('slug', array_filter(array_unique($slugs)));
+                    })
+                    ->get();
+
+                $categoriesByWpId = $existingCategories->keyBy('wp_id');
+                $categoriesBySlug = $existingCategories->keyBy('slug');
+
                 // --- مرحله اول: ایجاد یا بروزرسانی تمام دسته‌ها (بدون در نظر گرفتن والد) ---
                 foreach ($categories as $cat) {
                     $wpId = Arr::get($cat, $mapping['wp_id'] ?? 'id');
                     $title = Arr::get($cat, $mapping['title'] ?? 'name');
-                    
+
                     if (!$title || !$wpId) continue;
 
                     $slug = Arr::get($cat, $mapping['slug'] ?? 'slug');
@@ -54,10 +78,10 @@ class WpCategoryService extends BaseWordPressService
                     $icon = isset($mapping['image']) ? Arr::get($cat, $mapping['image']) : null;
                     if(is_array($icon)) $icon = $icon['src'] ?? null;
 
-                    // جستجو بر اساس wp_id (اولویت) یا slug
-                    $category = Category::where('wp_id', $wpId)->first();
+                    // جستجو بر اساس wp_id (اولویت) یا slug از مپ
+                    $category = $categoriesByWpId->get($wpId);
                     if (!$category) {
-                        $category = Category::where('slug', $slug)->first();
+                        $category = $categoriesBySlug->get($slug);
                     }
 
                     if ($category) {
@@ -66,6 +90,7 @@ class WpCategoryService extends BaseWordPressService
                             'title' => $title,
                             'slug' => $slug,
                             'icon' => $icon ?: $category->icon,
+                            'deleted_at' => null // Restore if soft deleted
                         ]);
                         $updated++;
                     } else {
@@ -82,16 +107,23 @@ class WpCategoryService extends BaseWordPressService
 
                 // --- مرحله دوم: آپدیت روابط والد/فرزند ---
                 // این مرحله جداگانه انجام می‌شود تا مطمئن شویم والدها حتماً ساخته شده‌اند
+                // مجددا همه دسته‌ها را برای روابط لود می‌کنیم
+                $allAffectedWpIds = array_filter(array_unique(array_merge(
+                    array_column($categories, $mapping['wp_id'] ?? 'id'),
+                    array_column($categories, $mapping['parent_id'] ?? 'parent')
+                )));
+                $refreshCategoriesByWpId = Category::whereIn('wp_id', $allAffectedWpIds)->get()->keyBy('wp_id');
+
                 foreach ($categories as $cat) {
                     $wpId = Arr::get($cat, $mapping['wp_id'] ?? 'id');
                     $wpParentId = (int) Arr::get($cat, $mapping['parent_id'] ?? 'parent', 0);
 
                     if ($wpId && $wpParentId > 0) {
                         // پیدا کردن دسته‌ی فرزند (که همین الان ساختیم/آپدیت کردیم)
-                        $currentCat = Category::where('wp_id', $wpId)->first();
-                        
+                        $currentCat = $refreshCategoriesByWpId->get($wpId);
+
                         // پیدا کردن دسته‌ی والد در دیتابیس خودمان
-                        $parentCat = Category::where('wp_id', $wpParentId)->first();
+                        $parentCat = $refreshCategoriesByWpId->get($wpParentId);
 
                         if ($currentCat && $parentCat) {
                             // فقط اگر والد تغییر کرده باشد آپدیت می‌کنیم

@@ -36,7 +36,7 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh]">
 
                 <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
@@ -52,18 +52,27 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
                             <div className="relative group rounded-xl overflow-hidden shadow-sm bg-white flex items-center justify-center h-full max-h-[500px]">
                                 {registration.invoice_image ? (
                                     <div className="relative w-full h-full flex items-center justify-center p-2">
-                                        <img
-                                            src={registration.invoice_image}
-                                            alt="Invoice"
-                                            className={`max-w-full max-h-full object-contain transition-transform duration-300 ${isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'}`}
-                                            onClick={() => setIsZoomed(!isZoomed)}
-                                        />
-                                        {!isZoomed && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                                <span className="bg-black/70 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
-                                                    <ZoomIn size={14} /> کلیک برای بزرگنمایی
-                                                </span>
-                                            </div>
+                                        {registration.invoice_image.toLowerCase().endsWith('.pdf') ? (
+                                            <a href={registration.invoice_image} target="_blank" className="flex flex-col items-center justify-center p-8 text-blue-600 hover:text-blue-800 transition bg-blue-50 rounded-xl w-full h-full">
+                                                <FileText size={64} className="mb-4" />
+                                                <span className="font-bold">مشاهده فایل فاکتور (PDF)</span>
+                                            </a>
+                                        ) : (
+                                            <>
+                                                <img
+                                                    src={registration.invoice_image}
+                                                    alt="تصویر فاکتور"
+                                                    className={`max-w-full max-h-full object-contain transition-transform duration-300 ${isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'}`}
+                                                    onClick={() => setIsZoomed(!isZoomed)}
+                                                />
+                                                {!isZoomed && (
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                        <span className="bg-black/70 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
+                                                            <ZoomIn size={14} /> کلیک برای بزرگنمایی
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 ) : (
@@ -115,7 +124,15 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
                                         </div>
                                         <div className="flex justify-between items-center pt-2 mt-2 border-t border-gray-50">
                                             <span className="text-gray-500">سریال:</span>
-                                            <span className="font-mono bg-yellow-50 px-3 py-1 rounded text-yellow-800 font-bold border border-yellow-100 tracking-wider select-all">{registration.serial_code}</span>
+                                            <div className="flex items-center gap-2">
+                                                {registration.is_serial_valid === true && (
+                                                    <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">معتبر</span>
+                                                )}
+                                                {registration.is_serial_valid === false && (
+                                                    <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-bold">نا معتبر</span>
+                                                )}
+                                                <span className="font-mono bg-yellow-50 px-3 py-1 rounded text-yellow-800 font-bold border border-yellow-100 tracking-wider select-all">{registration.serial_code}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -84,6 +84,7 @@ class PointTransaction extends Model
 
     public function getAmountWithSignAttribute()
     {
+        if ($this->amount == 0) return "0";
         return $this->isEarned() || ($this->isAdjustment() && $this->amount > 0)
             ? "+{$this->amount}"
             : "-" . abs($this->amount);
@@ -138,6 +139,9 @@ class PointTransaction extends Model
             // آپدیت مستقیم کاربر
             $user->current_points = $newBalance;
             $user->save();
+
+            // به‌روزرسانی کش امتیاز کاربر در زمان کسب یا خرج امتیاز (Event-driven / Triggered)
+            \Illuminate\Support\Facades\Cache::put('user_points_' . $user->id, $newBalance, now()->addDays(7));
 
             // ثبت لاگ فعالیت
             try {

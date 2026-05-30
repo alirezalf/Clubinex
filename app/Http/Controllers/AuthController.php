@@ -27,7 +27,7 @@ class AuthController extends Controller
     {
         // Fetch all settings flattened by key
         $settings = \App\Models\SystemSetting::all()->pluck('value', 'key')->toArray();
-        
+
         $captchaEnabled = filter_var($settings['captcha_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $captchaUrl = $captchaEnabled ? captcha_src('flat') : null;
 
@@ -44,10 +44,10 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            
+
             session(['locked' => false]);
             session(['last_activity_time' => now()->timestamp]);
-            
+
             ActivityLog::log('user.login', 'ورود موفق با ایمیل', ['user_id' => Auth::id()]);
 
             return redirect()->intended('dashboard');
@@ -61,7 +61,7 @@ class AuthController extends Controller
     // مرحله 1: درخواست OTP (ریفکتور شده)
     public function sendOtp(SendOtpRequest $request)
     {
-        $result = $this->otpService->sendOtp($request->mobile);
+        $result = $this->otpService->sendOtp($request->mobile, $request->referral_code);
 
         if ($result['success']) {
             return response()->json([
@@ -89,10 +89,10 @@ class AuthController extends Controller
         if ($user) {
             Auth::login($user, true);
             $request->session()->regenerate();
-            
+
             session(['locked' => false]);
             session(['last_activity_time' => now()->timestamp]);
-            
+
             ActivityLog::log('user.login', 'ورود با موبایل (OTP)', ['user_id' => $user->id]);
 
             return redirect()->intended('dashboard');
@@ -106,7 +106,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             ActivityLog::log('user.logout', 'خروج', ['user_id' => Auth::id()]);
         }
-        
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -121,6 +121,20 @@ class AuthController extends Controller
     // متد ثبت نام مستقل (ریفکتور شده)
     public function register(RegisterRequest $request)
     {
+        $referredById = null;
+        if ($request->referral_code) {
+            $referralCode = strtr($request->referral_code, ['۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9', '١'=>'1','٢'=>'2','٣'=>'3','٤'=>'4','٥'=>'5','٦'=>'6','٧'=>'7','٨'=>'8','٩'=>'9','٠'=>'0']);
+            $referralCodeUpperCase = strtoupper(trim($referralCode));
+
+            $referrer = User::where('referral_code', $referralCodeUpperCase)
+                ->orWhere('mobile', $referralCode)
+                ->first();
+
+            if ($referrer) {
+                $referredById = $referrer->id;
+            }
+        }
+
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -128,12 +142,18 @@ class AuthController extends Controller
             'mobile' => $request->mobile,
             'password' => Hash::make($request->password),
             'status_id' => 1, // Active
+            'referred_by' => $referredById,
+            'referral_code' => strtoupper(substr(md5($request->mobile . time()), 0, 8)),
         ]);
-        
+
         $user->assignRole('user');
 
+        if ($referredById && $referredById !== $user->id) {
+            \App\Models\ReferralNetwork::createReferral($referredById, $user->id);
+        }
+
         Auth::login($user);
-        
+
         session(['locked' => false]);
         session(['last_activity_time' => now()->timestamp]);
 

@@ -39,6 +39,10 @@ class UserController extends Controller
             $query->where('club_id', $request->club);
         }
 
+        if ($request->tag && $request->tag !== 'all') {
+            $query->whereJsonContains('tags', $request->tag);
+        }
+
         $sortField = $request->input('sort_by', 'created_at');
         $sortDir = $request->input('sort_dir', 'desc');
 
@@ -60,7 +64,7 @@ class UserController extends Controller
         $clubs = Club::select('id', 'name')->get();
         $roles = Role::select('name', 'id')->get();
         $statuses = UserStatus::select('id', 'name', 'slug')->get();
-        
+
         // دریافت تمام پرمیشن‌ها و گروه‌بندی آنها برای نمایش در مودال
         $allPermissions = Permission::all()->map(function($perm) {
             $parts = explode('.', $perm->name);
@@ -74,14 +78,14 @@ class UserController extends Controller
             'roles' => $roles,
             'statuses' => $statuses,
             'allPermissions' => $allPermissions, // ارسال به فرانت
-            'filters' => $request->only(['search', 'sort_by', 'sort_dir', 'role', 'club'])
+            'filters' => $request->only(['search', 'sort_by', 'sort_dir', 'role', 'club', 'tag'])
         ]);
     }
 
     public function storeUser(StoreUserRequest $request)
     {
         $validated = $request->validated();
-        $statusId = UserStatus::where('slug', 'active')->first()->id;
+        $statusId = UserStatus::where('slug', 'active')->value('id') ?? 1;
 
         $user = User::create([
             'first_name' => $validated['first_name'],
@@ -95,7 +99,7 @@ class UserController extends Controller
         ]);
 
         // $user->assignRole($validated['role']); // This might be causing the 403 if the current user doesn't have permission to assign this role
-        
+
         // Instead of directly assigning, check if the current user can assign this role
         // For now, let's assume super-admin can assign any role, and admin can assign specific roles.
         // Or simply use syncRoles which is safer if the role exists.
@@ -103,7 +107,7 @@ class UserController extends Controller
         if ($role) {
             $user->assignRole($role);
         }
-        
+
         // ذخیره پرمیشن‌های مستقیم اگر ارسال شده باشد
         if ($request->has('permissions')) {
             $user->syncPermissions($request->permissions);
@@ -140,7 +144,7 @@ class UserController extends Controller
         if($request->role) {
             $user->syncRoles([$request->role]);
         }
-        
+
         // همگام‌سازی پرمیشن‌های مستقیم
         if ($request->has('permissions')) {
             $user->syncPermissions($request->permissions);
@@ -158,8 +162,8 @@ class UserController extends Controller
     public function toggleUserStatus($id)
     {
         $user = User::findOrFail($id);
-        $activeId = UserStatus::where('slug', 'active')->first()->id;
-        $bannedId = UserStatus::where('slug', 'banned')->first()->id;
+        $activeId = UserStatus::where('slug', 'active')->value('id') ?? 1;
+        $bannedId = UserStatus::where('slug', 'banned')->value('id') ?? 2;
 
         $newStatus = $user->status_id == $bannedId ? $activeId : $bannedId;
         $user->update(['status_id' => $newStatus]);
@@ -209,19 +213,19 @@ class UserController extends Controller
                     'admin_id' => auth()->id(),
                     'new_values' => ['status_id' => $request->status_id]
                 ]);
-            } 
+            }
             elseif ($action === 'change_club') {
                 User::whereIn('id', $ids)->update(['club_id' => $request->club_id]);
                 ActivityLog::log('user.bulk_club', "تغییر باشگاه گروهی برای {$count} کاربر", [
                     'admin_id' => auth()->id(),
                     'new_values' => ['club_id' => $request->club_id]
                 ]);
-            } 
+            }
             elseif ($action === 'send_message') {
                 $users = User::whereIn('id', $ids)->get();
                 foreach ($users as $user) {
                     \Illuminate\Support\Facades\Notification::send(
-                        $user, 
+                        $user,
                         new \App\Notifications\SystemNotification('پیام از طرف مدیریت', $request->message)
                     );
                 }
@@ -235,5 +239,23 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'خطا در انجام عملیات: ' . $e->getMessage());
         }
+    }
+
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+
+        // جلوگیری از حذف خود مدیر
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'شما نمی‌توانید حساب کاربری خود را حذف کنید.');
+        }
+
+        ActivityLog::log('user.deleted', "حذف کاربر {$user->full_name} توسط مدیر", [
+            'admin_id' => auth()->id(),
+            'model_id' => $user->id
+        ]);
+
+        $user->delete();
+        return back()->with('message', 'کاربر با موفقیت حذف شد.');
     }
 }

@@ -22,9 +22,16 @@
       */
       public function spin(User $user): array
       {
-          return DB::transaction(function () use ($user) {
-              // 1. قفل کردن رکورد کاربر برای جلوگیری از درخواست همزمان
-              $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
+          $lock = \Illuminate\Support\Facades\Cache::lock('lucky_wheel_spin_'.$user->id, 10);
+
+          if (!$lock->get()) {
+              throw new Exception('درخواست شما در حال پردازش است. لطفا چند لحظه صبر کنید.');
+          }
+
+          try {
+              return DB::transaction(function () use ($user) {
+                  // 1. قفل کردن رکورد کاربر برای جلوگیری از درخواست همزمان
+                  $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
 
               // 2. اعتبارسنجی گردونه
               $wheel = $this->getActiveWheel();
@@ -77,15 +84,32 @@
               // انتخاب اولیه بر اساس وزن
               $selectedPrize = $this->selectPrizeWithProbability($prizes);
 
-              // 6. مدیریت موجودی کالا (Stock Management) با Race Condition Handling
-              if ($selectedPrize->stock !== null) {
+              // 6. مدیریت موجودی کالا (Stock Management) و سقف روزانه (Daily Limit) با Race Condition Handling
+              if ($selectedPrize->stock !== null || $selectedPrize->daily_limit !== null) {
                   // قفل کردن سطر جایزه برای اطمینان از موجودی
                   $lockedPrize = LuckyWheelPrize::where('id', $selectedPrize->id)->lockForUpdate()->first();
 
-                  if ($lockedPrize->stock > 0) {
-                      $lockedPrize->decrement('stock');
-                  } else {
-                      // اگر موجودی تمام شده بود، جایزه پوچ یا شانس مجدد را جایگزین کن
+                  $canGivePrize = true;
+
+                  if ($lockedPrize->stock !== null) {
+                      if ($lockedPrize->stock > 0) {
+                          $lockedPrize->decrement('stock');
+                      } else {
+                          $canGivePrize = false;
+                      }
+                  }
+
+                  if ($canGivePrize && $lockedPrize->daily_limit !== null) {
+                      $todayWinCount = LuckyWheelSpin::where('prize_id', $lockedPrize->id)
+                                          ->whereDate('created_at', \Carbon\Carbon::today())
+                                          ->count();
+                      if ($todayWinCount >= $lockedPrize->daily_limit) {
+                          $canGivePrize = false;
+                      }
+                  }
+
+                  if (!$canGivePrize) {
+                      // اگر موجودی تمام شده بود یا سقف پر شده بود، جایزه پوچ یا شانس مجدد را جایگزین کن
                       $fallbackPrize = $prizes->whereIn('type', ['empty', 'retry'])->first();
 
                       if (!$fallbackPrize) {
@@ -109,6 +133,9 @@
               // 8. پردازش جایزه و تولید خروجی
               return $this->processPrize($user, $selectedPrize, $spin);
           });
+          } finally {
+              $lock->release();
+          }
       }
 
       /**
@@ -134,9 +161,21 @@
       */
       private function selectPrizeWithProbability($prizes)
       {
-          // فیلتر کردن جوایزی که موجودی ندارند (یک لایه محافظتی اولیه)
-          $availablePrizes = $prizes->filter(function($p) {
-              return is_null($p->stock) || $p->stock > 0;
+          $todaySpinsCount = LuckyWheelSpin::whereDate('created_at', \Carbon\Carbon::today())
+                                           ->selectRaw('prize_id, count(*) as count')
+                                           ->groupBy('prize_id')
+                                           ->pluck('count', 'prize_id');
+
+          // فیلتر کردن جوایزی که موجودی ندارند یا از سقف روزانه گذشته‌اند
+          $availablePrizes = $prizes->filter(function($p) use ($todaySpinsCount) {
+              if (!is_null($p->stock) && $p->stock <= 0) return false;
+
+              if (!is_null($p->daily_limit)) {
+                  $todayCount = $todaySpinsCount->get($p->id, 0);
+                  if ($todayCount >= $p->daily_limit) return false;
+              }
+
+              return true;
           });
 
           // اگر همه جوایز اصلی تمام شده بودند، فقط پوچ/Retry را برگردان

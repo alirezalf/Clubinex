@@ -2,27 +2,42 @@
 
 namespace App\Services;
 
-use App\Models\SystemSetting;
 use App\Models\User;
 use App\Services\SMS\SmsManager;
-use Exception;
+use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
+use Exception;
+use Illuminate\Http\Request;
 
 class OtpService
 {
     protected $smsManager;
+    protected $request;
 
-    public function __construct(SmsManager $smsManager)
+    public function __construct(SmsManager $smsManager, Request $request)
     {
         $this->smsManager = $smsManager;
+        $this->request = $request;
     }
 
     /**
      * ارسال کد تایید
      */
-    public function sendOtp(string $mobile): array
+    public function sendOtp(string $mobile, ?string $referralCode = null): array
     {
+        // Rate limiting: Max 3 per hour per IP+Mobile combo
+        $rateLimitKey = 'send-otp:' . $mobile . ':' . $this->request->ip();
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
+            $seconds = RateLimiter::availableIn($rateLimitKey);
+            return [
+                'success' => false,
+                'message' => "بیش از حد مجاز تلاش کرده‌اید. لطفا مجددا پس از {$seconds} ثانیه تلاش کنید.",
+                'remaining' => $seconds
+            ];
+        }
+
         // 0. بررسی محدودیت ارسال (Throttling)
         $resendInterval = (int) SystemSetting::getValue('sms', 'resend_interval', 120);
         $throttleKey = 'otp_throttle_' . $mobile;
@@ -38,13 +53,38 @@ class OtpService
             }
         }
 
+        // بررسی کد معرف در صورت وجود
+        $referredById = null;
+        if (!empty($referralCode)) {
+            // تبدیل اعداد فارسی به انگلیسی و حروف به بزرگ
+            $referralCode = strtr($referralCode, ['۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9', '١'=>'1','٢'=>'2','٣'=>'3','٤'=>'4','٥'=>'5','٦'=>'6','٧'=>'7','٨'=>'8','٩'=>'9','٠'=>'0']);
+            $referralCodeUpperCase = strtoupper(trim($referralCode));
+
+            $referrer = User::where('referral_code', $referralCodeUpperCase)
+                ->orWhere('mobile', $referralCode) // موبایل معمولا بزرگ و کوچک ندارد
+                ->first();
+
+            if ($referrer) {
+                $referredById = $referrer->id;
+            }
+        }
+
         // 1. یافتن یا ساخت کاربر
         $user = User::firstOrCreate(
             ['mobile' => $mobile],
             [
                 'status_id' => 1,
+                'referred_by' => $referredById,
+                'referral_code' => strtoupper(substr(md5($mobile . time()), 0, 8)),
             ]
         );
+
+        if ($user->wasRecentlyCreated) {
+            $user->assignRole('user');
+            if ($referredById && $referredById !== $user->id) {
+                \App\Models\ReferralNetwork::createReferral($referredById, $user->id);
+            }
+        }
 
         // 2. تولید کد
         $otpCode = $user->sendNewOtp();
@@ -53,15 +93,13 @@ class OtpService
         try {
             // استفاده از درایور مناسب (smsir یا ...)
             $sent = $this->smsManager->driver()->sendVerify($mobile, (string)$otpCode);
-            Log::info('OTP SEND RESULT', [
-                'mobile' => $mobile,
-                'code' => $otpCode,
-                'sent' => $sent ? 'true' : 'false',
-                'provider' => SystemSetting::getValue('sms', 'sms_provider', 'smsir')
-            ]);
+
             if ($sent) {
                 // تنظیم کش برای جلوگیری از ارسال مجدد سریع
                 Cache::put($throttleKey, now()->addSeconds($resendInterval)->timestamp, $resendInterval);
+
+                // ثبت در Rate Limiter برای محدودیت ساعتی (۳ بار در ساعت)
+                RateLimiter::hit($rateLimitKey, 3600);
 
                 return [
                     'success' => true,
@@ -70,11 +108,10 @@ class OtpService
                     'resend_interval' => $resendInterval
                 ];
             } else {
-                \Illuminate\Support\Facades\Log::error('OTP Service: Failed to send SMS', ['mobile' => $mobile]);
                 return ['success' => false, 'message' => 'خطا در ارسال پیامک.'];
             }
+
         } catch (Exception $e) {
-            \Illuminate\Support\Facades\Log::error('OTP Service Exception', ['error' => $e->getMessage()]);
             return ['success' => false, 'message' => 'خطا در ارسال پیامک: ' . $e->getMessage()];
         }
     }
@@ -91,29 +128,6 @@ class OtpService
         }
 
         if ($user->verifyOtp($code)) {
-            // Check if user has received initial registration points
-            $hasRegistrationPoints = \App\Models\PointTransaction::where('user_id', $user->id)
-                ->whereHas('rule', function ($q) {
-                    $q->where('action_code', 'initial_registration');
-                })->exists();
-
-            if (!$hasRegistrationPoints) {
-                $rule = \App\Models\PointRule::firstOrCreate(
-                    ['action_code' => 'initial_registration'],
-                    [
-                        'title' => 'امتیاز ثبت نام اولیه',
-                        'points' => 10, // Default points
-                        'type' => 'one_time',
-                        'is_active' => true,
-                        'description' => 'امتیازی که کاربر هنگام اولین ثبت نام و ورود به سیستم دریافت می‌کند.'
-                    ]
-                );
-
-                if ($rule && $rule->is_active && $rule->points > 0) {
-                    $rule->applyToUser($user->id, [], 'امتیاز ثبت نام اولیه');
-                }
-            }
-
             return $user;
         }
 

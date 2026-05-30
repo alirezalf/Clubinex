@@ -27,17 +27,17 @@ return new class extends Migration {
             $table->string('last_name', 50)->nullable();
             $table->string('national_code', 10)->nullable()->unique();
             $table->date('birth_date')->nullable();
-            
+
             // Gender as Enum
-            $table->enum('gender', ['male', 'female', 'other'])->nullable(); 
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
 
             $table->enum('marital_status', ['single', 'married', 'divorced', 'widowed'])->nullable();
             $table->string('job', 100)->nullable();
-            
+
             // Location as Foreign Keys
             $table->foreignId('province_id')->nullable()->constrained('provinces')->nullOnDelete();
             $table->foreignId('city_id')->nullable()->constrained('cities')->nullOnDelete();
-            
+
             $table->string('postal_code', 10)->nullable();
             $table->text('address')->nullable();
 
@@ -48,16 +48,19 @@ return new class extends Migration {
             $table->foreignId('club_id')->nullable()->constrained('clubs');
             $table->string('referral_code', 20)->nullable()->unique();
             $table->foreignId('referred_by')->nullable()->constrained('users');
-            
+
             // ادغام شده: فیلد agent_id (کلید خارجی در مایگریشن agents تعریف می‌شود)
             $table->unsignedBigInteger('agent_id')->nullable();
 
             $table->timestamp('last_login_at')->nullable();
             $table->rememberToken();
-            
+
             // ادغام شده: تنظیمات
             $table->json('theme_preferences')->nullable();
             $table->json('dashboard_preferences')->nullable();
+
+            // تگ‌های گروه بندی کاربر (بخش 16)
+            $table->json('tags')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
@@ -66,7 +69,7 @@ return new class extends Migration {
             $table->index(['status_id', 'club_id']);
             $table->index(['province_id', 'city_id']);
             $table->index('gender');
-            
+
             $table->index(['last_name', 'first_name']);
             $table->index('created_at');
         });
@@ -77,7 +80,7 @@ return new class extends Migration {
             $table->foreignId('club_id')->constrained()->onDelete('cascade');
             $table->timestamp('joined_at')->useCurrent();
             $table->boolean('is_active')->default(true);
-            
+
             $table->unique(['user_id', 'club_id']);
         });
     }

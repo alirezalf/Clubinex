@@ -27,9 +27,23 @@ Route::middleware(['role:super-admin|admin'])->group(function () {
     Route::post('/slides/{slide}/duplicate', [SliderController::class, 'duplicateSlide'])->name('sliders.slides.duplicate');
 
     // Dynamic Reports
+    Route::get('/reports/test', function() {
+        $controller = app()->make(\App\Http\Controllers\Admin\DynamicReportController::class);
+        $request = \Illuminate\Http\Request::create('/admin/reports/dynamic/fetch', 'POST', [
+            'table' => 'users',
+            'fields' => ['id', 'first_name', 'last_name'],
+            'page' => 1,
+            'per_page' => 20,
+            'sort_dir' => 'desc',
+            'advanced_filters' => []
+        ]);
+
+        $response = $controller->fetchData($request);
+        return $response->getContent();
+    });
     Route::get('/reports/dynamic', [DynamicReportController::class, 'index'])->name('reports.dynamic');
-    Route::get('/reports/dynamic/fetch', [DynamicReportController::class, 'fetchData'])->name('reports.dynamic.fetch');
-    Route::get('/reports/dynamic/export', [DynamicReportController::class, 'export'])->name('reports.dynamic.export');
+    Route::post('/reports/dynamic/fetch', [DynamicReportController::class, 'fetchData'])->name('reports.dynamic.fetch');
+    Route::match(['GET', 'POST'], '/reports/dynamic/export', [DynamicReportController::class, 'export'])->name('reports.dynamic.export');
     Route::get('/reports/dynamic/columns/{table}', [DynamicReportController::class, 'getTableColumns'])->name('reports.dynamic.columns');
 
     // Settings
@@ -37,6 +51,7 @@ Route::middleware(['role:super-admin|admin'])->group(function () {
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
     Route::post('/settings/reset-defaults', [SettingController::class, 'resetDefaults'])->name('settings.reset_defaults');
     Route::post('/settings/clear-cache', [SettingController::class, 'clearCache'])->name('settings.clear_cache');
+    Route::post('/settings/backup-database', [SettingController::class, 'backupDatabase'])->name('settings.backup_database');
 
     // Integration Tests
     Route::post('/settings/test-wp', [IntegrationController::class, 'testWpConnection'])->name('settings.test_wp');

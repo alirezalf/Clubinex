@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>چک‌لیست بررسی ماژول‌های Clubinex</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.0.0/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+        }
+
+        .progress-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            position: sticky;
+            top: 20px;
+            z-index: 10;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-bar {
+            height: 12px;
+            background-color: var(--bg-color);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-bar-inner {
+            height: 100%;
+            background-color: var(--success-color);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            font-weight: bold;
+            color: var(--success-color);
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .actions {
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-clear {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .btn-clear:hover {
+            background-color: #dc2626;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .section:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 15px;
+            color: var(--text-main);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section h2::before {
+            content: '';
+            display: inline-block;
+            width: 5px;
+            height: 20px;
+            background-color: var(--primary-color);
+            margin-left: 10px;
+            border-radius: 4px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin: 15px 0;
+        }
+
+        .item-container {
+            display: flex;
+            align-items: flex-start;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .item-container:hover {
+            background: var(--bg-color);
+        }
+
+        .checkbox-wrapper {
+            margin-left: 15px;
+            padding-top: 2px;
+        }
+
+        input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: var(--success-color);
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+
+        .item-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .checked .item-title {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .sub-items {
+            margin-right: 35px;
+            margin-top: 10px;
+            border-right: 2px solid var(--border-color);
+            padding-right: 15px;
+        }
+
+        .sub-item-container {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+
+        .sub-item-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>چک‌لیست سنجش وضعیت سامانه Clubinex</h1>
+        <p>لطفاً صحت عملکرد هر بخش را بررسی کرده و در صورت تایید، تیک آن را بزنید. اطلاعات شما در مرورگر ذخیره می‌گردد.</p>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-text">
+            <span>وضعیت تکمیل:</span>
+            <span id="progress-text-value">0٪</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-bar-inner" id="progress-bar-inner"></div>
+        </div>
+        <div class="actions">
+            <button class="btn-clear" onclick="clearProgress()">پاک کردن همه تیک‌ها</button>
+        </div>
+    </div>
+
+    <!-- بخش احراز هویت -->
+    <div class="section">
+        <h2>۱. احراز هویت و حساب کاربری (Authentication)</h2>
+        <ul>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="auth_main" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="auth_main" class="item-title">سیستم ورود و ثبت‌نام</label>
+                        <div class="item-desc">بررسی فرم‌های ورود، ثبت‌نام و الگوهای نمایشی</div>
+                    </div>
+                </div>
+                <ul class="sub-items">
+                    <li class="sub-item-container"><input type="checkbox" id="auth_classic"><label for="auth_classic">ورود کلاسیک و مدرن</label></li>
+                    <li class="sub-item-container"><input type="checkbox" id="auth_otp"><label for="auth_otp">ورود و ثبت‌نام با پیامک (OTP)</label></li>
+                    <li class="sub-item-container"><input type="checkbox" id="auth_lock"><label for="auth_lock">صفحه قفل (Lock Screen)</label></li>
+                </ul>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="profile_main" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="profile_main" class="item-title">پروفایل کاربری</label>
+                        <div class="item-desc">مدیریت اطلاعات پروفایل کاربران و امنیت</div>
+                    </div>
+                </div>
+                <ul class="sub-items">
+                    <li class="sub-item-container"><input type="checkbox" id="profile_info"><label for="profile_info">ویرایش اطلاعات فرم پروفایل</label></li>
+                    <li class="sub-item-container"><input type="checkbox" id="profile_password"><label for="profile_password">تغییر رمز عبور کاربر</label></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <!-- بخش داشبورد -->
+    <div class="section">
+        <h2>۲. داشبوردها (Dashboards)</h2>
+        <ul>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="dash_admin" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="dash_admin" class="item-title">داشبورد ادمین</label>
+                        <div class="item-desc">نمایش آمار، دسترسی سریع، نمودارها و هشدارها</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="dash_user" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="dash_user" class="item-title">داشبورد کاربر</label>
+                        <div class="item-desc">نمایش امتیازات کاربری، جوایز دریافتی و تاریخچه</div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- بخش مدیریت محتوا و تنظیمات -->
+    <div class="section">
+        <h2>۳. محصولات، سریال‌ها و دسته‌بندی‌ها</h2>
+        <ul>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="prod_cats" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="prod_cats" class="item-title">دسته‌بندی محصولات</label>
+                        <div class="item-desc">امکان ساخت، ویرایش و حذف دسته‌بندی‌ها</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="prod_list" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="prod_list" class="item-title">مدیریت محصولات</label>
+                        <div class="item-desc">افزودن و ویرایش محصولات فیزیکی و دیجیتال</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="prod_serials" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="prod_serials" class="item-title">مدیریت سریال‌ها (Serials)</label>
+                        <div class="item-desc">تولید، وارد کردن با فرمت و تخصیص سریال محصول</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="prod_wp" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="prod_wp" class="item-title">همگام‌سازی با وردپرس (WP Sync)</label>
+                        <div class="item-desc">ایمپورت کامل محصولات و دسته‌بندی‌ها از وردپرس/ووکامرس</div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- بخش گیمیفیکیشن -->
+    <div class="section">
+        <h2>۴. گیمیفیکیشن و وفاداری (Gamification & Loyalty)</h2>
+        <ul>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="gam_points" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="gam_points" class="item-title">قوانین و تاریخچه امتیازات (Point Rules)</label>
+                        <div class="item-desc">تعریف قوانین اختصاص امتیاز بر اساس فعالیت‌ها</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="gam_wheel" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="gam_wheel" class="item-title">گردونه شانس (Lucky Wheel)</label>
+                        <div class="item-desc">چرخش، اعمال جوایز به کاربر، مدیریت احتمالات در سمت ادمین</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="gam_surveys" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="gam_surveys" class="item-title">نظرسنجی و آزمون (Surveys & Quizzes)</label>
+                        <div class="item-desc">طراحی سوالات فرم‌ها و بررسی سوابق مشارکت‌ها</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="gam_clubs" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="gam_clubs" class="item-title">کلوپ‌های مشتریان (Clubs & Tiers)</label>
+                        <div class="item-desc">سطح‌بندی کاربران، ارتقا مرحله‌ای و دستاوردهای ویژه</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="gam_rewards" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="gam_rewards" class="item-title">جوایز و بازخرید (Rewards & Redemption)</label>
+                        <div class="item-desc">تعریف ویترین جوایز و تاریخچه دریافت جوایز کاربر</div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- بخش ارتباط با مشتری و بازاریابی -->
+    <div class="section">
+        <h2>۵. پشتیبانی، مارکتینگ و ارتباطات</h2>
+        <ul>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="com_tickets" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="com_tickets" class="item-title">سیستم تیکتینگ (Tickets)</label>
+                        <div class="item-desc">ثبت تیکت کاربر، پاسخ‌دهی ادمین و وضعیت‌های جاری</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="com_sliders" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="com_sliders" class="item-title">مدیریت اسلایدر (Sliders)</label>
+                        <div class="item-desc">ساخت بنرهای پویا برای صفحات مختلف سایت</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="com_notif" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="com_notif" class="item-title">نوتیفیکیشن‌های انبوه (Broadcast Notifications)</label>
+                        <div class="item-desc">مدیریت و ارسال پیام‌های داخل سیستمی، پیامکی و ایمיلی</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="com_referrals" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="com_referrals" class="item-title">بازاریابی ارجاعی (Referral System)</label>
+                        <div class="item-desc">گزارش کدهای معرف، پورسانت‌ها و اعضای زیرمجموعه</div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- تنظیمات کلان -->
+    <div class="section">
+        <h2>۶. مدیریت تنظیمات و زیرساخت (Settings & Administration)</h2>
+        <ul>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="set_users" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="set_users" class="item-title">مدیریت کاربران و نقش‌ها (Users & Roles)</label>
+                        <div class="item-desc">تعریف سطح دسترسی، ادمین‌ها لاگ‌های سیستمی (System Logs)</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="set_general" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="set_general" class="item-title">تنظیمات اصلی (General Settings)</label>
+                        <div class="item-desc">تنظیمات تماس، امنیتی (Captcha) و شبکه‌های اجتماعی</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="set_sms" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="set_sms" class="item-title">تنظیمات پیامک و قالب‌ها (SMS Settings & Templates)</label>
+                        <div class="item-desc">تنظیمات وبروکر پیامک، پترن‌ها و پیام‌های خوش‌آمدگویی</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="set_themes" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="set_themes" class="item-title">مدیریت قالب (Theme Customizer)</label>
+                        <div class="item-desc">تم‌های گرافیکی ایمیل‌ها، داشبورد و رنگ‌بندی سیستم</div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="item-container">
+                    <div class="checkbox-wrapper"><input type="checkbox" id="set_reports" class="main-checkbox"></div>
+                    <div class="item-content">
+                        <label for="set_reports" class="item-title">گزارش‌گیری پیشرفته (Dynamic Reports & Exports)</label>
+                        <div class="item-desc">ساخت گزارش از تراکنش‌ها، کاربران، نظرسنجی‌ها و امکان Export</div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+</div>
+
+<script>
+    const STORAGE_KEY_PREFIX = 'clubinex_checklist_';
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    const progressBarInner = document.getElementById('progress-bar-inner');
+    const progressTextValue = document.getElementById('progress-text-value');
+
+    // Function to calculate and update progress visual elements
+    function updateProgress() {
+        const total = checkboxes.length;
+        let checkedCount = 0;
+
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                checkedCount++;
+                // Handle styling toggle for visual feedback
+                let container = cb.closest('.item-container') || cb.closest('.sub-item-container');
+                if(container) container.classList.add('checked');
+            } else {
+                let container = cb.closest('.item-container') || cb.closest('.sub-item-container');
+                if(container) container.classList.remove('checked');
+            }
+        });
+
+        const percent = total === 0 ? 0 : Math.round((checkedCount / total) * 100);
+
+        progressBarInner.style.width = percent + '%';
+        progressTextValue.textContent = `${percent}٪ (${checkedCount} از ${total})`;
+    }
+
+    // Initialize application state
+    function init() {
+        checkboxes.forEach(cb => {
+            // Load from localStorage
+            const savedState = localStorage.getItem(STORAGE_KEY_PREFIX + cb.id);
+            if (savedState === 'true') {
+                cb.checked = true;
+            }
+
+            // Event listener for changes
+            cb.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                localStorage.setItem(STORAGE_KEY_PREFIX + cb.id, isChecked);
+
+                // If a main item gets unchecked, uncheck sub-items? (Optional UX enhancement, left basic for now)
+
+                updateProgress();
+            });
+        });
+
+        updateProgress();
+    }
+
+    function clearProgress() {
+        if(confirm('آیا مطمئن هستید که می‌خواهید همه وضعیت‌ها پاک شوند؟')) {
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+                localStorage.removeItem(STORAGE_KEY_PREFIX + cb.id);
+            });
+            updateProgress();
+        }
+    }
+
+    // Run initialization
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

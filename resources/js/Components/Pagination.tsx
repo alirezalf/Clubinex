@@ -18,25 +18,29 @@ export default function Pagination({ links, className = '' }: PaginationProps) {
         <div className={`flex flex-wrap justify-center gap-1 mt-6 ${className}`}>
             {links.map((link, key) => {
                 let label = link.label;
-                
+
                 // Replace text labels with icons if needed
                 if (label.includes('Previous')) {
                     return link.url ? (
-                        <Link 
-                            key={key} 
-                            href={link.url} 
+                        <Link
+                            key={key}
+                            href={link.url}
+                            preserveState
+                            preserveScroll
                             className="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition"
                         >
                             <ChevronRight size={16} />
                         </Link>
                     ) : null;
                 }
-                
+
                 if (label.includes('Next')) {
                     return link.url ? (
-                        <Link 
-                            key={key} 
-                            href={link.url} 
+                        <Link
+                            key={key}
+                            href={link.url}
+                            preserveState
+                            preserveScroll
                             className="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition"
                         >
                             <ChevronLeft size={16} />
@@ -48,6 +52,8 @@ export default function Pagination({ links, className = '' }: PaginationProps) {
                     <Link
                         key={key}
                         href={link.url}
+                        preserveState
+                        preserveScroll
                         className={`px-3 py-1.5 min-w-[32px] text-center rounded-lg text-sm font-medium transition-colors ${
                             link.active
                                 ? 'bg-primary-600 text-white shadow-md shadow-primary-500/30'

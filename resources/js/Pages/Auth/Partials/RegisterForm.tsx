@@ -156,7 +156,20 @@ export default function RegisterForm({ captchaUrl, refreshCaptcha }: Props) {
                 </div>
             )}
 
-            <input type="hidden" name="referral_code" value={data.referral_code} />
+            <div className="space-y-0.5">
+                <label className="block text-[10px] font-medium text-gray-500">کد دعوت (اختیاری)</label>
+                <div className="relative group">
+                    <input
+                        type="text"
+                        name="referral_code"
+                        value={data.referral_code || ''}
+                        onChange={(e) => setData('referral_code', e.target.value)}
+                        className="w-full pl-2 pr-7 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all text-[11px] text-left ltr placeholder:text-gray-300"
+                        placeholder="کد دعوت"
+                    />
+                    <User className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors" size={12} />
+                </div>
+            </div>
 
             <button
                 disabled={processing}

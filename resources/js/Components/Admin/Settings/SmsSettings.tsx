@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Smartphone, RefreshCw, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { InputGroup } from './SharedInputs';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 
 export default function SmsSettings({ data, setData }: { data: any, setData: any }) {
     const [smsTesting, setSmsTesting] = useState(false);

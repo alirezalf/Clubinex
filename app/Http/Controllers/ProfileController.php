@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest; // Import Request
-use App\Models\ActivityLog;
-use App\Models\Agent;
-use App\Models\PointRule;
-use App\Models\PointTransaction;
 use App\Models\User;
-use App\Services\ThemeService;
+use App\Models\Agent;
+use App\Models\PointTransaction;
+use App\Models\PointRule;
+use App\Models\ActivityLog;
+use App\Http\Requests\ProfileUpdateRequest; // Import Request
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
+use App\Services\ThemeService;
 
 class ProfileController extends Controller
 {
@@ -144,5 +143,86 @@ class ProfileController extends Controller
         $this->themeService->updateUserTheme($user, $request->all());
 
         return back()->with('message', 'تنظیمات ظاهری شما شخصی‌سازی شد.');
+    }
+
+    public function sessions()
+    {
+        $sessions = DB::table('sessions')
+                      ->where('user_id', auth()->id())
+                      ->orderBy('last_activity', 'desc')
+                      ->get()
+                      ->map(function ($session) {
+                          $isCurrent = $session->id === request()->session()->getId();
+
+                          $agent = $session->user_agent;
+                          $device = 'کامپیوتر';
+                          if (strpos($agent, 'Mobile') !== false) {
+                              $device = 'موبایل';
+                          } elseif (strpos($agent, 'Tablet') !== false) {
+                              $device = 'تبلت';
+                          }
+
+                          $browser = 'ناشناس';
+                          if (strpos($agent, 'Chrome') !== false) {
+                              $browser = 'Chrome';
+                          } elseif (strpos($agent, 'Firefox') !== false) {
+                              $browser = 'Firefox';
+                          } elseif (strpos($agent, 'Safari') !== false) {
+                              $browser = 'Safari';
+                          }
+
+                          $platform = 'ناشناس';
+                          if (strpos($agent, 'Windows') !== false) {
+                              $platform = 'Windows';
+                          } elseif (strpos($agent, 'Mac') !== false) {
+                              $platform = 'MacOS';
+                          } elseif (strpos($agent, 'Linux') !== false) {
+                              $platform = 'Linux';
+                          } elseif (strpos($agent, 'Android') !== false) {
+                              $platform = 'Android';
+                          } elseif (strpos($agent, 'iPhone') !== false || strpos($agent, 'iPad') !== false) {
+                              $platform = 'iOS';
+                          }
+
+                          return [
+                              'id' => $session->id,
+                              'ip_address' => $session->ip_address,
+                              'is_current_device' => $isCurrent,
+                              'device' => $device,
+                              'browser' => $browser,
+                              'platform' => $platform,
+                              'last_active' => \Morilog\Jalali\Jalalian::forge((int) $session->last_activity)->ago(),
+                          ];
+                      });
+
+        return Inertia::render('Profile/Sessions', [
+            'sessions' => $sessions
+        ]);
+    }
+
+    public function logoutSession($id)
+    {
+        DB::table('sessions')
+            ->where('id', $id)
+            ->where('user_id', auth()->id())
+            ->delete();
+
+        return back()->with('message', 'خروج از دستگاه با موفقیت انجام شد.');
+    }
+
+    public function logoutOtherSessions(Request $request)
+    {
+        $request->validate([
+            'password' => ['required', 'current_password'],
+        ]);
+
+        \Illuminate\Support\Facades\Auth::logoutOtherDevices($request->password);
+
+        DB::table('sessions')
+            ->where('user_id', auth()->id())
+            ->where('id', '!=', $request->session()->getId())
+            ->delete();
+
+        return back()->with('message', 'همه دستگاه‌های دیگر خارج شدند.');
     }
 }

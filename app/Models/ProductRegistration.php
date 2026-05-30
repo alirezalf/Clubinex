@@ -69,4 +69,19 @@ class ProductRegistration extends Model
         $defaultRule = PointRule::where('action_code', 'product_registration_default')->first();
         return $defaultRule ? $defaultRule->points : 0;
     }
+
+    public function getIsSerialValidAttribute()
+    {
+        if (empty($this->serial_code) || str_starts_with($this->serial_code, 'PROD-') || str_starts_with($this->serial_code, strtoupper(substr(\Illuminate\Support\Str::slug($this->product_model), 0, 6)))) {
+            // It's likely an auto-generated serial, so we don't have a record of it yet
+            return null;
+        }
+
+        $serialCode = strtr($this->serial_code, ['۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9', '١'=>'1','٢'=>'2','٣'=>'3','٤'=>'4','٥'=>'5','٦'=>'6','٧'=>'7','٨'=>'8','٩'=>'9','٠'=>'0']);
+        $serialCode = strtoupper($serialCode);
+
+        $exists = ProductSerial::where('serial_code', $serialCode)->exists();
+
+        return $exists;
+    }
 }

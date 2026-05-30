@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 import { Loader2, ArrowLeft, RefreshCw } from 'lucide-react';
 
 interface Props {
@@ -20,6 +19,13 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
 
     const [resendInterval, setResendInterval] = useState(0);
     const [countdown, setCountdown] = useState(0);
+    const [referralCode, setReferralCode] = useState<string | null>(null);
+
+    React.useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref');
+        if (ref) setReferralCode(ref);
+    }, []);
 
     // Timer effect
     React.useEffect(() => {
@@ -35,7 +41,9 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
         setOtpError('');
 
         try {
-            const response = await axios.post(route('login.otp.send'), { mobile, captcha });
+            const payload: any = { mobile, captcha };
+            if (referralCode) payload.referral_code = referralCode;
+            const response = await axios.post(route('login.otp.send'), payload);
             setStep('verify');
             const interval = response.data.resend_interval || 120;
             setResendInterval(interval);
@@ -84,8 +92,8 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
         }
     };
 
-    const handleVerifyOtp = (e?: React.FormEvent) => {
-        if (e) e.preventDefault();
+    const handleVerifyOtp = (e: React.FormEvent) => {
+        e.preventDefault();
         // Use manual inertia post to handle redirect properly
         router.post(route('login.otp.verify'), { mobile, code: otpCode }, {
             onStart: () => setLoading(true),
@@ -93,13 +101,6 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
             onError: () => setOtpError('کد وارد شده صحیح نیست')
         });
     };
-
-    // Auto-submit when OTP is 5 digits
-    React.useEffect(() => {
-        if (otpCode.length === 5 && step === 'verify') {
-            handleVerifyOtp();
-        }
-    }, [otpCode]);
 
     return (
         <div>
@@ -141,6 +142,17 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
                         </div>
                     )}
 
+                    <div className="space-y-1">
+                        <label className="block text-[10px] font-medium text-gray-500">کد دعوت (اختیاری)</label>
+                        <input
+                            type="text"
+                            value={referralCode || ''}
+                            onChange={(e) => setReferralCode(e.target.value)}
+                            placeholder="کد دعوت"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-left ltr transition-all text-xs placeholder:text-gray-300 text-gray-900 bg-white"
+                        />
+                    </div>
+
                     {otpError && <p className="text-red-500 text-[10px] mt-1 bg-red-50 p-1.5 rounded-lg border border-red-100">{otpError}</p>}
 
                     <button
@@ -172,7 +184,6 @@ export default function OtpLoginForm({ captchaUrl, refreshCaptcha, onSwitchMetho
                             maxLength={5}
                             autoFocus
                             placeholder="-----"
-                            autoComplete="one-time-code"
                             required
                         />
                          {otpError && <p className="text-red-500 text-[10px] mt-2 text-center">{otpError}</p>}

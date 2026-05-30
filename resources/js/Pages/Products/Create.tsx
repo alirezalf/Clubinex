@@ -47,13 +47,13 @@ type CustomPageProps = PageProps<{
 
 export default function ProductCreate({ categories, prefilledProduct, agentInfo, editingRegistration, flash }: CustomPageProps) {
     const { auth } = usePage<PageProps>().props;
-    
+
     // اگر محصولی از قبل انتخاب شده باشد یا در حال ویرایش باشیم، مستقیماً به تب پیشرفته می‌رویم
     const initialMode = (prefilledProduct || editingRegistration) ? 'advanced' : 'simple';
     const [regMode, setRegMode] = useState<'simple' | 'advanced'>(initialMode);
 
     // Determine if the current user is an agent based on profile or role
-    const user = auth.user as any; 
+    const user = auth.user as any;
     const isAgent = user.is_agent || (user.roles && user.roles.includes('agent'));
 
     const { data, setData, post, processing, errors } = useForm({
@@ -64,30 +64,37 @@ export default function ProductCreate({ categories, prefilledProduct, agentInfo,
         category_id: editingRegistration?.category_id || prefilledProduct?.category_id || '',
         tool_pic_file: null as File | null,
         invoice_file: null as File | null,
-        
+
         customer_user: editingRegistration?.customer_user || 'owner',
         customer_mobile_number: editingRegistration?.customer_mobile_number || '',
-        
+
         // Auto-select "owner" for seller if the user is an agent
         seller_user: editingRegistration?.seller_user || (isAgent ? 'owner' : 'none'),
         // If agent, pre-fill with their mobile number
         seller_mobile_number: editingRegistration?.seller_mobile_number || (isAgent ? user.mobile : ''),
-        
+
         introducer_user: editingRegistration?.introducer_user || 'none',
         introducer_mobile_number: editingRegistration?.introducer_mobile_number || '',
-        
+
         guarantee_status: editingRegistration?.guarantee_status || 'no_guarantee', // Default: No Warranty
-        
+
         // فیلد تک برای ثبت سریع سریال
         serial_code: ''
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (editingRegistration) {
             post(route('products.registrations.update', editingRegistration.id), {
                 forceFormData: true,
+            });
+        } else if (regMode === 'simple') {
+            post(route('products.check_serial'), {
+                data: { serial_code: data.serial_code, register: true },
+                onSuccess: () => {
+                    // Handled by flash message in layout
+                }
             });
         } else {
             post(route('products.register'), {
@@ -138,20 +145,20 @@ export default function ProductCreate({ categories, prefilledProduct, agentInfo,
                     <form onSubmit={handleSubmit} className="p-6 md:p-8">
                         {/* Simple Mode */}
                         {regMode === 'simple' && (
-                            <SimpleForm 
-                                data={data} 
-                                setData={setData} 
-                                errors={errors} 
+                            <SimpleForm
+                                data={data}
+                                setData={setData}
+                                errors={errors}
                             />
                         )}
 
                         {/* Advanced Mode */}
                         {regMode === 'advanced' && (
-                            <AdvancedForm 
-                                data={data} 
-                                setData={setData} 
-                                errors={errors} 
-                                categories={categories} 
+                            <AdvancedForm
+                                data={data}
+                                setData={setData}
+                                errors={errors}
+                                categories={categories}
                                 isAgent={isAgent}
                                 agentInfo={agentInfo}
                                 prefilledProduct={prefilledProduct}

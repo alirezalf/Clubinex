@@ -15,8 +15,8 @@ trait HasProfileLogic
     public function getProfileCompletionPercentageAttribute()
     {
         $requiredFields = [
-            'first_name', 'last_name', 'national_code', 'birth_date', 
-            'job', 'province_id', 'city_id', 'postal_code', 'address', 
+            'first_name', 'last_name', 'national_code', 'birth_date',
+            'job', 'province_id', 'city_id', 'postal_code', 'address',
             'email', 'avatar',
         ];
 
@@ -71,6 +71,15 @@ trait HasProfileLogic
     {
         if (!$this->profile_completed) {
             $this->update(['profile_completed' => true]);
+
+            // فعال‌سازی واریز پورسانت معرف در صورتی که منتظر تایید است
+            $pendingReferrals = \App\Models\ReferralNetwork::where('referred_id', $this->id)
+                ->where('status', 'pending')
+                ->get();
+
+            foreach ($pendingReferrals as $referral) {
+                $referral->activate();
+            }
         }
     }
 
@@ -82,7 +91,7 @@ trait HasProfileLogic
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
-    
+
     public function getProvinceNameAttribute()
     {
         return $this->province ? $this->province->name : null;

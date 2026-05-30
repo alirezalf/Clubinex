@@ -1,6 +1,6 @@
 import {
     LayoutDashboard, User, Users, Award, Gift,
-    ShoppingCart, Dna, Settings,
+    ShoppingCart, Dna, Settings, Wallet,
     MessageSquare, FileText, Package, Bell, BarChart2, Database,
     Layers, Gamepad2, ShieldCheck, UserPlus, FileQuestion,
     MonitorPlay, Star, Target, Heart
@@ -27,6 +27,13 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         href: route('referrals.index'),
         group: 'general',
         description: 'دعوت دوستان و کسب امتیاز'
+    },
+    {
+        name: 'کیف پول من',
+        icon: Wallet,
+        href: route('wallet.index'),
+        group: 'general',
+        description: 'مدیریت اعتبار و پرداخت‌ها'
     },
 
     {
@@ -72,6 +79,13 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         group: 'support',
         badge: notificationCount,
         description: 'آخرین پیام‌ها'
+    },
+    {
+        name: 'تیکت‌های پشتیبانی',
+        icon: MessageSquare,
+        href: route('tickets.index'),
+        group: 'support',
+        description: 'ثبت و پیگیری تیکت‌ها'
     },
     {
         name: 'درباره ما',

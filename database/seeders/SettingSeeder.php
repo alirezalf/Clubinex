@@ -50,6 +50,9 @@ class SettingSeeder extends Seeder
             ['group' => 'club', 'key' => 'referral_points', 'value' => '20', 'type' => 'number', 'is_public' => false, 'label' => 'امتیاز معرفی'],
             ['group' => 'club', 'key' => 'daily_point_limit', 'value' => '1000', 'type' => 'number', 'is_public' => false, 'label' => 'سقف امتیاز روزانه'],
             ['group' => 'finance', 'key' => 'currency', 'value' => 'تومان', 'type' => 'string', 'is_public' => true, 'label' => 'واحد پول'],
+            ['group' => 'finance', 'key' => 'point_to_currency_rate', 'value' => '100', 'type' => 'number', 'is_public' => true, 'label' => 'ارزش هر امتیاز (به واحد پول)'],
+            ['group' => 'finance', 'key' => 'allow_points_to_wallet', 'value' => '1', 'type' => 'boolean', 'is_public' => true, 'label' => 'تبدیل امتیاز به کیف پول مجاز است'],
+            ['group' => 'finance', 'key' => 'allow_wallet_to_points', 'value' => '1', 'type' => 'boolean', 'is_public' => true, 'label' => 'تبدیل کیف پول به امتیاز مجاز است'],
 
             // تنظیمات پیامک
             ['group' => 'sms', 'key' => 'sms_provider', 'value' => 'kavenegar', 'type' => 'string', 'is_public' => false, 'label' => 'سرویس دهنده پیامک'],
@@ -60,6 +63,14 @@ class SettingSeeder extends Seeder
             ['group' => 'sms', 'key' => 'resend_interval', 'value' => 120, 'type' => 'number', 'is_public' => true, 'label' => 'فاصله ارسال مجدد (ثانیه)'],
             ['group' => 'sms', 'key' => 'sms_ir_template_id', 'value' => '', 'type' => 'string', 'is_public' => false, 'label' => 'شناسه قالب SMS.ir'],
             ['group' => 'sms', 'key' => 'sms_ir_parameter_name', 'value' => 'Code', 'type' => 'string', 'is_public' => false, 'label' => 'نام پارامتر SMS.ir'],
+
+            // تنظیمات درگاه پرداخت
+            ['group' => 'payment', 'key' => 'payment_gateway', 'value' => 'zarinpal', 'type' => 'string', 'is_public' => false, 'label' => 'درگاه پرداخت پیش‌فرض'],
+            ['group' => 'payment', 'key' => 'payment_merchant_id', 'value' => '', 'type' => 'string', 'is_public' => false, 'label' => 'مرچنت کد / ترمینال آی‌دی'],
+            ['group' => 'payment', 'key' => 'payment_username', 'value' => '', 'type' => 'string', 'is_public' => false, 'label' => 'نام کاربری درگاه'],
+            ['group' => 'payment', 'key' => 'payment_password', 'value' => '', 'type' => 'string', 'is_public' => false, 'label' => 'رمز عبور درگاه'],
+            ['group' => 'payment', 'key' => 'payment_api_key', 'value' => '', 'type' => 'string', 'is_public' => false, 'label' => 'کلید API درگاه'],
+            ['group' => 'payment', 'key' => 'payment_sandbox', 'value' => '1', 'type' => 'boolean', 'is_public' => false, 'label' => 'محیط سندباکس'],
 
             // تنظیمات اتصال به وردپرس
             ['group' => 'wordpress', 'key' => 'wp_url', 'value' => '', 'type' => 'string', 'is_public' => false, 'label' => 'آدرس سایت وردپرس'],

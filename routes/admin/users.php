@@ -14,6 +14,7 @@ Route::post('/users/bulk-action', [UserController::class, 'bulkAction'])->name('
 Route::middleware(['role:super-admin|admin'])->group(function () {
     Route::post('/users/{id}/toggle-status', [UserController::class, 'toggleUserStatus'])->name('users.toggle-status');
     Route::post('/users/{id}/reset-password', [UserController::class, 'resetUserPassword'])->name('users.reset-password');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
 // --- Roles & Permissions (Super Admin / Admin Only) ---

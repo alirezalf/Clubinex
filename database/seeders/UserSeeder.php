@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
         // دریافت شناسه استان و شهر تهران برای کاربران ثابت
         $tehranProv = Province::where('name', 'تهران')->first();
         $tehranCity = City::where('name', 'تهران')->first();
-        
+
         $tehranProvId = $tehranProv ? $tehranProv->id : null;
         $tehranCityId = $tehranCity ? $tehranCity->id : null;
 
@@ -37,7 +37,9 @@ class UserSeeder extends Seeder
                 'last_name' => 'لباف',
                 'mobile' => '09196600545',
                 'email' => 'alirezalf@gmail.com',
+                'username' => 'admin',
                 'password' => Hash::make('admin'),
+                'password_set_at' => now(),
                 'status_id' => $activeStatus,
                 'club_id' => $diamondClub, // ادمین بالاترین سطح را دارد
                 'current_points' => 999999,
@@ -68,7 +70,7 @@ class UserSeeder extends Seeder
                     'radius_size' => '0.5rem'
                 ]
             ]);
-            
+
             $admin->assignRole('super-admin');
         } else {
             $admin = User::where('mobile', '09196600545')->first();
@@ -84,7 +86,9 @@ class UserSeeder extends Seeder
                 'last_name' => 'فروشنده',
                 'mobile' => '09120000001',
                 'email' => 'agent@clubinex.com',
+                'username' => 'agent001',
                 'password' => Hash::make('password'),
+                'password_set_at' => now(),
                 'status_id' => $activeStatus,
                 'club_id' => $goldClub,
                 'current_points' => 5000,
@@ -134,7 +138,7 @@ class UserSeeder extends Seeder
         $lastNames = ['احمدی', 'حسینی', 'رضایی', 'کریمی', 'محمدی', 'عباسی', 'تقوی', 'راد', 'نیازی', 'شمس', 'کیانی', 'زند'];
         $jobs = ['برنامه‌نویس', 'طراح گرافیک', 'حسابدار', 'معلم', 'پزشک', 'مهندس عمران', 'فروشنده', 'دانشجو', 'خانه دار', 'آزاد'];
         $colors = ['#0284c7', '#dc2626', '#16a34a', '#d97706', '#7c3aed', '#db2777']; // تنوع رنگی تم
-        
+
         // دریافت لیست شهرها برای انتخاب تصادفی
         $allCities = City::with('province')->get();
 
@@ -145,10 +149,10 @@ class UserSeeder extends Seeder
             $randomClub = $clubs->random();
             $firstName = $firstNames[array_rand($firstNames)];
             $lastName = $lastNames[array_rand($lastNames)];
-            
+
             // انتخاب یک شهر تصادفی
             $randomCity = $allCities->count() > 0 ? $allCities->random() : null;
-            
+
             // تولد تصادفی
             $birthDate = now()->subYears(rand(18, 55))->subDays(rand(0, 365));
 
@@ -163,7 +167,9 @@ class UserSeeder extends Seeder
                 'last_name' => $lastName,
                 'mobile' => '09' . rand(10, 19) . rand(1000000, 9999999),
                 'email' => "user{$i}_" . uniqid() . "@example.com",
+                'username' => "user{$i}_" . uniqid(),
                 'password' => Hash::make('password'),
+                'password_set_at' => now(),
                 'status_id' => $activeStatus,
                 'club_id' => $randomClub->id,
                 'current_points' => rand($randomClub->min_points, $randomClub->max_points ?? $randomClub->min_points + 5000),
@@ -177,7 +183,7 @@ class UserSeeder extends Seeder
                 'gender' => rand(0, 1) ? 'male' : 'female',
                 'marital_status' => rand(0, 1) ? 'single' : 'married',
                 'job' => $jobs[array_rand($jobs)],
-                'province_id' => $randomCity ? $randomCity->province_id : null, 
+                'province_id' => $randomCity ? $randomCity->province_id : null,
                 'city_id' => $randomCity ? $randomCity->id : null,
                 'address' => 'خیابان اصلی، کوچه فرعی، پلاک ' . rand(1, 100),
                 'postal_code' => rand(1111111111, 9999999999),
@@ -192,7 +198,7 @@ class UserSeeder extends Seeder
             ]);
 
             $user->assignRole('user');
-            
+
             // اضافه کردن این کاربر به لیست معرف‌ها برای کاربران بعدی (شبکه سازی)
             $referrers[] = $user->id;
         }

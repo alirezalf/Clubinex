@@ -32,7 +32,8 @@ return new class extends Migration {
             $table->enum('type', ['points', 'item', 'empty', 'retry']); // نوع جایزه
             $table->integer('value')->default(0);            // مقدار (مثلا تعداد امتیاز)
             $table->integer('probability')->default(0);      // شانس برنده شدن (وزن)
-            $table->integer('stock')->nullable();            // محدودیت تعداد موجودی این جایزه
+            $table->integer('stock')->nullable();            // محدودیت تعداد موجودی کلی این جایزه
+            $table->integer('daily_limit')->nullable();      // سقف روزانه برای این جایزه
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();

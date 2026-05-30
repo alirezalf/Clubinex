@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Trash2, Plus, RefreshCw, Loader2, Sparkles, Copy, Settings } from 'lucide-react';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 import { useForm } from '@inertiajs/react';
 
 export default function ManageSerialsModal({ isOpen, onClose, productId, productTitle, modelName }: any) {
@@ -69,7 +69,7 @@ export default function ManageSerialsModal({ isOpen, onClose, productId, product
     // تولید انبوه سریال بدون پرسش تایید
     const handleGenerateSerials = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         postGen(route('admin.products.serials.generate', productId), {
             onSuccess: () => {
                 resetGen();
@@ -93,9 +93,9 @@ export default function ManageSerialsModal({ isOpen, onClose, productId, product
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh]">
-                
+
                 {/* هدر مودال */}
                 <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                     <div>
@@ -124,21 +124,21 @@ export default function ManageSerialsModal({ isOpen, onClose, productId, product
 
                 {/* محتوا */}
                 <div className="flex-1 overflow-y-auto">
-                    
+
                     {activeTab === 'manual' && (
                         <>
                             {/* فرم افزودن دستی */}
                             <div className="p-5 bg-gray-50/50 border-b border-gray-100">
                                 <form onSubmit={handleAddSerial} className="flex gap-3 items-start">
                                     <div className="flex-1 relative">
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={data.serial_code}
                                             onChange={e => setData('serial_code', e.target.value)}
                                             className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary-500 pr-10"
                                             placeholder="کد سریال را وارد کنید..."
                                         />
-                                        <button 
+                                        <button
                                             type="button"
                                             onClick={generateSuggestion}
                                             className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-600 p-1"
@@ -148,7 +148,7 @@ export default function ManageSerialsModal({ isOpen, onClose, productId, product
                                         </button>
                                         {errors.serial_code && <p className="text-red-500 text-xs mt-1">{errors.serial_code}</p>}
                                     </div>
-                                    <button 
+                                    <button
                                         disabled={processing}
                                         className="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-700 flex items-center gap-2 shadow-sm"
                                     >
@@ -196,7 +196,7 @@ export default function ManageSerialsModal({ isOpen, onClose, productId, product
                                                 </td>
                                                 <td className="px-5 py-3">
                                                     {!serial.is_used && (
-                                                        <button 
+                                                        <button
                                                             onClick={() => handleDeleteSerial(serial.id)}
                                                             className="text-red-500 hover:bg-red-50 p-1.5 rounded transition"
                                                             title="حذف"
@@ -227,26 +227,26 @@ export default function ManageSerialsModal({ isOpen, onClose, productId, product
                                 <p className="text-sm text-purple-700 mb-6 leading-relaxed">
                                     این ابزار سریال‌های یکتا و غیرقابل حدس را بر اساس نام مدل "<b>{modelName}</b>" تولید می‌کند.
                                 </p>
-                                
+
                                 <form onSubmit={handleGenerateSerials} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 mb-1">تعداد سریال</label>
-                                        <input 
-                                            type="number" 
-                                            value={genData.count} 
+                                        <input
+                                            type="number"
+                                            value={genData.count}
                                             onChange={e => setGenData('count', parseInt(e.target.value))}
-                                            min={1} 
+                                            min={1}
                                             max={1000}
                                             className="w-full text-center border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500 text-lg font-bold"
                                         />
                                         {genErrors.count && <p className="text-red-500 text-xs mt-1">{genErrors.count}</p>}
                                     </div>
-                                    
+
                                     <div className="bg-white p-3 rounded-lg border border-purple-100 text-xs text-gray-500 font-mono">
                                         فرمت نمونه: {modelName ? modelName.substring(0,4).toUpperCase() : 'PROD'}-X7B9-K2M1-9L0P
                                     </div>
 
-                                    <button 
+                                    <button
                                         type="submit"
                                         disabled={genProcessing}
                                         className="w-full bg-purple-600 text-white py-3 rounded-xl font-bold hover:bg-purple-700 shadow-lg shadow-purple-500/20 transition flex items-center justify-center gap-2"
@@ -263,7 +263,7 @@ export default function ManageSerialsModal({ isOpen, onClose, productId, product
                 {/* صفحه‌بندی (فقط برای تب دستی/لیست) */}
                 {activeTab === 'manual' && lastPage > 1 && (
                     <div className="p-3 border-t border-gray-100 flex justify-center gap-2 bg-gray-50">
-                        <button 
+                        <button
                             onClick={() => fetchSerials(page - 1)}
                             disabled={page === 1 || loading}
                             className="px-3 py-1 bg-white border rounded disabled:opacity-50 text-xs"
@@ -271,7 +271,7 @@ export default function ManageSerialsModal({ isOpen, onClose, productId, product
                             قبلی
                         </button>
                         <span className="text-xs self-center">صفحه {page} از {lastPage}</span>
-                        <button 
+                        <button
                             onClick={() => fetchSerials(page + 1)}
                             disabled={page === lastPage || loading}
                             className="px-3 py-1 bg-white border rounded disabled:opacity-50 text-xs"

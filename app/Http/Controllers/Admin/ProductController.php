@@ -24,60 +24,32 @@ class ProductController extends Controller
         $this->productService = $productService;
     }
 
-   public function index(Request $request)
-{
-    $search = $request->input('search');
+    public function index()
+    {
+        $products = Product::with('category')->withCount(['serials', 'serials as used_serials_count' => function ($query) {
+            $query->where('is_used', true);
+        }])->latest()->paginate(10, ['*'], 'products_page');
 
-    // --- محصولات ---
-    $productsQuery = Product::with('category')
-        ->withCount([
-            'serials',
-            'serials as used_serials_count' => function ($query) {
-                $query->where('is_used', true);
-            }
-        ])
-        ->latest();
+        $registrations = ProductRegistration::with(['user', 'category', 'admin'])
+            ->latest()
+            ->paginate(10, ['*'], 'registrations_page');
 
-    // --- اعمال جستجو ---
-    if ($search) {
-        $productsQuery->where(function ($query) use ($search) {
-            foreach (['title', 'model_name', 'brand', 'description'] as $column) {
-                $query->orWhere($column, 'like', "%{$search}%");
-            }
-
-            $query->orWhereHas('serials', function ($q) use ($search) {
-                $q->where('serial_code', 'like', "%{$search}%");
-            });
+        $registrations->getCollection()->transform(function ($reg) {
+            $reg->created_at_jalali = $reg->created_at_jalali;
+            $reg->status_farsi = $reg->status_farsi;
+            $reg->append('estimated_points'); // Explicitly append accessor
+            $reg->append('is_serial_valid'); // Append serial validation result
+            return $reg;
         });
+
+        $categories = Category::all();
+
+        return Inertia::render('Admin/Products/Index', [
+            'products' => $products,
+            'registrations' => $registrations,
+            'categories' => $categories
+        ]);
     }
-
-    $products = $productsQuery->paginate(10, ['*'], 'products_page')
-        ->appends(['search' => $search]); // حفظ مقدار جستجو در pagination links
-
-    // --- درخواست‌ها ---
-    $registrations = ProductRegistration::with(['user', 'category', 'admin'])
-        ->latest()
-        ->paginate(10, ['*'], 'registrations_page');
-
-    $registrations->getCollection()->transform(function ($reg) {
-        $reg->created_at_jalali = $reg->created_at_jalali;
-        $reg->status_farsi = $reg->status_farsi;
-        $reg->append('estimated_points'); // Explicitly append accessor
-        return $reg;
-    });
-
-    $categories = Category::all();
-
-    // --- بازگشت به Inertia ---
-    return Inertia::render('Admin/Products/Index', [
-        'products' => $products,
-        'registrations' => $registrations,
-        'categories' => $categories,
-        'filters' => [
-            'search' => $search, // برای همگام‌سازی با GlobalSearch
-        ],
-    ]);
-}
 
     public function store(StoreProductRequest $request)
     {
@@ -101,14 +73,16 @@ class ProductController extends Controller
 
         if ($request->hasFile('image')) {
             if ($product->image) {
-                $oldPath = str_replace('/storage/', 'public/', $product->image);
-                if (Storage::exists($oldPath)) {
-                    Storage::delete($oldPath);
+                $relativePath = str_replace('/uploads/products/', '', $product->image);
+                if (file_exists(public_path('uploads/products/' . $relativePath))) {
+                    unlink(public_path('uploads/products/' . $relativePath));
                 }
             }
 
-            $path = $request->file('image')->store('public/products');
-            $validated['image'] = Storage::url($path);
+            $file = $request->file('image');
+            $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/products'), $filename);
+            $validated['image'] = '/uploads/products/' . $filename;
         }
 
         $product->update($validated);
@@ -124,9 +98,9 @@ class ProductController extends Controller
         }
 
         if ($product->image) {
-            $oldPath = str_replace('/storage/', 'public/', $product->image);
-            if (Storage::exists($oldPath)) {
-                Storage::delete($oldPath);
+            $relativePath = str_replace('/uploads/products/', '', $product->image);
+            if (file_exists(public_path('uploads/products/' . $relativePath))) {
+                unlink(public_path('uploads/products/' . $relativePath));
             }
         }
 
@@ -187,10 +161,36 @@ class ProductController extends Controller
         ]);
 
         if ($request->boolean('background')) {
-            SyncWpProducts::dispatch($request->mapping);
+            // Get total pages by fetching 1 item
+            $response = \Illuminate\Support\Facades\Http::withBasicAuth(env('WP_KEY', config('services.wordpress.key')), env('WP_SECRET', config('services.wordpress.secret')))
+                ->withOptions(['verify' => app()->isProduction()])
+                ->get(rtrim(env('WP_URL', config('services.wordpress.url')), '/') . '/wp-json/wc/v3/products', [
+                    'per_page' => 20,
+                    'page' => 1,
+                    'status' => 'publish',
+                ]);
+
+            if ($response->successful()) {
+                $totalPages = (int) $response->header('X-WP-TotalPages') ?: 1;
+                $jobs = [];
+                for ($p = 1; $p <= $totalPages; $p++) {
+                    $jobs[] = new SyncWpProducts($request->mapping, $p);
+                }
+
+                $batch = \Illuminate\Support\Facades\Bus::batch($jobs)->name('WP Products Sync')->dispatch();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'همگام‌سازی در پس‌زمینه آغاز شد. تعداد صفحات: ' . $totalPages,
+                    'batch_id' => $batch->id
+                ]);
+            }
+
+            // Fallback
+            SyncWpProducts::dispatch($request->mapping, 1);
             return response()->json([
                 'success' => true,
-                'message' => 'همگام‌سازی در پس‌زمینه آغاز شد. می‌توانید پنجره را ببندید.'
+                'message' => 'همگام‌سازی در پس‌زمینه آغاز شد.'
             ]);
         }
 

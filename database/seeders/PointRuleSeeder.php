@@ -23,12 +23,12 @@ class PointRuleSeeder extends Seeder
         PointRule::firstOrCreate(['action_code' => 'product_registration_default'], [
             'points_required' => 0,
             'title' => 'ثبت محصول',
-            'points' => 50,
+            'points' => 500,
             'type' => 'repeatable',
             'action_code' => 'product_registration_default',
             'description' => 'امتیاز پیش‌فرض برای ثبت هر محصول'
         ]);
-        
+
         // امتیاز معرفی دوستان (سطح 1) - عضویت
         PointRule::firstOrCreate(['action_code' => 'referral_level_1'], [
             'points_required' => 0,
@@ -99,7 +99,7 @@ class PointRuleSeeder extends Seeder
             'action_code' => 'birthday_gift',
             'description' => 'امتیاز هدیه به مناسبت روز تولد کاربر'
         ]);
-        
+
         // هزینه چرخش گردونه (برای نمایش در قوانین - منطق اصلی در تنظیمات گردونه است)
         PointRule::firstOrCreate(['action_code' => 'lucky_wheel_spin'], [
             'points_required' => 0,

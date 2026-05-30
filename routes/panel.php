@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProfileController; 
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ClubController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RewardController;
@@ -24,18 +24,23 @@ use App\Http\Controllers\GeneralController;
 */
 
 Route::middleware(['auth', 'active.user'])->group(function () {
-    
+
     // Dashboard & Home
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/dashboard/quick-access', [DashboardController::class, 'updateQuickAccess'])->name('dashboard.quick-access.update'); 
+    Route::post('/dashboard/quick-access', [DashboardController::class, 'updateQuickAccess'])->name('dashboard.quick-access.update');
 
-    // Profile & Settings 
+    // Profile & Settings
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::post('/profile', [ProfileController::class, 'update']);
-    
+
     // Changed URI to avoid collision with Fortify's default /user/password route
     Route::post('/profile/security/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
-    Route::post('/user/theme', [ProfileController::class, 'updateTheme'])->name('user.theme.update'); 
+    Route::post('/user/theme', [ProfileController::class, 'updateTheme'])->name('user.theme.update');
+
+    // Active Sessions (For Users to manage their devices)
+    Route::get('/profile/sessions', [ProfileController::class, 'sessions'])->name('profile.sessions');
+    Route::delete('/profile/sessions/{id}', [ProfileController::class, 'logoutSession'])->name('profile.sessions.destroy');
+    Route::delete('/profile/sessions', [ProfileController::class, 'logoutOtherSessions'])->name('profile.sessions.destroy_other');
 
     // Clubs Management
     Route::get('/clubs', [ClubController::class, 'index'])->name('clubs.index');
@@ -45,14 +50,16 @@ Route::middleware(['auth', 'active.user'])->group(function () {
     // Products & Points
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-    Route::post('/products/register', [ProductController::class, 'registerProduct'])->name('products.register');
-    
+    // مرحله 14: مقاومت در برابر حملات ثبت بارگیری با Rate Limiter (Fraud Detection)
+    Route::post('/products/register', [ProductController::class, 'registerProduct'])->middleware('throttle:10,1')->name('products.register');
+
     // روت‌های جدید برای ویرایش و حذف درخواست
     Route::get('/products/registrations/{id}/edit', [ProductController::class, 'editRegistration'])->name('products.registrations.edit');
     Route::post('/products/registrations/{id}', [ProductController::class, 'updateRegistration'])->name('products.registrations.update'); // POST supports file upload better with method spoofing if needed, but here we use simple POST for update logic often in Laravel with files
     Route::delete('/products/registrations/{id}', [ProductController::class, 'destroyRegistration'])->name('products.registrations.destroy');
 
-    Route::post('/products/check-serial', [ProductController::class, 'checkSerial'])->name('products.check_serial');
+    // جلوگیری از حدس زدن سریال محصول: مسدودسازی کاربر برای ۱۰ دقیقه در صورت ۵ بار تلاش
+    Route::post('/products/check-serial', [ProductController::class, 'checkSerial'])->middleware('throttle:5,10')->name('products.check_serial');
 
     // Rewards & Shop
     Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
@@ -86,11 +93,18 @@ Route::middleware(['auth', 'active.user'])->group(function () {
 
     // Data Exports
     Route::get('/export/transactions', [ExportController::class, 'transactions'])->name('export.transactions');
-    
+
+    // Wallet
+    Route::get('/wallet', [\App\Http\Controllers\WalletController::class, 'index'])->name('wallet.index');
+    Route::post('/wallet/charge', [\App\Http\Controllers\WalletController::class, 'charge'])->name('wallet.charge');
+    Route::get('/wallet/verify/{transaction}', [\App\Http\Controllers\WalletController::class, 'verify'])->name('wallet.verify');
+    Route::post('/wallet/points-to-wallet', [\App\Http\Controllers\WalletController::class, 'convertPointsToWallet'])->name('wallet.points_to_wallet');
+    Route::post('/wallet/wallet-to-points', [\App\Http\Controllers\WalletController::class, 'convertWalletToPoints'])->name('wallet.wallet_to_points');
+
     // API Helpers (Internal)
     Route::post('/api/users/lookup', [GeneralController::class, 'lookupUser'])->name('api.users.lookup');
     Route::get('/api/users/search', [GeneralController::class, 'searchUsers'])->name('api.users.search');
-    
+
     // Global Search API (New)
     Route::get('/api/global-search', [GeneralController::class, 'globalSearch'])->name('api.global.search');
 });

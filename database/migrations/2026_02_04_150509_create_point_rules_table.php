@@ -16,6 +16,8 @@ return new class extends Migration {
             $table->enum('type', ['one_time', 'repeatable', 'conditional']); // نوع قانون
             $table->json('conditions')->nullable();          // شرایط اجرا (JSON)
             $table->unsignedInteger('max_per_user')->nullable(); // حداکثر دفعات برای هر کاربر
+            $table->unsignedInteger('cooldown_minutes')->nullable(); // زمان استراحت بین دو اکشن (دقیقه)
+            $table->unsignedInteger('max_per_day')->nullable(); // سقف دفعات اجرایی مجاز برای یک روز در یک کاربر
             $table->boolean('is_active')->default(true);     // فعال بودن قانون
             $table->timestamp('valid_from')->nullable();     // اعتبار از تاریخ
             $table->timestamp('valid_to')->nullable();       // اعتبار تا تاریخ

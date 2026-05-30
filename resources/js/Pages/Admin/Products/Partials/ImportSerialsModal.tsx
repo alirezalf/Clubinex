@@ -20,7 +20,7 @@ export default function ImportSerialsModal({ isOpen, onClose, selectedProduct }:
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                     <h3 className="font-bold text-lg">وارد کردن سریال‌ها از اکسل</h3>
@@ -29,9 +29,9 @@ export default function ImportSerialsModal({ isOpen, onClose, selectedProduct }:
                 <form onSubmit={submitImport} className="p-6 space-y-4">
                     <p className="text-sm text-gray-500">برای محصول: <span className="font-bold">{selectedProduct?.title}</span></p>
                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition cursor-pointer relative bg-gray-50/50">
-                        <input 
-                            type="file" 
-                            onChange={e => setImportData('file', e.target.files ? e.target.files[0] : null)} 
+                        <input
+                            type="file"
+                            onChange={e => setImportData('file', e.target.files ? e.target.files[0] : null)}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             accept=".xlsx,.xls,.csv"
                         />

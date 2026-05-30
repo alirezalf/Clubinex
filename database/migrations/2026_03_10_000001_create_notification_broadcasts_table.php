@@ -1,5 +1,5 @@
 <?php
-
+// فایل جدید
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('recipient_count')->default(0);
             $table->timestamps();
             $table->foreignId('email_theme_id')->nullable()->constrained('email_themes')->nullOnDelete();
+            $table->foreignId('sms_template_id')->nullable()->constrained('sms_templates')->nullOnDelete();
         });
     }
 

@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->text('description')->nullable();         // توضیحات
             $table->string('image')->nullable();             // تصویر جایزه
             $table->integer('points_cost');                  // هزینه امتیاز
+            $table->decimal('cash_cost', 15, 2)->default(0); // هزینه نقدی (تومان)
             $table->enum('type', ['digital', 'physical', 'charge', 'discount_code']); // نوع جایزه
             $table->text('delivery_instructions')->nullable(); // دستورالعمل دریافت/ارسال
             $table->integer('stock')->default(0);            // موجودی انبار
@@ -38,7 +39,9 @@ return new class extends Migration {
             $table->unsignedBigInteger('lucky_wheel_spin_id')->nullable();
 
             $table->integer('points_spent');                 // امتیاز خرج شده در لحظه ثبت
-            $table->enum('status', ['pending', 'processing', 'completed', 'rejected', 'converted'])->default('pending');
+            $table->decimal('cash_spent', 15, 2)->default(0); // مبلغ نقدی خرج شده
+
+            $table->enum('status', ['pending', 'processing', 'shipped', 'delivered', 'completed', 'rejected', 'converted'])->default('pending');
 
             // ادغام شده: ادمین تغییر دهنده وضعیت
             $table->foreignId('admin_id')->nullable()->constrained('users')->nullOnDelete();

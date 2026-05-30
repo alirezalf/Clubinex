@@ -29,7 +29,7 @@ class SettingController extends Controller
         $notificationTemplates = NotificationTemplate::with(['emailTheme', 'smsTemplate'])->get();
         $emailThemes = EmailTheme::latest()->get();
         $smsTemplates = SmsTemplate::latest()->get();
-        
+
         $admins = User::whereHas('roles', function($q) {
             $q->whereIn('name', ['super-admin', 'admin', 'staff']);
         })->select('id', 'first_name', 'last_name', 'email', 'avatar')->get();
@@ -39,7 +39,7 @@ class SettingController extends Controller
             'notificationTemplates' => $notificationTemplates,
             'emailThemes' => $emailThemes,
             'smsTemplates' => $smsTemplates,
-            'admins' => $admins 
+            'admins' => $admins
         ]);
     }
 
@@ -71,7 +71,7 @@ class SettingController extends Controller
             }
 
             if ($value === null && !$request->hasFile($key)) {
-                continue; 
+                continue;
             }
 
             if (in_array($key, $themeKeys)) {
@@ -92,6 +92,8 @@ class SettingController extends Controller
             // Check if it's a login setting
             if (str_starts_with($key, 'login_')) {
                 $group = 'login';
+            } elseif (str_starts_with($key, 'payment_')) {
+                $group = 'payment';
             } elseif (str_starts_with($key, 'mail_')) {
                 $group = 'email';
             } elseif (str_starts_with($key, 'sms_') || $key === 'resend_interval') {
@@ -99,7 +101,7 @@ class SettingController extends Controller
             } else {
                 $group = $existingKeys[$key] ?? 'general';
             }
-            
+
             SystemSetting::setValue($group, $key, $value);
         }
 
@@ -118,7 +120,7 @@ class SettingController extends Controller
             \Illuminate\Support\Facades\Artisan::call('cache:clear');
             \Illuminate\Support\Facades\Artisan::call('route:clear');
             \Illuminate\Support\Facades\Artisan::call('view:clear');
-            
+
             return back()->with('message', 'کش سیستم با موفقیت پاکسازی شد.');
         } catch (\Exception $e) {
             return back()->with('error', 'خطا در پاکسازی کش: ' . $e->getMessage());
@@ -129,7 +131,7 @@ class SettingController extends Controller
     public function resetDefaults(Request $request)
     {
         $group = $request->input('group');
-        
+
         if (!in_array($group, ['theme', 'login', 'general'])) {
             return back()->with('error', 'گروه تنظیمات نامعتبر است.');
         }
@@ -200,6 +202,53 @@ class SettingController extends Controller
 
         } catch (\Exception $e) {
             return back()->with('error', 'خطا در بازنشانی تنظیمات: ' . $e->getMessage());
+        }
+    }
+
+    public function backupDatabase()
+    {
+        try {
+            $filename = "backup-" . date('Y-m-d_H-i-s');
+
+            $dbConnection = env('DB_CONNECTION', 'mysql');
+
+            if ($dbConnection === 'sqlite') {
+                $sqlitePath = database_path('database.sqlite');
+                if (file_exists($sqlitePath)) {
+                    return response()->download($sqlitePath, $filename . '.sqlite');
+                }
+                return back()->with('error', 'پایگاه داده SQLite یافت نشد.');
+            }
+
+            if ($dbConnection === 'mysql') {
+                $dbHost = env('DB_HOST', '127.0.0.1');
+                $dbPort = env('DB_PORT', '3306');
+                $dbUser = env('DB_USERNAME', 'root');
+                $dbPass = env('DB_PASSWORD', '');
+                $dbName = env('DB_DATABASE', 'laravel');
+
+                $path = sys_get_temp_dir() . '/' . $filename . '.sql';
+
+                // For live servers, executing shell commands via PHP might be disabled,
+                // but this is the simplest approach for a native mysqldump without packages.
+                $command = "mysqldump --user={$dbUser} --password={$dbPass} --host={$dbHost} --port={$dbPort} {$dbName} > {$path}";
+
+                exec($command, $output, $returnVar);
+
+                if ($returnVar !== 0) {
+                     return back()->with('error', 'اجرای دستور بک‌آپ با خطا مواجه شد. در سرورهای اشتراکی ممکن است دسترسی mysqldump مسدود باشد.');
+                }
+
+                if (file_exists($path)) {
+                    return response()->download($path)->deleteFileAfterSend(true);
+                }
+            }
+
+            return back()->with('error', 'پشتیبان‌گیری برای نوع دیتابیس فعلی پشتیبانی نمی‌شود.');
+
+        } catch (\Exception $e) {
+            \Log::error("Database backup failed: " . $e->getMessage());
+            return back()->with('error', 'خطا در ایجاد بک‌آپ: ' . $e->getMessage());
         }
     }
 }

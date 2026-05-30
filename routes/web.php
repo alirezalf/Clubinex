@@ -78,6 +78,37 @@ Route::get('/fix-system', function () {
     }
 });
 
+// --- SEO & Content Routes ---
+Route::get('/robots.txt', function () {
+    $content = "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /dashboard/\nDisallow: /profile/\n\nSitemap: " . url('/sitemap.xml');
+    return response($content)->header('Content-Type', 'text/plain');
+});
+
+Route::get('/sitemap.xml', function () {
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+    // Add primary public routes
+    $urls = [
+        url('/'),
+        url('/login'),
+        url('/register'),
+    ];
+
+    foreach ($urls as $url) {
+        $xml .= '<url>';
+        $xml .= '<loc>' . $url . '</loc>';
+        $xml .= '<lastmod>' . now()->toAtomString() . '</lastmod>';
+        $xml .= '<changefreq>weekly</changefreq>';
+        $xml .= '<priority>' . ($url == url('/') ? '1.0' : '0.8') . '</priority>';
+        $xml .= '</url>';
+    }
+
+    $xml .= '</urlset>';
+
+    return response($xml)->header('Content-Type', 'application/xml');
+});
+
 // Captcha Image Generation
 Route::get('/captcha/{config?}', function(string $config = 'default') {
     try {
@@ -93,6 +124,22 @@ Route::get('/api/provinces/{province}/cities', [GeneralController::class, 'getCi
 // --- Load Route Modules ---
 
 // 1. Authentication (Login, Register, OTP)
+Route::get('/reports/test', function() {
+        $controller = app()->make(\App\Http\Controllers\Admin\DynamicReportController::class);
+        $request = \Illuminate\Http\Request::create('/admin/reports/dynamic/fetch', 'POST', [
+            'table' => 'users',
+            'fields' => ['id', 'first_name', 'last_name'],
+            'page' => 1,
+            'per_page' => 20,
+            'sort_dir' => 'desc',
+            'advanced_filters' => []
+        ]);
+
+        $response = $controller->fetchData($request);
+        file_put_contents(base_path('mytest.log'), $response->getContent());
+        return "Done. check mytest.log";
+});
+
 require __DIR__ . '/auth.php';
 
 // 2. User Panel (Dashboard, Profile, Features)

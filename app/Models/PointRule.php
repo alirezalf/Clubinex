@@ -26,6 +26,8 @@ class PointRule extends Model
         'type',            // نوع قانون (یک‌بار، تکرارشونده، شرطی)
         'conditions',      // شرایط اجرا (ذخیره به صورت JSON)
         'max_per_user',    // حداکثر دفعات اجرا برای هر کاربر
+        'cooldown_minutes', // زمان استراحت بین دو اکشن (دقیقه)
+        'max_per_day',     // سقف دفعات اجرایی مجاز برای یک روز در یک کاربر
         'is_active',       // فعال بودن قانون
         'valid_from',      // اعتبار از تاریخ
         'valid_to',        // اعتبار تا تاریخ
@@ -224,6 +226,31 @@ class PointRule extends Model
 
             if ($usageCount >= $this->max_per_user) {
                 return ['result' => false, 'reason' => 'حداکثر دفعات استفاده از این قانون رسیده است'];
+            }
+        }
+
+        // بررسی سقف روزانه برای کاربر
+        if ($this->max_per_day) {
+            $todayUsageCount = $this->transactions()
+                ->where('user_id', $userId)
+                ->whereDate('created_at', now()->format('Y-m-d'))
+                ->count();
+
+            if ($todayUsageCount >= $this->max_per_day) {
+                return ['result' => false, 'reason' => 'سقف مجاز روزانه شما برای این مورد پر شده است'];
+            }
+        }
+
+        // بررسی زمان استراحت (Cooldown)
+        if ($this->cooldown_minutes) {
+            $lastTransaction = $this->transactions()
+                ->where('user_id', $userId)
+                ->latest('created_at')
+                ->first();
+
+            if ($lastTransaction && $lastTransaction->created_at->addMinutes($this->cooldown_minutes)->isFuture()) {
+                $remains = $lastTransaction->created_at->addMinutes($this->cooldown_minutes)->diffForHumans(now(), ['syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE]);
+                return ['result' => false, 'reason' => "باید حدود $remains دیگر صبر کنید تا دوباره امکان استفاده باشد"];
             }
         }
 

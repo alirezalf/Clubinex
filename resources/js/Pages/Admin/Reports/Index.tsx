@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import axios from 'axios';
+import { http as axios } from '@/Utils/http';
 import {
     TrendingUp, ShoppingBag, Users, Barcode, FileQuestion,
     Loader2, X, Eye, FileText
