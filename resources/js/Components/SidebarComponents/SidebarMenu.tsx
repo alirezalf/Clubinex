@@ -28,7 +28,7 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
 
     // تابع تبدیل اعداد به فارسی
     const toPersianDigits = (num: number) => {
-        return num.toString().replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+        return num.toString().replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[parseInt(d, 10)]);
     };
 
     useLayoutEffect(() => {

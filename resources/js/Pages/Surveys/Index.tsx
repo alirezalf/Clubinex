@@ -3,7 +3,7 @@ import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { PageProps } from '@/types';
 import { FileText, Trophy, Clock, CheckCircle, ArrowLeft, Calendar, AlertTriangle } from 'lucide-react';
-import QuizHistoryTable from '@/Components/QuizHistoryTable.tsx';
+import QuizHistoryTable from '@/Components/QuizHistoryTable';
 
 interface SurveyItem {
     id: number;
@@ -40,7 +40,7 @@ export default function SurveysIndex({ surveys, history }: Props) {
     return (
         <DashboardLayout breadcrumbs={[{ label: 'مسابقات و نظرسنجی' }]}>
             <Head title="مسابقات و نظرسنجی" />
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {surveys.map((survey) => (
                     <div key={survey.id} className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition flex flex-col h-full ${!survey.is_available && !survey.is_participated ? 'opacity-70' : ''}`}>
@@ -64,10 +64,10 @@ export default function SurveysIndex({ surveys, history }: Props) {
                                     </span>
                                 )}
                             </div>
-                            
+
                             <h3 className="text-lg font-bold text-gray-800 mb-2">{survey.title}</h3>
                             <p className="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">{survey.description}</p>
-                            
+
                             <div className="flex flex-col gap-2 text-xs text-gray-400 mb-6">
                                 <div className="flex items-center gap-4">
                                     <span className="flex items-center gap-1"><Clock size={12} /> {survey.questions_count} سوال</span>
@@ -82,11 +82,11 @@ export default function SurveysIndex({ surveys, history }: Props) {
                             </div>
 
                             {survey.is_available || survey.is_participated ? (
-                                <Link 
+                                <Link
                                     href={route('surveys.show', survey.slug)}
                                     className={`w-full py-2.5 rounded-xl text-center font-bold text-sm transition flex items-center justify-center gap-2 ${
-                                        survey.is_participated 
-                                        ? 'bg-gray-100 text-gray-500 hover:bg-gray-200' 
+                                        survey.is_participated
+                                        ? 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                         : 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg shadow-primary-500/20'
                                     }`}
                                 >

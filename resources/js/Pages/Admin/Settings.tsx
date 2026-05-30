@@ -44,6 +44,7 @@ interface NotificationTemplate {
     email_body: string;
     email_theme_id: number | null;
     variables: string;
+    sms_template_id: number | null;
 }
 
 interface EmailTheme {

@@ -4,7 +4,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import { PageProps } from '@/types';
 import SliderSettingsForm from './Partials/SliderSettingsForm';
 import SlideManager from './Partials/SlideManager';
-import SliderPreview from './Partials/SliderPreview'; 
+import SliderPreview from './Partials/SliderPreview';
 
 type Props = PageProps<{
     slider?: any;
@@ -28,7 +28,7 @@ export default function SliderForm({ slider, availablePages }: Props) {
     // Update live settings when prop changes (e.g. after save)
     useEffect(() => {
         if (slider) {
-            setLiveSettings(prev => ({ ...prev, ...slider }));
+            setLiveSettings((prev: any) => ({ ...prev, ...slider }));
         }
     }, [slider]);
 
@@ -42,9 +42,9 @@ export default function SliderForm({ slider, availablePages }: Props) {
             {/* Top Section: Full Width Live Preview */}
             <div className="mb-8">
                 {isEditing ? (
-                    <SliderPreview 
-                        sliderSettings={liveSettings} 
-                        slides={slider.slides || []} 
+                    <SliderPreview
+                        sliderSettings={liveSettings}
+                        slides={slider.slides || []}
                     />
                 ) : (
                     <div className="bg-blue-50 border border-blue-100 rounded-2xl p-8 text-center text-blue-800">
@@ -57,14 +57,14 @@ export default function SliderForm({ slider, availablePages }: Props) {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
+
                 {/* Left Column: Slider Config */}
                 <div className="lg:col-span-1">
-                    <SliderSettingsForm 
-                        slider={slider} 
-                        availablePages={availablePages} 
-                        isEditing={isEditing} 
-                        onSettingsChange={(newSettings) => setLiveSettings(prev => ({ ...prev, ...newSettings }))}
+                    <SliderSettingsForm
+                        slider={slider}
+                        availablePages={availablePages}
+                        isEditing={isEditing}
+                        onSettingsChange={(newSettings) => setLiveSettings((prev: any) => ({ ...prev, ...newSettings }))}
                     />
                 </div>
 

@@ -8,7 +8,7 @@ import ThemeControls from '@/Components/Theme/ThemeControls';
 export default function ThemeCustomizer({ data, setData, submit, handleFileChange }: any) {
 
     const handlePresetSelect = (preset: any) => {
-        setData(prev => ({
+        setData((prev: any) => ({
             ...prev,
             primary_color: preset.primary,
             sidebar_bg: preset.sidebar,
@@ -19,7 +19,7 @@ export default function ThemeCustomizer({ data, setData, submit, handleFileChang
     };
 
     const handleControlChange = (key: string, value: any) => {
-        setData(prev => ({ ...prev, [key]: value }));
+        setData((prev: any) => ({ ...prev, [key]: value }));
     };
 
     return (

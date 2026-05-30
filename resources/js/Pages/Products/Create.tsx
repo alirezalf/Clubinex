@@ -90,11 +90,15 @@ export default function ProductCreate({ categories, prefilledProduct, agentInfo,
                 forceFormData: true,
             });
         } else if (regMode === 'simple') {
-            post(route('products.check_serial'), {
-                data: { serial_code: data.serial_code, register: true },
-                onSuccess: () => {
-                    // Handled by flash message in layout
-                }
+            import('@inertiajs/react').then(({ router }) => {
+                router.post(route('products.check_serial'), {
+                    serial_code: data.serial_code,
+                    register: true
+                }, {
+                    onSuccess: () => {
+                        // Handled by flash message in layout
+                    }
+                });
             });
         } else {
             post(route('products.register'), {

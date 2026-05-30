@@ -24,7 +24,7 @@ interface Reward {
 interface Redemption {
     id: number;
     user: { id: number; first_name: string; last_name: string; mobile: string };
-    reward: { title: string; image: string | null } | null;
+    reward: { title: string; image: string | null; value?: number } | null;
     points_spent: number;
     status: string;
     status_farsi: string;
@@ -33,6 +33,8 @@ interface Redemption {
     created_at_jalali: string;
     admin_name: string | null;
     reward_title: string;
+    reward_value?: number;
+    delivery_info: any;
 }
 
 interface FilterParams {
@@ -62,7 +64,7 @@ export default function AdminRewardsIndex({ tab, rewards, redemptions, clubs, fi
 
             <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <div className="flex bg-white p-1 rounded-xl shadow-sm border border-gray-100">
-                    <button 
+                    <button
                         onClick={() => switchTab('list')}
                         className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition ${tab === 'list' ? 'bg-primary-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                     >
@@ -70,7 +72,7 @@ export default function AdminRewardsIndex({ tab, rewards, redemptions, clubs, fi
                         لیست جوایز
                         {counts && <span className="bg-white/20 px-1.5 rounded-full text-xs">{counts.rewards}</span>}
                     </button>
-                    <button 
+                    <button
                         onClick={() => switchTab('redemptions')}
                         className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition ${tab === 'redemptions' ? 'bg-primary-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                     >

@@ -108,7 +108,7 @@ export default function LuckyWheelIndex({ wheel, userPoints: initialPoints, spin
                     only: ['auth', 'userPoints', 'spinHistory'],
                     onSuccess: (page) => {
                          // Update local state from fresh server data
-                         const newPoints = (page.props as PageProps).auth.user.points;
+                         const newPoints = (page.props as any).auth.user.points;
                          setUserPoints(newPoints);
                     }
                 });

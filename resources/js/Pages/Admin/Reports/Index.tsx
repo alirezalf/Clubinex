@@ -134,48 +134,48 @@ export default function AdminReports({ data, filters, currentTab }: Props) {
                 {/* Data Tables */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     {currentTab === 'transactions' && (
-                        <TransactionsTable 
-                            data={data.data} 
-                            sort={{ sort_by: params.sort_by, sort_dir: params.sort_dir }} 
-                            onSort={handleSort} 
-                            from={data.from} 
+                        <TransactionsTable
+                            data={data.data}
+                            sort={{ sort_by: params.sort_by, sort_dir: params.sort_dir }}
+                            onSort={handleSort}
+                            from={data.from}
                         />
                     )}
 
                     {currentTab === 'redemptions' && (
-                        <RedemptionsTable 
-                            data={data.data} 
-                            sort={{ sort_by: params.sort_by, sort_dir: params.sort_dir }} 
-                            onSort={handleSort} 
-                            from={data.from} 
+                        <RedemptionsTable
+                            data={data.data}
+                            sort={{ sort_by: params.sort_by, sort_dir: params.sort_dir }}
+                            onSort={handleSort}
+                            from={data.from}
                         />
                     )}
 
                     {currentTab === 'users' && (
-                        <UsersTable 
-                            data={data.data} 
-                            sort={{ sort_by: params.sort_by, sort_dir: params.sort_dir }} 
-                            onSort={handleSort} 
+                        <UsersTable
+                            data={data.data}
+                            sort={{ sort_by: params.sort_by, sort_dir: params.sort_dir }}
+                            onSort={handleSort}
                             from={data.from}
                             onShowStats={openUserStats}
                         />
                     )}
 
                     {currentTab === 'products' && (
-                        <ProductsTable 
-                            data={data.data} 
-                            sort={{ sort_by: params.sort_by, sort_dir: params.sort_dir }} 
-                            onSort={handleSort} 
+                        <ProductsTable
+                            data={data.data}
+                            sort={{ sort_by: params.sort_by, sort_dir: params.sort_dir }}
+                            onSort={handleSort}
                             from={data.from}
                             type={params.type}
                         />
                     )}
 
                     {currentTab === 'surveys' && (
-                        <SurveysTable 
-                            data={data.data} 
-                            sort={{ sort_by: params.sort_by, sort_dir: params.sort_dir }} 
-                            onSort={handleSort} 
+                        <SurveysTable
+                            data={data.data}
+                            sort={{ sort_by: params.sort_by, sort_dir: params.sort_dir }}
+                            onSort={handleSort}
                             from={data.from}
                         />
                     )}

@@ -38,7 +38,7 @@ createInertiaApp({
         // راه‌اندازی تابع route سراسری با استفاده از کانفیگ دریافتی از بک‌اند
         // @ts-ignore
         window.route = (name, params, absolute, config = (window as any).Ziggy) => {
-            return routeFn(name, params, absolute, config);
+            return routeFn(name as string, params, absolute, config);
         };
 
         const root = createRoot(el);

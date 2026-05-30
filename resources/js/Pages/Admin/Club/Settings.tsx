@@ -6,14 +6,14 @@ import { Award, Save, Edit2, Shield, Zap, Plus, X, Settings as SettingsIcon, Tra
 
 export default function ClubSettings({ clubs, rules, flash }: any) {
     const [showCreateModal, setShowCreateModal] = useState(false);
-    
+
     // Create Club Form
     const { data, setData, post, processing, reset, errors } = useForm({
         name: '',
         slug: '',
         min_points: '',
         max_points: '',
-        joining_cost: '', 
+        joining_cost: '',
         color: '#000000',
         icon: 'star',
         is_tier: true, // Default to Tier
@@ -98,18 +98,18 @@ export default function ClubSettings({ clubs, rules, flash }: any) {
                         <form onSubmit={submitCreate} className="p-6 space-y-4">
                             <div className="flex gap-4 p-3 bg-gray-50 rounded-lg">
                                 <label className="flex items-center gap-2 cursor-pointer">
-                                    <input 
-                                        type="radio" 
-                                        checked={data.is_tier} 
+                                    <input
+                                        type="radio"
+                                        checked={data.is_tier}
                                         onChange={() => setData('is_tier', true)}
                                         className="text-primary-600 focus:ring-primary-500"
                                     />
                                     <span className="text-sm font-bold">سطح اصلی (Level)</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
-                                    <input 
-                                        type="radio" 
-                                        checked={!data.is_tier} 
+                                    <input
+                                        type="radio"
+                                        checked={!data.is_tier}
                                         onChange={() => setData('is_tier', false)}
                                         className="text-primary-600 focus:ring-primary-500"
                                     />
@@ -153,11 +153,11 @@ export default function ClubSettings({ clubs, rules, flash }: any) {
                             <div>
                                 <label className="block text-sm font-medium mb-1">ویژگی‌ها و مزایا</label>
                                 <div className="flex gap-2 mb-2">
-                                    <input 
-                                        type="text" 
-                                        value={newBenefit} 
-                                        onChange={e => setNewBenefit(e.target.value)} 
-                                        className="w-full border rounded-lg px-3 py-2 text-sm" 
+                                    <input
+                                        type="text"
+                                        value={newBenefit}
+                                        onChange={e => setNewBenefit(e.target.value)}
+                                        className="w-full border rounded-lg px-3 py-2 text-sm"
                                         placeholder="مثلا: ارسال رایگان..."
                                         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addBenefit(); } }}
                                     />
@@ -195,7 +195,7 @@ export default function ClubSettings({ clubs, rules, flash }: any) {
 // Component for Global Settings (Daily Limit)
 const GeneralClubSettings = () => {
     const { data, setData, post, processing } = useForm({
-        daily_point_limit: '' 
+        daily_point_limit: ''
     });
 
     const submit = (e: React.FormEvent) => {
@@ -214,11 +214,11 @@ const GeneralClubSettings = () => {
             <form onSubmit={submit} className="flex items-end gap-4">
                 <div className="flex-1 max-w-md">
                     <label className="block text-sm font-medium mb-1 text-gray-700">سقف امتیاز روزانه (0 = نامحدود)</label>
-                    <input 
-                        type="number" 
-                        value={data.daily_point_limit} 
-                        onChange={e => setData('daily_point_limit', e.target.value)} 
-                        className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-primary-500 focus:border-primary-500" 
+                    <input
+                        type="number"
+                        value={data.daily_point_limit}
+                        onChange={e => setData('daily_point_limit', e.target.value)}
+                        className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-primary-500 focus:border-primary-500"
                         placeholder="مثلا 1000"
                     />
                 </div>
@@ -305,7 +305,7 @@ const ClubCard = ({ club }: any) => {
                     </button>
                 </div>
             </div>
-            
+
             {editing ? (
                 <form onSubmit={submit} className="space-y-3">
                     <div className="flex gap-2 mb-2 text-xs">
@@ -321,7 +321,7 @@ const ClubCard = ({ club }: any) => {
                         <input type="text" value={data.name} onChange={e => setData('name', e.target.value)} className="border rounded-lg px-2 py-1 text-sm" placeholder="نام" />
                         <input type="color" value={data.color} onChange={e => setData('color', e.target.value)} className="h-8 w-full" />
                     </div>
-                    
+
                     <div>
                         <label className="text-xs font-bold text-gray-600 mb-1 block">تغییر تصویر</label>
                         <input type="file" onChange={e => setData('image', e.target.files ? e.target.files[0] : null)} className="w-full border rounded-lg px-2 py-1 text-xs" accept="image/*" />
@@ -342,18 +342,18 @@ const ClubCard = ({ club }: any) => {
                     <div className="border-t pt-2">
                         <label className="text-xs font-bold text-gray-600 mb-1 block">ویژگی‌ها</label>
                         <div className="flex gap-1 mb-2">
-                            <input 
-                                type="text" 
-                                value={newBenefit} 
-                                onChange={e => setNewBenefit(e.target.value)} 
-                                className="w-full border rounded px-2 py-1 text-xs" 
+                            <input
+                                type="text"
+                                value={newBenefit}
+                                onChange={e => setNewBenefit(e.target.value)}
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="ویژگی جدید..."
                                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addBenefit(); } }}
                             />
                             <button type="button" onClick={addBenefit} className="bg-gray-100 px-2 rounded hover:bg-gray-200"><Plus size={14} /></button>
                         </div>
                         <div className="flex flex-wrap gap-1">
-                            {data.benefits.map((b, i) => (
+                            {data.benefits.map((b: string, i: number) => (
                                 <span key={i} className="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded flex items-center gap-1">
                                     {b}
                                     <button type="button" onClick={() => removeBenefit(i)} className="hover:text-red-500"><X size={10} /></button>

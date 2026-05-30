@@ -10,23 +10,24 @@ import clsx from 'clsx';
 
 interface PersianDatePickerProps {
     value?: string; // Expecting YYYY-MM-DD HH:mm:ss (Gregorian) from DB
-    onChange: (date: string) => void; 
+    onChange: (date: string) => void;
     label?: string;
     error?: string;
     placeholder?: string;
     withTime?: boolean; // New prop to enable time selection
+    className?: string;
 }
 
 export default function PersianDatePicker({ value, onChange, label, error, placeholder = "انتخاب تاریخ", withTime = false }: PersianDatePickerProps) {
     // When value comes from DB (e.g., 1990-01-01), we need to create a DateObject with Gregorian calendar first
     // so it knows how to interpret the string, then it can display in Persian.
-    const datePickerValue = value 
-        ? new DateObject({ 
-            date: value, 
-            format: withTime ? "YYYY-MM-DD HH:mm:ss" : "YYYY-MM-DD", 
-            calendar: gregorian, 
-            locale: gregorian_en 
-          }) 
+    const datePickerValue = value
+        ? new DateObject({
+            date: value,
+            format: withTime ? "YYYY-MM-DD HH:mm:ss" : "YYYY-MM-DD",
+            calendar: gregorian,
+            locale: gregorian_en
+          })
         : null;
 
     const handleDesktopChange = (date: DateObject | null) => {
@@ -44,7 +45,7 @@ export default function PersianDatePicker({ value, onChange, label, error, place
     return (
         <div className="w-full">
             {label && <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
-            
+
             <div className="relative">
                 <DatePicker
                     value={datePickerValue}
@@ -69,7 +70,7 @@ export default function PersianDatePicker({ value, onChange, label, error, place
                     {withTime ? <Clock size={18} /> : <CalendarIcon size={18} />}
                 </div>
             </div>
-            
+
             {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
         </div>
     );

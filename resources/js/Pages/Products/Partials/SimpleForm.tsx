@@ -16,7 +16,7 @@ export default function SimpleForm({ data, setData, errors }: Props) {
         message: string;
         product?: {
             title: string;
-            model: string;
+            model_name: string;
             image: string | null;
             points: number;
             category: string;

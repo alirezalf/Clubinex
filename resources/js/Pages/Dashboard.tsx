@@ -24,8 +24,7 @@ export default function Dashboard(props: DashboardProps) {
     return (
         <DashboardLayout
             breadcrumbs={[{
-                label: isAdmin ? 'داشبورد مدیریت' : 'داشبورد کاربری',
-                icon: isAdmin ? 'admin' : 'user'
+                label: isAdmin ? 'داشبورد مدیریت' : 'داشبورد کاربری'
             }]}
         >
             <Head title={isAdmin ? 'پنل مدیریت' : 'داشبورد'} />
@@ -33,9 +32,9 @@ export default function Dashboard(props: DashboardProps) {
             {/* محتوای داشبورد با انیمیشن */}
             <div className="animate-in fade-in duration-500">
                 {isAdmin ? (
-                    <AdminDashboard {...props} />
+                    <AdminDashboard {...(props as any)} />
                 ) : (
-                    <UserDashboard {...props} />
+                    <UserDashboard {...(props as any)} />
                 )}
             </div>
         </DashboardLayout>

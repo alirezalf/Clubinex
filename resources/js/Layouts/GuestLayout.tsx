@@ -13,6 +13,7 @@ interface SiteSettings {
         telegram: string | null;
         whatsapp: string | null;
         linkedin: string | null;
+        twitter?: string | null;
     };
     contact: {
         phone: string;
@@ -27,8 +28,8 @@ export default function GuestLayout({ children }: PropsWithChildren) {
     const [currentDate, setCurrentDate] = useState('');
 
     useEffect(() => {
-        const date = new Date().toLocaleDateString('fa-IR', { 
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        const date = new Date().toLocaleDateString('fa-IR', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
         });
         setCurrentDate(date);
     }, []);
@@ -133,7 +134,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                 {site.socials.linkedin && <a href={site.socials.linkedin} className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary-600 hover:text-white transition"><Linkedin size={18} /></a>}
                             </div>
                         </div>
-                        
+
                         <div>
                             <h4 className="text-white font-bold mb-6">دسترسی سریع</h4>
                             <ul className="space-y-3 text-sm">
@@ -176,7 +177,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                             </ul>
                         </div>
                     </div>
-                    
+
                     <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
                         <p>© ۱۴۰۳ تمامی حقوق برای {site.name} محفوظ است.</p>
                         <p>طراحی و توسعه با عشق ❤️</p>

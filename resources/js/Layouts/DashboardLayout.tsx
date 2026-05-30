@@ -19,7 +19,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, breadcrumbs }: DashboardLayoutProps) {
     // دریافت pageSlider از پراپ‌های سراسری
-    const { auth, themeSettings, flash, unreadNotificationsCount, pageSlider } = 
+    const { auth, themeSettings, flash, unreadNotificationsCount, pageSlider } =
         usePage<PageProps<{ themeSettings?: ThemeSettings, unreadNotificationsCount: number, pageSlider?: any }>>().props;
 
     // Apply Theme Globally
@@ -27,18 +27,18 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-        const defaultCollapsed = themeSettings?.sidebar_collapsed === '1' || themeSettings?.sidebar_collapsed === true || themeSettings?.sidebar_collapsed === 'true';
+        const defaultCollapsed = String(themeSettings?.sidebar_collapsed) === '1' || String(themeSettings?.sidebar_collapsed) === 'true';
         if (typeof window !== 'undefined') {
             const saved = sessionStorage.getItem('sidebarCollapsed');
             const savedDefault = sessionStorage.getItem('sidebarDefaultCollapsed');
-            
+
             // If the default setting from server changed, ignore the saved personal toggle
             if (savedDefault !== null && JSON.parse(savedDefault) !== defaultCollapsed) {
                 sessionStorage.removeItem('sidebarCollapsed');
                 sessionStorage.setItem('sidebarDefaultCollapsed', JSON.stringify(defaultCollapsed));
                 return defaultCollapsed;
             }
-            
+
             if (savedDefault === null) {
                 sessionStorage.setItem('sidebarDefaultCollapsed', JSON.stringify(defaultCollapsed));
             }
@@ -50,7 +50,7 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
 
     // Listen for themeSettings changes (e.g. after saving Theme Settings Panel)
     useEffect(() => {
-        const defaultCollapsed = themeSettings?.sidebar_collapsed === '1' || themeSettings?.sidebar_collapsed === true || themeSettings?.sidebar_collapsed === 'true';
+        const defaultCollapsed = String(themeSettings?.sidebar_collapsed) === '1' || String(themeSettings?.sidebar_collapsed) === 'true';
         if (typeof window !== 'undefined') {
             const savedDefault = sessionStorage.getItem('sidebarDefaultCollapsed');
             if (savedDefault !== null && JSON.parse(savedDefault) !== defaultCollapsed) {
@@ -64,10 +64,10 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
 
     useEffect(() => {
         const interval = setInterval(() => {
-            router.reload({ 
+            router.reload({
                 only: ['unreadNotificationsCount', 'badges']
             });
-        }, 60000); 
+        }, 60000);
 
         return () => clearInterval(interval);
     }, []);
