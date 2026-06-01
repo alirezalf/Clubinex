@@ -3,151 +3,61 @@ import { Head } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Book, Shield, Settings, Server, Users, Code, Search, ChevronRight, FileText, Lock, Sparkles, Terminal } from 'lucide-react';
 import clsx from 'clsx';
+import * as LucideIcons from 'lucide-react';
 
-// Content structure
-const categories = [
-    { id: 'install', name: 'نصب و راه‌اندازی', icon: Server, color: 'text-blue-500', bg: 'bg-blue-50' },
-    { id: 'dev', name: 'برنامه‌نویسی و توسعه', icon: Code, color: 'text-purple-500', bg: 'bg-purple-50' },
-    { id: 'security', name: 'امنیت و لایسنس', icon: Shield, color: 'text-red-500', bg: 'bg-red-50' },
-    { id: 'admin', name: 'راهنمای مدیران', icon: Settings, color: 'text-amber-500', bg: 'bg-amber-50' },
-    { id: 'users', name: 'راهنمای کاربران', icon: Users, color: 'text-green-500', bg: 'bg-green-50' },
-];
+interface Article {
+    id: number;
+    help_category_id: number;
+    title: string;
+    slug: string;
+    content: string;
+}
 
-const articles = [
-    {
-        id: 'build-deploy',
-        categoryId: 'install',
-        title: 'بیلد و استقرار پروژه روی هاست',
-        content: `برای استقرار پروژه روی سرور مشتری مراحل زیر را با دقت دنبال کنید:
+interface Category {
+    id: number;
+    name: string;
+    slug: string;
+    icon: string | null;
+    color: string;
+    bg: string;
+    articles: Article[];
+}
 
-1. **کامپایل فایل‌های فرانت‌اند (React):** قبل از خروجی گرفتن برای مشتری در سیستم خودتان حتماً دستور زیر را اجرا کنید تا فایل‌های React کامپایل شوند و حجم آن‌ها کم شود. (پوشه node_modules نیازی نیست به هاست مشتری منتقل شود).
-\`\`\`bash
-npm install
-npm run build
-\`\`\`
-
-2. **نصب پکیج‌های بک‌اند:** در سرور مشتری سعی کنید پکیج‌ها را فقط برای پروداکشن نصب کنید تا حجم و مصرف رم کاهش یابد:
-\`\`\`bash
-composer install --optimize-autoloader --no-dev
-\`\`\`
-
-3. **دستورات پایانی در هاست:** اجرا کردن دستورات زیر برای ساخت جداول پایگاه داده و بالاتر بردن سرعت سایت در هاست الزامی است:
-\`\`\`bash
-php artisan migrate --force
-php artisan optimize
-\`\`\`
-
-4. **تنظیم پابلیش (Public Check):** هاست مشتری باید به گونه‌ای تنظیم شود که فقط فولدر \`public\` در دسترس عموم و اینترنت باشد و پوشه‌هایی مثل \`app\` یا \`storage\` کاملا خارج از دسترس وب باشند (Document Root باید روی فولدر public تنظیم شود).`
-    },
-    {
-        id: 'license-security',
-        categoryId: 'security',
-        title: 'امنیت ۱۰۰ درصدی و جلوگیری از نال شدن لایسنس',
-        content: `چون نرم‌افزار شما با PHP و Laravel نوشته شده است، سورس کدها عموماً به صورت متنِ باز (Open Source) روی هاست مشتری قرار می‌گیرند. اگر مشتری شما یک برنامه‌نویس حرفه‌ای لاراول استخدام کند و به او دسترسی هاست بدهد، آن برنامه‌نویس می‌تواند به ساختار برنامه نفوذ کند (مانند تغییر LicenseService).
-
-**راه حل نهایی برای امنیت ۱۰۰ درصدی:**
-برای اینکه هیچ‌کس نتواند سورس برنامه را تغییر دهد تا لایسنس را خنثی کند، قبل از تحویل پروژه به مشتری و آپلود روی هاست، باید فایل‌های حساس خود (مخصوصاً کل پوشه \`app/Services/\` و \`app/Providers/\`) را با ابزارهایی مثل **ionCube Encoder** یا **SourceGuardian** رمزنگاری (Obfuscate/Encode) کنید.
-وقتی این کار را بکنید، کدها ناخوانا می‌شوند و در ترکیب با این سیستم لایسنسی که طراحی کرده‌ایم، کپی کردن یا دور زدن برنامه برای مشتری غیرممکن می‌شود.`
-    },
-    {
-        id: 'modules-dev',
-        categoryId: 'dev',
-        title: 'راهنمای افزودن ماژول‌های جدید به سیستم',
-        content: `سیستم ماژولار ما به گونه‌ای طراحی شده است که به صورت کاملا اتوماتیک هر ماژول جدید را تشخیص می‌دهد.
-برای افزودن قابلیت یا ماژول جدید به لایسنس و دسترسی‌ها، فقط کافیست مراحل زیر را طی کنید:
-
-1. **نام‌گذاری متغیر (پیش‌وند enable_):**
-به بخش "مدیریت لایسنس" در پنل بروید. هر ویژگی جدیدی که قصد فروش یا مدیریت آن را دارید با کلمه \`enable_\` شروع کنید.
-مثلا اگر یک سیستم حسابداری جدید می‌سازید نام متغیر را در لایسنس \`enable_accounting\` بگذارید.
-
-2. **تشخیص اتوماتیک:**
-وقتی کاربر لایسنسی دریافت می‌کند که این متغیر درون آن روشن باشد، سیستم فرانت‌اند ما هنگام چک کردن \`modules.enable_accounting\` مقدار true را می‌بیند.
-شما فقط کافیست در قالب (مانند \`SidebarConfig.tsx\`) فیلد \`module: 'enable_accounting'\` را روی آن منو اضافه کنید.`
-    },
-    {
-        id: 'db-update',
-        categoryId: 'dev',
-        title: 'راهنمای بروزرسانی دیتابیس',
-        content: `هنگام اضافه شدن ویژگی‌های جدید به ساختار پایگاه داده، به جای ویرایش مستقیم دیتابیس به صورت دستی (که باعث خطای همگام‌سازی در دیتابیس مشتری می‌شود)، همواره از \`Migration\` های لاراول استفاده کنید.
-
-نمونه دستور ساخت جدول یا تغییر دیتابیس:
-\`\`\`bash
-php artisan make:migration create_help_articles_table
-\`\`\`
-پس از آپلود پروژه بروز در سرور کارفرما، تنها کافیست دستور \`php artisan migrate --force\` اجرا شود.`
-    },
-    {
-        id: 'update-guide',
-        categoryId: 'admin',
-        title: 'فرآیند آپدیت و انتقال تغییرات به مشتری',
-        content: `اگر از Git استفاده می‌کنید، نیاز دارید تا بروزرسانی‌های خود را به صورت هوشمند برای مشتری‌ها ارسال کنید.
-
-### مرحله ۱: بیلد و ساخت بسته
-1. همیشه بعد از تغییر در ظاهر پنل دستورکامپایل را اجرا کنید: \`npm run build\`
-2. پیدا کردن آخرین کامیت (مثلاً abcd123) که به مشتری تحویل داده‌اید.
-3. در ترمینال خود اجرا کنید:
-\`\`\`bash
-php artisan make:update abcd123
-\`\`\`
-این دستور یک فایل \`zip\` از تغییرات (شامل public/build) در مسیر اصلی پروژه برای شما می‌سازد.
-
-### مرحله ۲: اعمال آپدیت روی سایت مشتری
-1. به مسیر **پنل ادمین > تنظیمات سیستم > ابزارهای سیستم** بروید.
-2. در بخش «آپلود و نصب بسته بروزرسانی» فایل \`zip\` ساخته شده را آپلود کنید.
-سیستم به‌صورت خودکار فایل‌ها را جایگزین می‌کند، مایگریشن‌ها (\`php artisan migrate --force\`) را اجرا می‌کند و کش‌ها را پاکسازی می‌کند.
-
-**نکته درباره پکیج‌های جدید:** اگر از طریق \`composer require\` پکیج جدیدی نصب کرده‌اید، به دلیل تحریم یا عدم دسترسی کامپوزر در هاست اشتراکی، باید به صورت دستی پوشه \`vendor\` سیستم خودتان را همراه آپدیت در سایت مشتری آپلود کنید.`
-    },
-    {
-        id: 'super-admin-guide',
-        categoryId: 'admin',
-        title: 'تفاوت سوپر ادمین و ادمین‌های عادی',
-        content: `سیستم ما دارای سطوح دسترسی پیشرفته است:
-- **سوپر ادمین (super-admin):** این کاربر بالاترین سطح دسترسی را دارد و مدیریت کامل کل پیکربندی‌های وب‌سایت شامل لاگ‌ها، لایسنس‌ها، و تنظیمات تم سایت را در اختیار دارد.
-- **ادمین (admin):** مدیران عادی بر اساس نقش‌هایی (Roles) که شما در "مدیریت دسترسی‌ها" می‌سازید، فقط به بخش‌های تعیین شده (مثلا امور مالی یا مدیریت محصولات) دسترسی خواهند داشت.`
-    },
-    {
-        id: 'user-guide',
-        categoryId: 'users',
-        title: 'فرآیند ثبت‌نام و سطوح کاربری (Club)',
-        content: `باشگاه مشتریان (Club) بر اساس امتیازات کاربران کار می‌کند.
-کاربران با ثبت نام، تکمیل پروفایل، یا خرید کالا امتیاز می‌گیرند و هرچه امتیازشان بیشتر شود وارد سطوح بالاتری (مانند طلایی، نقره‌ای و برنزی) می‌شوند.
-شما در پنل مدیریت می‌توانید این سطوح و حداقل امتیاز مورد نیاز هرکدام را تغییر دهید.`
-    }
-];
-
-export default function HelpIndex({ isAdmin }: { isAdmin: boolean }) {
+export default function HelpIndex({ isAdmin, categories }: { isAdmin: boolean, categories: Category[] }) {
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeCategory, setActiveCategory] = useState<string | null>(null);
-    const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
+    const [activeCategory, setActiveCategory] = useState<number | null>(null);
+    const [selectedArticle, setSelectedArticle] = useState<number | null>(null);
+
+    // Extract all articles flat
+    const allArticles = useMemo(() => {
+        let list: Article[] = [];
+        categories.forEach(cat => {
+            if (cat.articles) {
+                list = [...list, ...cat.articles];
+            }
+        });
+        return list;
+    }, [categories]);
 
     // فیلتر کردن مقالات
     const filteredArticles = useMemo(() => {
-        return articles.filter(article => {
+        return allArticles.filter(article => {
             const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                  article.content.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesCategory = activeCategory ? article.categoryId === activeCategory : true;
+            const matchesCategory = activeCategory ? article.help_category_id === activeCategory : true;
             return matchesSearch && matchesCategory;
         });
-    }, [searchTerm, activeCategory]);
+    }, [searchTerm, activeCategory, allArticles]);
 
-    const activeArticleObj = articles.find(a => a.id === selectedArticle);
+    const activeArticleObj = allArticles.find(a => a.id === selectedArticle);
 
-    // رندر هوشمند مارک‌داون‌های محدود (بولد و کدبلاک)
-    const renderContent = (content: string) => {
-        return content.split('\n').map((line, i) => {
-            if (line.startsWith('\`\`\`')) {
-                return null; // Handle manually if complex
-            }
+    const getIcon = (iconName: string | null) => {
+        if (!iconName) return FileText;
 
-            // جایگزینی بولد
-            let formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            // کد درون‌خطی
-            formattedLine = formattedLine.replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-red-500 font-mono text-sm">$1</code>');
-
-            if (line.trim() === '') return <br key={i} />;
-            return <p key={i} className="mb-2 text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: formattedLine }} />;
-        });
+        // Convert dash-case to PascalCase
+        const pascalName = iconName.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+        const IconComponent = (LucideIcons as any)[pascalName];
+        return IconComponent || FileText;
     };
 
     return (
@@ -183,21 +93,24 @@ export default function HelpIndex({ isAdmin }: { isAdmin: boolean }) {
                             همه مقالات
                         </button>
 
-                        {categories.map(category => (
-                            <button
-                                key={category.id}
-                                onClick={() => { setActiveCategory(category.id); setSelectedArticle(null); }}
-                                className={clsx(
-                                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-right text-sm font-bold",
-                                    activeCategory === category.id
-                                        ? `${category.bg} ${category.color} shadow-sm border border-${category.color.split('-')[1]}-200`
-                                        : "hover:bg-gray-50 text-gray-600 border border-transparent"
-                                )}
-                            >
-                                <category.icon size={18} className={activeCategory === category.id ? '' : 'opacity-60'} />
-                                {category.name}
-                            </button>
-                        ))}
+                        {categories.map(category => {
+                            const IconCmp = getIcon(category.icon);
+                            return (
+                                <button
+                                    key={category.id}
+                                    onClick={() => { setActiveCategory(category.id); setSelectedArticle(null); }}
+                                    className={clsx(
+                                        "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-right text-sm font-bold",
+                                        activeCategory === category.id
+                                            ? `${category.bg} ${category.color} shadow-sm border border-${category.color.split('-')[1]}-200`
+                                            : "hover:bg-gray-50 text-gray-600 border border-transparent"
+                                    )}
+                                >
+                                    <IconCmp size={18} className={activeCategory === category.id ? '' : 'opacity-60'} />
+                                    {category.name}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -241,7 +154,7 @@ export default function HelpIndex({ isAdmin }: { isAdmin: boolean }) {
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {filteredArticles.map(article => {
-                                        const cat = categories.find(c => c.id === article.categoryId);
+                                        const cat = categories.find(c => c.id === article.help_category_id);
                                         return (
                                             <div
                                                 key={article.id}
@@ -277,7 +190,7 @@ export default function HelpIndex({ isAdmin }: { isAdmin: boolean }) {
     );
 }
 
-// کامپوننت کمکی برای رندر کردن کدها
+// کامپوننت کمکی برای رندر کردن کدها و عکس‌ها
 const contentRenderer = (content: string) => {
     const parts = content.split('```');
     return parts.map((part, index) => {
@@ -305,11 +218,22 @@ const contentRenderer = (content: string) => {
                         let formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                         formattedLine = formattedLine.replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1.5 py-0.5 rounded-md text-red-500 font-mono text-sm border border-gray-200 select-all">$1</code>');
 
+                        // Handle Markdown Image: ![Alt text](/path/to/img.jpg)
+                        const imgMatch = line.match(/!\[(.*?)\]\((.*?)\)/);
+                        if (imgMatch) {
+                           const [, alt, src] = imgMatch;
+                           return <div key={i} className="my-4"><img src={src} alt={alt} className="w-full max-w-2xl mx-auto rounded-xl shadow-lg border border-gray-200" /></div>;
+                        }
+
                         if (line.startsWith('- ')) {
                             return <li key={i} className="mr-4 text-gray-700 list-disc marker:text-primary-500" dangerouslySetInnerHTML={{ __html: formattedLine.substring(2) }} />;
                         }
 
-                        if (line.trim() === '') return null; // Ignore blanks to let gap handle it
+                        if (line.startsWith('### ')) {
+                            return <h3 key={i} className="text-lg font-bold text-gray-800 mt-6 mb-2 border-b border-gray-100 pb-2 flex items-center gap-2" dangerouslySetInnerHTML={{ __html: formattedLine.substring(4) }} />;
+                        }
+
+                        if (line.trim() === '') return null;
                         return <p key={i} className="text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: formattedLine }} />;
                     }).filter(Boolean)}
                 </div>

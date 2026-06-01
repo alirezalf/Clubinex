@@ -45,18 +45,32 @@ class ProductController extends Controller
 
         $myRegistrations = ProductRegistration::with('category')
             ->where('user_id', $user->id)
+            ->where('status', '!=', 'approved') // Only pending/rejected show as hand requests
             ->latest()
             ->get()
             ->map(function($reg) {
+                // جستجو برای یافتن محصول سیستمی و خواندن عکس پیش‌فرض آن
+                $systemProduct = Product::where('title', trim($reg->product_name))->first();
+                if (!$systemProduct) {
+                    $systemProduct = Product::where('title', 'like', '%' . trim($reg->product_name) . '%')->first();
+                }
+                $displayImage = $reg->product_image ?: ($systemProduct ? $systemProduct->display_image : null);
+
                 return [
-                    'id' => $reg->id,
+                    'id' => 'reg_' . $reg->id,
+                    'real_id' => $reg->id,
                     'type' => 'registration',
                     'serial_code' => $reg->serial_code,
                     'product_title' => $reg->product_name,
                     'product_model' => $reg->product_model,
-                    'product_image' => $reg->product_image,
+                    'product_image' => $displayImage,
                     'points_earned' => $reg->estimated_points ?? 0,
                     'registered_at' => $reg->created_at_jalali,
+                    'warranty_status' => collect([
+                        'request_activation' => 'درخواست فعال‌سازی',
+                        'already_active' => 'فعال از قبل',
+                        'no_guarantee' => 'بدون گارانتی'
+                    ])->get($reg->warranty_status, 'نامشخص'),
                     'status' => $reg->status,
                     'status_farsi' => $reg->status_farsi,
                     'admin_note' => $reg->admin_note,
@@ -65,7 +79,9 @@ class ProductController extends Controller
                 ];
             });
 
-        $mySerials = ProductSerial::with('product')
+        // Since we excluded 'approved' registrations, we don't need to filter them out anymore.
+        // Approved hand registrations will correctly show up as 'serial' now.
+        $mySerials = ProductSerial::with(['product', 'registration'])
             ->where('is_used', true)
             ->where('used_by', $user->id)
             ->latest('used_at')
@@ -75,13 +91,32 @@ class ProductController extends Controller
                 if ($serial->product && $serial->product->points_value > 0) {
                     $points = $serial->product->points_value;
                 }
+
+                // If it was a manual registration, we can get image and warranty status
+                $warrantyStatus = null;
+                $displayImage = $serial->product ? $serial->product->display_image : null;
+
+                if ($serial->registration) {
+                    $warrantyStatus = collect([
+                        'request_activation' => 'درخواست فعال‌سازی',
+                        'already_active' => 'فعال از قبل',
+                        'no_guarantee' => 'بدون گارانتی'
+                    ])->get($serial->registration->warranty_status, 'نامشخص');
+
+                    if (!$displayImage && $serial->registration->product_image) {
+                        $displayImage = $serial->registration->product_image;
+                    }
+                }
+
                 return [
-                    'id' => $serial->id,
+                    'id' => 'ser_' . $serial->id,
+                    'real_id' => $serial->id,
                     'type' => 'serial',
                     'serial_code' => $serial->serial_code,
-                    'product_title' => $serial->product ? $serial->product->title : 'نامشخص',
-                    'product_model' => $serial->product ? $serial->product->model_name : 'نامشخص',
-                    'product_image' => $serial->product ? $serial->product->image : null,
+                    'product_title' => $serial->product ? $serial->product->title : ($serial->registration ? $serial->registration->product_name : 'نامشخص'),
+                    'product_model' => $serial->product ? $serial->product->model_name : ($serial->registration ? $serial->registration->product_model : 'نامشخص'),
+                    'product_image' => $displayImage,
+                    'warranty_status' => $warrantyStatus,
                     'points_earned' => $points,
                     'registered_at' => \Morilog\Jalali\Jalalian::fromDateTime($serial->used_at)->format('Y/m/d H:i'),
                     'status' => 'approved',
@@ -145,7 +180,11 @@ class ProductController extends Controller
                 'seller_mobile_number' => $registration->seller_mobile,
                 'introducer_user' => $registration->introducer_type,
                 'introducer_mobile_number' => $registration->introducer_mobile,
-                'guarantee_status' => $registration->warranty_status,
+                'guarantee_status' => match($registration->warranty_status) {
+                    'request_activation' => 'reg_guarantee',
+                    'already_active' => 'pre_guarantee',
+                    default => 'no_guarantee',
+                },
                 'product_image_url' => $registration->product_image,
                 'invoice_image_url' => $registration->invoice_image,
             ]

@@ -13,17 +13,11 @@ use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         // Rate Limiting
@@ -39,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perHour(10)->by($request->ip());
         });
 
-        // Force HTTPS if APP_URL starts with https:// or if request is secure (Fixes Laragon SSL + VPN issues)
+        // Force HTTPS if APP_URL starts with https:// or if request is secure
         if (str_starts_with(config('app.url'), 'https://') || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
@@ -54,6 +48,8 @@ class AppServiceProvider extends ServiceProvider
             if (!Schema::hasTable('system_settings')) {
                 return;
             }
+
+            // ========== بخش HelpSeeder حذف شد ==========
 
             // Runtime Migration Fix for sms_template_id
             if (Schema::hasTable('notification_broadcasts') && !Schema::hasColumn('notification_broadcasts', 'sms_template_id')) {
@@ -94,8 +90,6 @@ class AppServiceProvider extends ServiceProvider
                 $primaryColor = '#' . $primaryColor;
             }
 
-            // تبدیل به RGB برای استفاده در CSS Variables
-            // مقادیر پیش‌فرض در صورت خطا
             $r = 2; $g = 132; $b = 199;
 
             try {
@@ -108,7 +102,7 @@ class AppServiceProvider extends ServiceProvider
 
             $themeData = [
                 'primary_color' => $primaryColor,
-                'primary_rgb' => "$r $g $b", // ارسال مقدار RGB محاسبه شده
+                'primary_rgb' => "$r $g $b",
                 'radius_size' => $settings['theme.radius_size'] ?? '0.75rem',
                 'sidebar_bg' => $settings['theme.sidebar_bg'] ?? '#ffffff',
                 'sidebar_text' => $settings['theme.sidebar_text'] ?? '#1f2937',
@@ -117,12 +111,10 @@ class AppServiceProvider extends ServiceProvider
                 'sidebar_collapsed' => filter_var($settings['theme.sidebar_collapsed'] ?? false, FILTER_VALIDATE_BOOLEAN),
             ];
 
-            // اشتراک‌گذاری تنظیمات مهم با ویوی اصلی بلید (برای CSS Variables اولیه)
             View::share('themeSettings', $themeData);
 
-            // اشتراک‌گذاری اطلاعات عمومی سایت با Inertia (برای استفاده در کامپوننت‌های React)
             Inertia::share([
-                'themeSettings' => $themeData, // ارسال تنظیمات تم به ری‌اکت
+                'themeSettings' => $themeData,
                 'site' => [
                     'name' => $settings['general.site_title'] ?? 'Clubinex',
                     'description' => $settings['general.site_description'] ?? '',
@@ -142,7 +134,6 @@ class AppServiceProvider extends ServiceProvider
                 ]
             ]);
         } catch (\Exception $e) {
-            // در صورت خطای دیتابیس، مقادیر پیش‌فرض را ست می‌کنیم تا بیلد شکست نخورد
             $defaultTheme = [
                 'primary_color' => '#0284c7',
                 'primary_rgb' => '2 132 199',

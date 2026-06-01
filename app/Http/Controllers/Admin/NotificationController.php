@@ -98,7 +98,11 @@ class NotificationController extends Controller
             ]);
 
             // Dispatch Job
-            SendBroadcastNotification::dispatch($broadcast);
+            if (env('QUEUE_CONNECTION', 'sync') === 'sync') {
+                SendBroadcastNotification::dispatchSync($broadcast);
+            } else {
+                SendBroadcastNotification::dispatch($broadcast);
+            }
 
             DB::commit();
             return back()->with('message', "عملیات ارسال برای {$count} کاربر در صف قرار گرفت.");

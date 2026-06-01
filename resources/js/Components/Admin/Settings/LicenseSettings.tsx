@@ -3,26 +3,31 @@ import clsx from 'clsx';
 import { usePage } from '@inertiajs/react';
 import { Copy, ShieldCheck, ShieldAlert, KeyRound, Cpu, Calendar, User } from 'lucide-react';
 
-function ToggleIndicator({ label, description, checked }: any) {
+function ToggleIndicator({ label, description, checked, onChange, disabled }: any) {
     return (
         <div className="flex items-start justify-between gap-4">
             <div>
                 <h4 className="font-bold text-gray-800 text-sm">{label}</h4>
                 <p className="text-xs text-gray-500 mt-1">{description}</p>
             </div>
-            <div
+            <button
+                type="button"
+                onClick={() => !disabled && onChange(!checked)}
+                disabled={disabled}
                 className={clsx(
-                    "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out",
-                    checked ? "bg-green-500" : "bg-gray-200 text-gray-400 opacity-70"
+                    "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
+                    checked ? "bg-green-500" : "bg-gray-200 text-gray-400 opacity-70",
+                    disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
                 )}
             >
+                <span className="sr-only">Toggle {label}</span>
                 <span
                     className={clsx(
                         "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                         checked ? "-translate-x-5" : "translate-x-0"
                     )}
                 />
-            </div>
+            </button>
         </div>
     );
 }
@@ -45,10 +50,10 @@ export default function LicenseSettings({ data, setData }: LicenseSettingsProps)
 
     // Fallback to checking data object (if updating states optimistically)
     const getModuleState = (key: string) => {
-        if (isLicenseValid && license_info?.modules) {
-            return license_info.modules[key] === true;
-        }
-        return data[key] === '1' || data[key] === true;
+        const isEnabledInDb = data[key] === '1' || data[key] === true;
+        const isAllowedByLicense = !data.license_key || (isLicenseValid && license_info?.modules && license_info.modules[key] === true);
+
+        return isEnabledInDb && isAllowedByLicense;
     };
 
     return (
@@ -122,7 +127,7 @@ export default function LicenseSettings({ data, setData }: LicenseSettingsProps)
             <div>
                 <h4 className="font-bold text-gray-800 mb-4 border-b pb-2">وضعیت ماژول‌های سیستم</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                    {!isLicenseValid && (
+                    {!isLicenseValid && !!data.license_key && (
                         <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex border-2 border-dashed border-gray-300 rounded-2xl items-center justify-center">
                              <div className="bg-white px-6 py-4 rounded-xl shadow-lg border text-center">
                                  <ShieldAlert className="w-8 h-8 text-red-500 mx-auto mb-2" />
@@ -136,6 +141,8 @@ export default function LicenseSettings({ data, setData }: LicenseSettingsProps)
                             label="ماژول باشگاه و سطوح کاربر"
                             description="فعال‌سازی سیستم باشگاه مشتریان (برنزی، نقره‌ای، طلایی...)"
                             checked={getModuleState('enable_clubs')}
+                            onChange={(val: boolean) => setData('enable_clubs', val ? '1' : '0')}
+                            disabled={!!data.license_key && !isLicenseValid}
                         />
                     </div>
 
@@ -144,6 +151,8 @@ export default function LicenseSettings({ data, setData }: LicenseSettingsProps)
                             label="ماژول گیمیفیکیشن (گردونه شانس)"
                             description="فعال‌سازی ویژگی گردونه شانس و سیستم پاداش مبتنی بر شانس"
                             checked={getModuleState('enable_lucky_wheel')}
+                            onChange={(val: boolean) => setData('enable_lucky_wheel', val ? '1' : '0')}
+                            disabled={!!data.license_key && !isLicenseValid}
                         />
                     </div>
 
@@ -152,6 +161,8 @@ export default function LicenseSettings({ data, setData }: LicenseSettingsProps)
                             label="ماژول ثبت محصول و سریال"
                             description="مدیریت بانک محصولات و امکان ثبت سریال کالا توسط مشتریان"
                             checked={getModuleState('enable_products')}
+                            onChange={(val: boolean) => setData('enable_products', val ? '1' : '0')}
+                            disabled={!!data.license_key && !isLicenseValid}
                         />
                     </div>
 
@@ -160,6 +171,8 @@ export default function LicenseSettings({ data, setData }: LicenseSettingsProps)
                             label="ماژول فروشگاه جوایز"
                             description="فروشگاه هدایا با قابلیت تبدیل امتیاز کاربران به جوایز فیزیکی یا کدهای تخفیف"
                             checked={getModuleState('enable_rewards')}
+                            onChange={(val: boolean) => setData('enable_rewards', val ? '1' : '0')}
+                            disabled={!!data.license_key && !isLicenseValid}
                         />
                     </div>
 
@@ -168,6 +181,8 @@ export default function LicenseSettings({ data, setData }: LicenseSettingsProps)
                             label="ماژول کیف پول اعتباری"
                             description="افزودن امکانات مالی، خرید، شارژ و برداشت وجه"
                             checked={getModuleState('enable_wallet')}
+                            onChange={(val: boolean) => setData('enable_wallet', val ? '1' : '0')}
+                            disabled={!!data.license_key && !isLicenseValid}
                         />
                     </div>
 
@@ -176,6 +191,8 @@ export default function LicenseSettings({ data, setData }: LicenseSettingsProps)
                             label="ماژول معرفی دوستان (Referral)"
                             description="فعال‌سازی لینک دعوت و سیستم امتیازدهی بازاریابی شبکه‌ای"
                             checked={getModuleState('enable_referrals')}
+                            onChange={(val: boolean) => setData('enable_referrals', val ? '1' : '0')}
+                            disabled={!!data.license_key && !isLicenseValid}
                         />
                     </div>
 
@@ -184,6 +201,8 @@ export default function LicenseSettings({ data, setData }: LicenseSettingsProps)
                             label="ماژول نظرسنجی و مسابقات"
                             description="امکان برگزاری کوئیز، مسابقه و نظرسنجی با تعیین پاداش مشارکت"
                             checked={getModuleState('enable_surveys')}
+                            onChange={(val: boolean) => setData('enable_surveys', val ? '1' : '0')}
+                            disabled={!!data.license_key && !isLicenseValid}
                         />
                     </div>
 
@@ -192,6 +211,8 @@ export default function LicenseSettings({ data, setData }: LicenseSettingsProps)
                             label="ماژول تیکتینگ و پشتیبانی"
                             description="سیستم ارسال تیکت و مدیریت مشکلات مشتریان"
                             checked={getModuleState('enable_tickets')}
+                            onChange={(val: boolean) => setData('enable_tickets', val ? '1' : '0')}
+                            disabled={!!data.license_key && !isLicenseValid}
                         />
                     </div>
 
@@ -200,6 +221,8 @@ export default function LicenseSettings({ data, setData }: LicenseSettingsProps)
                             label="ماژول گزارشات پیشرفته"
                             description="دسترسی به نمودارها، خروجی‌های تفصیلی و ساخت گزارشات پویا"
                             checked={getModuleState('enable_reports')}
+                            onChange={(val: boolean) => setData('enable_reports', val ? '1' : '0')}
+                            disabled={!!data.license_key && !isLicenseValid}
                         />
                     </div>
                 </div>

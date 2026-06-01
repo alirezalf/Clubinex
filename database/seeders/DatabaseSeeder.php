@@ -57,6 +57,7 @@ class DatabaseSeeder extends Seeder
             PointTransactionSeeder::class,
             SliderSeeder::class,
             ReferralSeeder::class,
+            HelpSeeder::class,
         ]);
     }
 }

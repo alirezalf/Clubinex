@@ -42,16 +42,17 @@ class Product extends Model
             return null;
         }
 
-        // اگر لینک کامل است (مثل لینک‌های وردپرس)
-        if (filter_var($image, FILTER_VALIDATE_URL)) {
+        // اگر لینک کامل است (مثل لینک‌های وردپرس یا هر لینک http/https)
+        if (str_starts_with($image, 'http://') || str_starts_with($image, 'https://')) {
             return $image;
         }
 
-        // اگر فایل لوکال است ولی آدرس کامل ندارد (فقط نام فایل است)
-        if (!str_starts_with($image, '/storage') && !str_starts_with($image, 'http')) {
-            return Storage::url($image);
+        // اگر از قبل دارای /storage است
+        if (str_starts_with($image, '/storage/')) {
+            return $image;
         }
 
-        return $image;
+        // مسیردهی فایل لوکال
+        return Storage::url($image);
     }
 }

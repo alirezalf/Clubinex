@@ -101,8 +101,12 @@ class SmsIrDriver implements SmsProviderInterface
 
     public function sendBulk(string $mobile, string $message): bool
     {
-        if (empty($this->apiKey) || empty($this->sender)) {
-            return false;
+        if (empty($this->apiKey)) {
+            throw new \Exception("SMS API Key is missing. Please configure it in settings.");
+        }
+
+        if (empty($this->sender)) {
+            throw new \Exception("SMS Sender Line Number is missing. It is required for Bulk SMS. Please configure it in settings.");
         }
 
         try {

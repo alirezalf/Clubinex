@@ -10,10 +10,10 @@ class ProductSerial extends Model
     use HasFactory;
 
     protected $fillable = [
-        'product_id', 
-        'serial_code', 
-        'is_used', 
-        'used_by', 
+        'product_id',
+        'serial_code',
+        'is_used',
+        'used_by',
         'used_at'
     ];
 
@@ -30,5 +30,10 @@ class ProductSerial extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'used_by');
+    }
+
+    public function registration()
+    {
+        return $this->hasOne(ProductRegistration::class, 'serial_code', 'serial_code');
     }
 }

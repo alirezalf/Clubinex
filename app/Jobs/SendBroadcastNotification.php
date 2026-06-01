@@ -67,7 +67,11 @@ class SendBroadcastNotification implements ShouldQueue
                                 }
                             }
 
-                            SendSms::dispatch($user->mobile, $message, $user->id, $templateId, $parameters);
+                            if (env('QUEUE_CONNECTION', 'sync') === 'sync') {
+                                SendSms::dispatchSync($user->mobile, $message, $user->id, $templateId, $parameters);
+                            } else {
+                                SendSms::dispatch($user->mobile, $message, $user->id, $templateId, $parameters);
+                            }
                         }
                     }
                 } elseif ($channel === 'email') {

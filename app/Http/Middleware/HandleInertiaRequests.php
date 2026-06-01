@@ -93,7 +93,7 @@ class HandleInertiaRequests extends Middleware
                 ];
                 foreach ($moduleKeys as $k) {
                     $isEnabledInDb = isset($dbModules[$k]) && ($dbModules[$k] === '1' || $dbModules[$k] === true);
-                    $isAllowedByLicense = !empty($licenseModules[$k]);
+                    $isAllowedByLicense = empty($licenseKey) || !empty($licenseModules[$k]);
                     $effectiveModules[$k] = $isEnabledInDb && $isAllowedByLicense;
                 }
                 return $effectiveModules;

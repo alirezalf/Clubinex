@@ -67,6 +67,7 @@ Route::get('/fix-system', function () {
         Artisan::call('optimize:clear');
         Artisan::call('config:clear');
         Artisan::call('cache:clear');
+        Artisan::call('db:seed', ['--class' => 'HelpSeeder', '--force' => true]);
 
         if(Schema::hasTable('jobs')) DB::table('jobs')->truncate();
         if(Schema::hasTable('failed_jobs')) DB::table('failed_jobs')->truncate();
@@ -158,6 +159,11 @@ Route::get('/reports/test', function() {
         $response = $controller->fetchData($request);
         file_put_contents(base_path('mytest.log'), $response->getContent());
         return "Done. check mytest.log";
+});
+
+Route::get('/seed-help', function() {
+    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'HelpSeeder', '--force' => true]);
+    return "Help seeded successfully.";
 });
 
 require __DIR__ . '/auth.php';
