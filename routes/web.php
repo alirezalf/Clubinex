@@ -16,6 +16,12 @@ use Inertia\Inertia;
 |
 */
 
+// --- Setup Setup Routes ---
+use App\Http\Controllers\SetupController;
+
+Route::get('/setup', [SetupController::class, 'index'])->name('setup.index');
+Route::post('/setup', [SetupController::class, 'store'])->name('setup.store');
+
 // --- Public Routes ---
 Route::get('/', function () {
     $seo = [
@@ -28,7 +34,21 @@ Route::get('/', function () {
         'seo' => $seo,
         'slider' => $slider
     ]);
+});
+
+Route::get('/home', function () {
+    $seo = [
+        'title' => \App\Models\SystemSetting::getValue('general', 'site_title', 'Clubinex'),
+        'description' => \App\Models\SystemSetting::getValue('general', 'site_description', ''),
+    ];
+    $slider = \App\Models\Slider::with('activeSlides')->where('location_key', 'home_main')->where('is_active', true)->first();
+
+    return Inertia::render('Welcome', [
+        'seo' => $seo,
+        'slider' => $slider
+    ]);
 })->name('home');
+
 
 // --- Utility Routes ---
 Route::get('/about', function() {

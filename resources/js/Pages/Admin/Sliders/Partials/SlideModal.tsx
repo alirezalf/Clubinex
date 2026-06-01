@@ -299,6 +299,34 @@ export default function SlideModal({ sliderId, slide, onClose }: Props) {
                                     </label>
                                 </div>
 
+                                {data.btn_pos_type === 'relative' && (
+                                    <div className="mt-3 mb-3 p-3 bg-white rounded border border-gray-100">
+                                        <label className="block text-xs font-medium mb-2">موقعیت دکمه نسبت به متن</label>
+                                        <select value={data.btn_relative_pos} onChange={e => setData('btn_relative_pos', e.target.value)} className="w-full border rounded-lg px-3 py-2 text-xs dir-ltr">
+                                            <option value="above">بالای متن</option>
+                                            <option value="below">پایین متن</option>
+                                            <option value="right">راست متن</option>
+                                            <option value="left">چپ متن</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                {data.btn_pos_type === 'absolute' && (
+                                    <div className="mt-3 mb-3 p-3 bg-white rounded border border-gray-100">
+                                        <label className="block text-xs font-medium mb-2">موقعیت دکمه در تصویر</label>
+                                        <select value={data.btn_custom_pos} onChange={e => setData('btn_custom_pos', e.target.value)} className="w-full border rounded-lg px-3 py-2 text-xs dir-ltr">
+                                            <option value="bottom-10 right-10">پایین راست</option>
+                                            <option value="bottom-10 left-10">پایین چپ</option>
+                                            <option value="top-10 right-10">بالا راست</option>
+                                            <option value="top-10 left-10">بالا چپ</option>
+                                            <option value="bottom-10 left-1/2 -translate-x-1/2">پایین وسط</option>
+                                            <option value="top-10 left-1/2 -translate-x-1/2">بالا وسط</option>
+                                            <option value="top-1/2 right-10 -translate-y-1/2">وسط راست</option>
+                                            <option value="top-1/2 left-10 -translate-y-1/2">وسط چپ</option>
+                                        </select>
+                                    </div>
+                                )}
+
                                 <div className="grid grid-cols-2 gap-4 mt-2">
                                     <ColorPicker label="رنگ متن دکمه" value={data.button_color} onChange={(v: string) => setData('button_color', v)} />
                                     <ColorPicker label="رنگ پس‌زمینه دکمه" value={data.button_bg_color} onChange={(v: string) => setData('button_bg_color', v)} />

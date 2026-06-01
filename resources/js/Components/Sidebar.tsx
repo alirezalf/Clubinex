@@ -17,9 +17,10 @@ interface SidebarProps {
     setIsOpen: (open: boolean) => void;
     isCollapsed: boolean;
     toggleCollapse: () => void;
+    onOpenThemePanel?: () => void;
 }
 
-export default function Sidebar({ isOpen, setIsOpen, isCollapsed, toggleCollapse }: SidebarProps) {
+export default function Sidebar({ isOpen, setIsOpen, isCollapsed, toggleCollapse, onOpenThemePanel }: SidebarProps) {
     // @ts-ignore
     const { auth, site, badges, unreadNotificationsCount } = usePage<PageProps & { site: any, badges: { user: number, admin: number, rewards: number }, unreadNotificationsCount: number }>().props;
     const [searchTerm, setSearchTerm] = useState('');
@@ -75,6 +76,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, toggleCollapse
                         toggleCollapse={toggleCollapse}
                         siteName={site?.name}
                         siteLogo={site?.logo}
+                        siteVersion={site?.version}
                     />
 
                     <SidebarProfile
@@ -171,6 +173,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, toggleCollapse
                     <SidebarFooter
                         isCollapsed={isCollapsed}
                         isAdmin={isAdmin}
+                        onOpenThemePanel={onOpenThemePanel}
                     />
                 </div>
             </aside>

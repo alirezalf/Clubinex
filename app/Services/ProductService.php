@@ -358,17 +358,19 @@ class ProductService
         // 3. ثبت سریال در سیستم (به عنوان استفاده شده) برای جلوگیری از ثبت مجدد
         if ($product && $reg->serial_code) {
             try {
-                ProductSerial::firstOrCreate(
-                    ['serial_code' => $reg->serial_code],
-                    [
-                        'product_id' => $product->id,
-                        'is_used' => true,
-                        'used_by' => $reg->user_id,
-                        'used_at' => now(),
-                    ]
-                );
+                $serial = ProductSerial::firstOrNew(['serial_code' => $reg->serial_code]);
+
+                // If the serial exists, we don't change its product_id unless it's new
+                if (!$serial->exists) {
+                    $serial->product_id = $product->id;
+                }
+
+                $serial->is_used = true;
+                $serial->used_by = $reg->user_id;
+                $serial->used_at = now();
+                $serial->save();
             } catch (Exception $e) {
-                // خطا نادیده گرفته می‌شود (شاید قبلاً ثبت شده باشد)
+                // خطا نادیده گرفته می‌شود
             }
         }
 

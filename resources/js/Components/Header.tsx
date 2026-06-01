@@ -12,8 +12,9 @@ import {
     LogOut,
     Settings,
     HelpCircle,
+    Smartphone,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import GlobalSearch from '@/Components/GlobalSearch';
 import type { PageProps } from '@/types';
 
@@ -35,6 +36,39 @@ export default function Header({
     onToggleThemePanel,
 }: HeaderProps) {
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+    useEffect(() => {
+        const checkIsMobile = () => {
+            const userAgent = typeof window.navigator === "undefined" ? "" : navigator.userAgent;
+            const mobile = Boolean(userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i));
+            setIsMobileDevice(mobile);
+        };
+        checkIsMobile();
+
+        const handleBeforeInstallPrompt = (e: any) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+        };
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        };
+    }, []);
+
+    const handleInstallClick = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                setDeferredPrompt(null);
+            }
+        }
+    };
+
     // @ts-ignore
     const { badges } = usePage<
         PageProps & { badges: { user: number; admin: number } }
@@ -108,6 +142,22 @@ export default function Header({
 
             {/* سمت چپ - آیکون‌ها و پروفایل */}
             <div className="flex items-center gap-2 lg:gap-3">
+                {/* دکمه نصب روی گوشی */}
+                {isMobileDevice && deferredPrompt && (
+                    <button
+                        onClick={handleInstallClick}
+                        className="group relative flex items-center gap-2 rounded-xl p-2.5 transition-all duration-200 hover:scale-105 active:scale-95"
+                        style={{
+                            backgroundColor: 'var(--header-hover)',
+                            color: 'var(--header-text)',
+                        }}
+                        title="نصب اپلیکیشن"
+                    >
+                        <Smartphone size={22} className="text-blue-500 animate-[gentle-shake_3s_ease-in-out_infinite] origin-bottom" />
+                        <span className="hidden text-sm font-medium xl:block">نصب اپلیکیشن</span>
+                    </button>
+                )}
+
                 {/* تاریخ شمسی */}
                 <div
                     className="hidden items-center gap-2.5 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 hover:scale-105 xl:flex"
@@ -266,12 +316,12 @@ export default function Header({
                                     method="post"
                                     as="button"
                                     className="flex w-full items-center gap-2 px-4 py-2.5 text-right text-sm text-red-600 transition-colors hover:bg-red-50"
-                                    onClick={() => { 
+                                    onClick={() => {
                                         if (typeof window !== 'undefined') {
                                             sessionStorage.removeItem('sidebarCollapsed');
                                             sessionStorage.removeItem('sidebarDefaultCollapsed');
                                         }
-                                        setShowUserMenu(false); 
+                                        setShowUserMenu(false);
                                     }}
                                 >
                                     <LogOut size={16} />

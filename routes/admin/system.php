@@ -51,7 +51,9 @@ Route::middleware(['role:super-admin|admin'])->group(function () {
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
     Route::post('/settings/reset-defaults', [SettingController::class, 'resetDefaults'])->name('settings.reset_defaults');
     Route::post('/settings/clear-cache', [SettingController::class, 'clearCache'])->name('settings.clear_cache');
-    Route::post('/settings/backup-database', [SettingController::class, 'backupDatabase'])->name('settings.backup_database');
+    Route::get('/settings/backup-database', [SettingController::class, 'backupDatabase'])->name('settings.backup_database');
+    Route::post('/settings/upload-update', [SettingController::class, 'uploadUpdate'])->name('settings.upload_update');
+    Route::post('/settings/update-system', [SettingController::class, 'updateSystem'])->name('settings.update_system');
 
     // Integration Tests
     Route::post('/settings/test-wp', [IntegrationController::class, 'testWpConnection'])->name('settings.test_wp');

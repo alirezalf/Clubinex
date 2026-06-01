@@ -243,6 +243,8 @@ class RewardController extends Controller
             'user' => [
                 'id' => $user->id,
                 'name' => $user->full_name,
+                'username' => $user->username,
+                'email' => $user->email,
                 'mobile' => $user->mobile,
                 'national_code' => $user->national_code ?? '---',
                 'address' => $user->full_address,

@@ -13,29 +13,36 @@ class RegisterProductRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'tool_name' => 'required|string|max:255',
             'tool_model' => 'required|string|max:255',
             'tool_brand_name' => 'nullable|string|max:100',
             'tool_serial' => 'nullable|string|max:100', // اختیاری چون ممکن است اتوماتیک تولید شود
             'category_id' => 'required|exists:categories,id',
-            
+
             // اعتبارسنجی فایل‌ها
             'tool_pic_file' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:5120', // 5MB
-            'invoice_file' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120', // 5MB (اجباری)
-            
+
             // اعتبارسنجی نقش‌ها
             'customer_user' => 'required|in:owner,other',
             'customer_mobile_number' => 'required_if:customer_user,other|nullable|string|min:10|max:15',
-            
+
             'seller_user' => 'required|in:none,owner,other',
             'seller_mobile_number' => 'required_if:seller_user,other|nullable|string|min:10|max:15',
-            
+
             'introducer_user' => 'required|in:none,owner,other',
             'introducer_mobile_number' => 'required_if:introducer_user,other|nullable|string|min:10|max:15',
-            
+
             'guarantee_status' => 'required|in:no_guarantee,reg_guarantee,pre_guarantee',
         ];
+
+        if ($this->routeIs('products.update_registration') || $this->has('_method') && $this->input('_method') === 'PUT') {
+             $rules['invoice_file'] = 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120';
+        } else {
+             $rules['invoice_file'] = 'required|file|mimes:jpeg,png,jpg,pdf|max:5120'; // 5MB (اجباری)
+        }
+
+        return $rules;
     }
 
     public function attributes()

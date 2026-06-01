@@ -1,4 +1,3 @@
-
 export interface User {
     id: number;
     first_name: string;
@@ -65,6 +64,8 @@ export type PageProps<
         message: string | null;
         error: string | null;
     };
+    loginSettings?: Record<string, any>;
+    modules?: Record<string, string>;
     ziggy: any;
 };
 

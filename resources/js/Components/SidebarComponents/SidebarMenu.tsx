@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import clsx from 'clsx';
-import { Zap, ChevronLeft, Search, Sparkles } from 'lucide-react';
-import React, { useRef, useLayoutEffect, useState } from 'react';
+import { Zap, ChevronLeft, ChevronDown, Search, Sparkles } from 'lucide-react';
+import React, { useRef, useLayoutEffect, useState, useEffect } from 'react';
 
 interface MenuItem {
     name: string;
@@ -22,9 +22,10 @@ interface Props {
 }
 
 export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminItems, isAdmin, searchTerm }: Props) {
-    const { url } = usePage();
+    const { url, modules } = usePage<any>().props;
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
     // تابع تبدیل اعداد به فارسی
     const toPersianDigits = (num: number) => {
@@ -60,12 +61,43 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
         }
     };
 
+    useEffect(() => {
+        // Expand active groups initially
+        const newExpanded: Record<string, boolean> = {};
+        menuGroups.forEach(group => {
+            const hasActive = group.items.some(item => isActive(item.href));
+            if (hasActive) {
+                newExpanded[group.id] = true;
+            }
+        });
+
+        // Admin active check
+        const hasAdminActive = adminItems.some(i => isActive(i.href));
+        if (hasAdminActive) {
+            newExpanded['admin'] = true;
+        }
+
+        setExpandedGroups(prev => ({ ...prev, ...newExpanded }));
+    }, [url]);
+
+    const toggleGroup = (groupId: string) => {
+        if (isCollapsed) return; // Prevent toggle when collapsed
+        setExpandedGroups(prev => ({
+            ...prev,
+            [groupId]: !prev[groupId]
+        }));
+    };
+
     const filterItems = (items: MenuItem[]) => {
-        if (!searchTerm) return items;
-        return items.filter(item =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.description?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        return items.filter(item => {
+            // Check module license
+            if ((item as any).module && modules && (modules[(item as any).module] === '0' || modules[(item as any).module] === false)) {
+                return false;
+            }
+            if (!searchTerm) return true;
+            return item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                   item.description?.toLowerCase().includes(searchTerm.toLowerCase());
+        });
     };
 
     const renderItem = (item: MenuItem, isAdminItem: boolean = false) => {
@@ -196,29 +228,43 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
             {menuGroups.map((group, index) => {
                 const items = filterItems(group.items);
                 if (items.length === 0) return null;
+                const isExpanded = isCollapsed ? true : expandedGroups[group.id] !== false; // Default expanded if not set
+                const groupHasActive = items.some(i => isActive(i.href));
 
                 return (
                     <div key={group.id} className="mb-3">
                         {!isCollapsed && !searchTerm && (
-                            <div className="flex items-center gap-2 px-2 mt-2 mb-2">
-                                {group.icon && (
-                                    <group.icon size={12} style={{ color: ['general', 'club', 'support'].includes(group.id) ? '#3b82f6' : 'var(--sidebar-text)', opacity: ['general', 'club', 'support'].includes(group.id) ? 1 : 0.5 }} />
+                            <button
+                                onClick={() => toggleGroup(group.id)}
+                                className={clsx(
+                                    "w-full flex items-center justify-between px-3 py-2 mt-2 mb-1 rounded-xl transition-all",
+                                    groupHasActive ? "bg-black/5" : "hover:bg-black/5"
                                 )}
-                                <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: ['general', 'club', 'support'].includes(group.id) ? '#3b82f6' : 'var(--sidebar-text)', opacity: ['general', 'club', 'support'].includes(group.id) ? 1 : 0.5 }}>
-                                    {group.title}
-                                </span>
-                                <div className="h-px flex-1" style={{
-                                    background: `linear-gradient(90deg, ${['general', 'club', 'support'].includes(group.id) ? '#3b82f6' : 'var(--sidebar-text)'} 0%, transparent 100%)`,
-                                    opacity: ['general', 'club', 'support'].includes(group.id) ? 0.3 : 0.2
-                                }} />
-                            </div>
+                            >
+                                <div className="flex items-center gap-2">
+                                    {group.icon && (
+                                        <group.icon size={14} style={{ color: ['general', 'club', 'support'].includes(group.id) ? '#3b82f6' : 'var(--sidebar-text)', opacity: ['general', 'club', 'support'].includes(group.id) ? 1 : 0.7 }} />
+                                    )}
+                                    <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: ['general', 'club', 'support'].includes(group.id) ? '#3b82f6' : 'var(--sidebar-text)', opacity: ['general', 'club', 'support'].includes(group.id) ? 1 : 0.7 }}>
+                                        {group.title}
+                                    </span>
+                                </div>
+                                <ChevronDown
+                                    size={14}
+                                    className={clsx("transition-transform duration-300", !isExpanded && "rotate-90")}
+                                    style={{ color: 'var(--sidebar-text)', opacity: 0.5 }}
+                                />
+                            </button>
                         )}
 
                         {isCollapsed && index > 0 && (
                             <div className="border-t border-dashed mx-auto my-2 w-8" style={{ borderColor: 'color-mix(in srgb, var(--sidebar-text), transparent 70%)' }} />
                         )}
 
-                        <div className="space-y-0.5">
+                        <div className={clsx(
+                            "space-y-0.5 overflow-hidden transition-all duration-300 ease-in-out",
+                            (!isExpanded && !isCollapsed && !searchTerm) ? "max-h-0 opacity-0" : "max-h-[1000px] opacity-100"
+                        )}>
                             {items.map(item => renderItem(item))}
                         </div>
                     </div>
@@ -227,18 +273,29 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
 
             {/* بخش ادمین */}
             {isAdmin && (
-                <div className="mt-4">
+                <div className="mt-4 border-t border-dashed pt-4" style={{ borderColor: 'color-mix(in srgb, var(--sidebar-text), transparent 80%)' }}>
                     {!isCollapsed && !searchTerm && (
-                        <div className="relative mb-3">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 to-amber-500/20 rounded-lg blur-sm" />
-                            <div className="relative bg-gradient-to-r from-red-50 to-amber-50 rounded-lg p-2 border border-red-100 flex items-center gap-2">
-                                <div className="p-1 bg-gradient-to-r from-red-500 to-amber-500 rounded-md shadow-lg">
-                                    <Zap size={12} className="text-white" />
+                        <button
+                            onClick={() => toggleGroup('admin')}
+                            className="w-full relative mb-3 group/admin"
+                        >
+                            <div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 to-amber-500/20 rounded-lg blur-sm group-hover/admin:opacity-100 opacity-60 transition-opacity" />
+                            <div className="relative bg-gradient-to-r from-red-50 to-amber-50 rounded-lg p-2 border border-red-100 flex items-center gap-2 justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-1 bg-gradient-to-r from-red-500 to-amber-500 rounded-md shadow-lg">
+                                        <Zap size={12} className="text-white" />
+                                    </div>
+                                    <span className="text-[11px] font-bold text-red-600">پنل مدیریت</span>
                                 </div>
-                                <span className="text-[10px] font-bold text-red-600">پنل مدیریت</span>
-                                <Sparkles size={10} className="text-amber-500 mr-auto" />
+                                <div className="flex items-center gap-1">
+                                    <Sparkles size={10} className="text-amber-500" />
+                                    <ChevronDown
+                                        size={14}
+                                        className={clsx("text-red-500 transition-transform duration-300", expandedGroups['admin'] === false && "rotate-90")}
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        </button>
                     )}
 
                     {isCollapsed && (
@@ -249,7 +306,10 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
                         </div>
                     )}
 
-                    <div className="space-y-0.5">
+                    <div className={clsx(
+                        "space-y-0.5 overflow-hidden transition-all duration-300 ease-in-out",
+                        (expandedGroups['admin'] === false && !isCollapsed && !searchTerm) ? "max-h-0 opacity-0" : "max-h-[1000px] opacity-100"
+                    )}>
                         {filterItems(adminItems).map(item => renderItem(item, true))}
                     </div>
                 </div>

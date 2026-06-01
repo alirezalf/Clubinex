@@ -7,9 +7,10 @@ interface Props {
     toggleCollapse: () => void;
     siteName?: string;
     siteLogo?: string | null;
+    siteVersion?: string;
 }
 
-export default function SidebarHeader({ isCollapsed, toggleCollapse, siteName = 'Clubinex', siteLogo }: Props) {
+export default function SidebarHeader({ isCollapsed, toggleCollapse, siteName = 'Clubinex', siteLogo, siteVersion = 'v2.0' }: Props) {
     return (
         <div
             className={clsx(
@@ -47,7 +48,7 @@ export default function SidebarHeader({ isCollapsed, toggleCollapse, siteName = 
                         >
                             PRO
                         </span>
-                        <span className="text-[8px] opacity-40" style={{ color: 'var(--sidebar-text)' }}>v2.0</span>
+                        <span className="text-[8px] opacity-40" style={{ color: 'var(--sidebar-text)' }}>{siteVersion}</span>
                     </div>
                 </div>
             </div>

@@ -28,6 +28,20 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('wallet_withdrawals', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('wallet_id')->constrained()->cascadeOnDelete();
+            $table->decimal('amount', 15, 2);
+            $table->string('bank_name')->nullable();
+            $table->string('iban_number')->nullable(); // شماره شبا
+            $table->string('card_number')->nullable(); // شماره کارت
+            $table->string('account_holder')->nullable(); // صاحب حساب
+            $table->string('status')->default('pending'); // pending, approved, rejected
+            $table->text('admin_note')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -35,6 +49,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('wallet_withdrawals');
         Schema::dropIfExists('wallet_transactions');
         Schema::dropIfExists('wallets');
     }

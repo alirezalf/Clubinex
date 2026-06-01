@@ -1,6 +1,6 @@
 
 import { Head, useForm, router, usePage } from '@inertiajs/react';
-import { Save, Globe, Smartphone, Palette, Share2, Phone, Mail, BellRing, Code, ShoppingBag, Headphones, Shield, User as UserIcon, MessageSquare, CreditCard } from 'lucide-react';
+import { Save, Globe, Smartphone, Palette, Share2, Phone, Mail, BellRing, Code, ShoppingBag, Headphones, Shield, User as UserIcon, MessageSquare, CreditCard, Package } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import clsx from 'clsx';
@@ -14,6 +14,7 @@ import SmsTemplatesManager from '@/Components/Admin/Settings/SmsTemplatesManager
 import TicketSettings from '@/Components/Admin/Settings/TicketSettings';
 import WordPressSettings from '@/Components/Admin/Settings/WordPressSettings';
 import SecuritySettings from '@/Components/Admin/Settings/SecuritySettings';
+import SystemToolsSettings from '@/Components/Admin/Settings/SystemToolsSettings';
 import GeneralSettings from '@/Components/Admin/Settings/GeneralSettings';
 import ContactSettings from '@/Components/Admin/Settings/ContactSettings';
 import SocialSettings from '@/Components/Admin/Settings/SocialSettings';
@@ -21,6 +22,7 @@ import SmsSettings from '@/Components/Admin/Settings/SmsSettings';
 import EmailSettings from '@/Components/Admin/Settings/EmailSettings';
 import LoginSettings from '@/Components/Admin/Settings/LoginSettings';
 import PaymentSettings from '@/Components/Admin/Settings/PaymentSettings';
+import LicenseSettings from '@/Components/Admin/Settings/LicenseSettings';
 import type { PageProps, User } from '@/types/index';
 
 // Types
@@ -72,6 +74,7 @@ interface SettingsProps extends PageProps {
 // Tabs Configuration
 const TABS = [
     { id: 'general', label: 'عمومی و سئو', icon: Globe },
+    { id: 'modules', label: 'لایسنس و ماژول‌ها', icon: Package },
     { id: 'theme', label: 'شخصی‌سازی ظاهر', icon: Palette },
     { id: 'login', label: 'تنظیمات ورود', icon: UserIcon }, // New Tab
     { id: 'security', label: 'امنیت', icon: Shield },
@@ -84,6 +87,7 @@ const TABS = [
     { id: 'support', label: 'تیکت و پشتیبانی', icon: Headphones },
     { id: 'wordpress', label: 'فروشگاه (WordPress)', icon: ShoppingBag },
     { id: 'email_themes', label: 'قالب‌های ایمیل', icon: Code },
+    { id: 'system_tools', label: 'ابزارهای سیستم', icon: Code },
     { id: 'templates', label: 'تنظیمات رویدادها', icon: BellRing },
 ];
 
@@ -207,6 +211,17 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         lockout_time: getSettingValue('security', 'lockout_time', '60'),
         session_timeout: getSettingValue('security', 'session_timeout', '30'),
         captcha_enabled: getSettingValue('security', 'captcha_enabled', '0') === '1',
+
+        // Modules
+        enable_clubs: getSettingValue('modules', 'enable_clubs', '1') === '1' || getSettingValue('modules', 'enable_clubs', '1') === true,
+        enable_lucky_wheel: getSettingValue('modules', 'enable_lucky_wheel', '1') === '1' || getSettingValue('modules', 'enable_lucky_wheel', '1') === true,
+        enable_products: getSettingValue('modules', 'enable_products', '1') === '1' || getSettingValue('modules', 'enable_products', '1') === true,
+        enable_rewards: getSettingValue('modules', 'enable_rewards', '1') === '1' || getSettingValue('modules', 'enable_rewards', '1') === true,
+        enable_wallet: getSettingValue('modules', 'enable_wallet', '1') === '1' || getSettingValue('modules', 'enable_wallet', '1') === true,
+        enable_referrals: getSettingValue('modules', 'enable_referrals', '1') === '1' || getSettingValue('modules', 'enable_referrals', '1') === true,
+        enable_surveys: getSettingValue('modules', 'enable_surveys', '1') === '1' || getSettingValue('modules', 'enable_surveys', '1') === true,
+        enable_tickets: getSettingValue('modules', 'enable_tickets', '1') === '1' || getSettingValue('modules', 'enable_tickets', '1') === true,
+        enable_reports: getSettingValue('modules', 'enable_reports', '1') === '1' || getSettingValue('modules', 'enable_reports', '1') === true,
     };
     }, [settings, themeSettings]);
 
@@ -215,6 +230,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
     // Define fields per tab to prevent overwriting unrelated settings
     const TAB_FIELDS: Record<string, string[]> = {
         general: ['site_title', 'site_description', 'footer_text', 'meta_keywords', 'og_image', 'app_name', 'support_mobile', 'author', 'app_version', 'app_description'],
+        modules: ['license_key', 'enable_clubs', 'enable_lucky_wheel', 'enable_products', 'enable_rewards', 'enable_wallet', 'enable_referrals', 'enable_surveys', 'enable_tickets', 'enable_reports'],
         theme: ['primary_color', 'sidebar_bg', 'sidebar_text', 'sidebar_texture', 'header_bg', 'radius_size', 'card_style', 'card_shadow', 'card_opacity', 'sidebar_collapsed', 'reset_personal_theme', 'logo_url', 'favicon_url'],
         login: ['login_theme', 'login_layout_reversed', 'login_left_bg_type', 'login_left_image', 'login_left_color', 'login_left_gradient', 'login_right_bg_type', 'login_right_image', 'login_right_color', 'login_right_gradient', 'login_title', 'login_subtitle', 'login_copyright', 'login_slogan_title', 'login_slogan_text', 'login_logo', 'login_title_color', 'login_subtitle_color', 'login_slogan_color', 'login_copyright_color', 'login_btn_bg', 'login_btn_text', 'login_card_bg'],
         contact: ['admin_mobile', 'support_email', 'address'],
@@ -332,6 +348,10 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
                                 <GeneralSettings data={data} setData={handleSettingChange} />
                             )}
 
+                            {activeTab === 'modules' && (
+                                <LicenseSettings data={data} setData={handleSettingChange} />
+                            )}
+
                             {activeTab === 'login' && (
                                 <LoginSettings data={data} setData={handleSettingChange} />
                             )}
@@ -364,12 +384,18 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
                                 <WordPressSettings data={data} setData={handleSettingChange} />
                             )}
 
-                            <div className="pt-6 border-t border-gray-100 flex justify-end sticky bottom-0 bg-white pb-2 z-10">
-                                <button type="submit" className="bg-primary-600 text-white px-8 py-3 rounded-xl hover:bg-primary-700 shadow-lg shadow-primary-500/30 flex items-center gap-2 transition font-bold transform hover:-translate-y-0.5">
-                                    <Save size={18} />
-                                    ذخیره تغییرات
-                                </button>
-                            </div>
+                            {activeTab === 'system_tools' && (
+                                <SystemToolsSettings />
+                            )}
+
+                            {activeTab !== 'system_tools' && (
+                                <div className="pt-6 border-t border-gray-100 flex justify-end sticky bottom-0 bg-white pb-2 z-10">
+                                    <button type="submit" className="bg-primary-600 text-white px-8 py-3 rounded-xl hover:bg-primary-700 shadow-lg shadow-primary-500/30 flex items-center gap-2 transition font-bold transform hover:-translate-y-0.5">
+                                        <Save size={18} />
+                                        ذخیره تغییرات
+                                    </button>
+                                </div>
+                            )}
                         </form>
                     )}
                 </div>

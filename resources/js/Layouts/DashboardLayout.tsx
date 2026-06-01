@@ -101,6 +101,7 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
                         sessionStorage.setItem('sidebarCollapsed', JSON.stringify(newVal));
                     }
                 }}
+                onOpenThemePanel={() => setIsThemePanelOpen(true)}
             />
 
             <div className={clsx(

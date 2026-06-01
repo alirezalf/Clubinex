@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\UpdateLastLogin::class,
             \App\Http\Middleware\CheckSessionTimeout::class,
             \App\Http\Middleware\ProcessInternalCrons::class,
+            \App\Http\Middleware\CheckSetup::class,
         ]);
 
         $middleware->alias([

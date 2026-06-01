@@ -3,6 +3,7 @@ import { usePage } from '@inertiajs/react';
 import ClassicLogin from './ClassicLogin';
 import ModernLogin from './ModernLogin';
 import MinimalLogin from './MinimalLogin';
+import { useThemeSystem } from '@/Hooks/useThemeSystem';
 
 interface LoginProps {
     settings: any;
@@ -10,6 +11,9 @@ interface LoginProps {
 }
 
 export default function Login({ settings, captchaUrl: initialCaptchaUrl }: LoginProps) {
+    const { themeSettings } = usePage<any>().props;
+    useThemeSystem(themeSettings);
+
     const [mode, setMode] = useState<'mobile' | 'email' | 'register'>('mobile');
     const [captchaUrl, setCaptchaUrl] = useState<string | null>(initialCaptchaUrl);
 

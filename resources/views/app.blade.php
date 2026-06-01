@@ -34,6 +34,15 @@
             <link rel="icon" href="{{ $site['favicon'] }}">
         @endif
 
+        <link rel="manifest" href="/manifest.json">
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js');
+                });
+            }
+        </script>
+
         <!-- Fonts -->
         <!-- Vazirmatn is imported via resources/css/app.css -->
 

@@ -9,23 +9,23 @@ import clsx from 'clsx';
 
 // List of all available quick actions
 const AVAILABLE_ACTIONS = [
-    { id: 'products', title: 'ثبت محصول', icon: Barcode, routeName: 'products.index', color: 'text-blue-600', bg: 'bg-blue-50' },
-    { id: 'rewards', title: 'فروشگاه جوایز', icon: Gift, routeName: 'rewards.index', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { id: 'lucky_wheel', title: 'گردونه شانس', icon: Dna, routeName: 'lucky-wheel.index', color: 'text-pink-600', bg: 'bg-pink-50' },
-    { id: 'surveys', title: 'مسابقات', icon: FileText, routeName: 'surveys.index', color: 'text-amber-600', bg: 'bg-amber-50' },
-    { id: 'tickets', title: 'پشتیبانی', icon: MessageSquare, routeName: 'tickets.index', color: 'text-green-600', bg: 'bg-green-50' },
-    { id: 'referrals', title: 'معرفی دوستان', icon: UserPlus, routeName: 'referrals.index', color: 'text-cyan-600', bg: 'bg-cyan-50' },
+    { id: 'products', title: 'ثبت محصول', icon: Barcode, routeName: 'products.index', color: 'text-blue-600', bg: 'bg-blue-50', module: 'enable_products' },
+    { id: 'rewards', title: 'فروشگاه جوایز', icon: Gift, routeName: 'rewards.index', color: 'text-indigo-600', bg: 'bg-indigo-50', module: 'enable_rewards' },
+    { id: 'lucky_wheel', title: 'گردونه شانس', icon: Dna, routeName: 'lucky-wheel.index', color: 'text-pink-600', bg: 'bg-pink-50', module: 'enable_lucky_wheel' },
+    { id: 'surveys', title: 'مسابقات', icon: FileText, routeName: 'surveys.index', color: 'text-amber-600', bg: 'bg-amber-50', module: 'enable_surveys' },
+    { id: 'tickets', title: 'پشتیبانی', icon: MessageSquare, routeName: 'tickets.index', color: 'text-green-600', bg: 'bg-green-50', module: 'enable_tickets' },
+    { id: 'referrals', title: 'معرفی دوستان', icon: UserPlus, routeName: 'referrals.index', color: 'text-cyan-600', bg: 'bg-cyan-50', module: 'enable_referrals' },
     { id: 'profile', title: 'پروفایل من', icon: Users, routeName: 'profile', color: 'text-orange-600', bg: 'bg-orange-50' },
     { id: 'notifications', title: 'پیام‌ها', icon: Bell, routeName: 'notifications.index', color: 'text-red-600', bg: 'bg-red-50' },
-    { id: 'clubs', title: 'باشگاه‌ها', icon: Star, routeName: 'clubs.index', color: 'text-purple-600', bg: 'bg-purple-50' },
+    { id: 'clubs', title: 'باشگاه‌ها', icon: Star, routeName: 'clubs.index', color: 'text-purple-600', bg: 'bg-purple-50', module: 'enable_clubs' },
 ];
 
 // Admin specific actions
 const ADMIN_ACTIONS = [
     { id: 'admin_users', title: 'کاربران', icon: Users, routeName: 'admin.users', color: 'text-blue-600', bg: 'bg-blue-50' },
-    { id: 'admin_products', title: 'محصولات', icon: Database, routeName: 'admin.products.index', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { id: 'admin_reports', title: 'گزارشات', icon: FileText, routeName: 'admin.reports.index', color: 'text-green-600', bg: 'bg-green-50' },
-    { id: 'admin_tickets', title: 'تیکت‌ها', icon: MessageSquare, routeName: 'admin.tickets.index', color: 'text-orange-600', bg: 'bg-orange-50' },
+    { id: 'admin_products', title: 'محصولات', icon: Database, routeName: 'admin.products.index', color: 'text-indigo-600', bg: 'bg-indigo-50', module: 'enable_products' },
+    { id: 'admin_reports', title: 'گزارشات', icon: FileText, routeName: 'admin.reports.index', color: 'text-green-600', bg: 'bg-green-50', module: 'enable_reports' },
+    { id: 'admin_tickets', title: 'تیکت‌ها', icon: MessageSquare, routeName: 'admin.tickets.index', color: 'text-orange-600', bg: 'bg-orange-50', module: 'enable_tickets' },
 ];
 
 interface Props {
@@ -34,16 +34,27 @@ interface Props {
     isAdmin: boolean;
 }
 
+import { usePage } from '@inertiajs/react';
+
 export default function QuickAccess({ pinned = [], frequent = [], isAdmin }: Props) {
+    const { modules } = usePage<any>().props;
     const [showModal, setShowModal] = useState(false);
     const [selectedItems, setSelectedItems] = useState<string[]>(pinned);
 
-    const pool = isAdmin ? [...AVAILABLE_ACTIONS, ...ADMIN_ACTIONS] : AVAILABLE_ACTIONS;
+    let rawPool = isAdmin ? [...ADMIN_ACTIONS, ...AVAILABLE_ACTIONS] : AVAILABLE_ACTIONS;
+
+    // Filter out disabled modules
+    const pool = rawPool.filter(item => {
+        if (item.module && modules && (modules[item.module] === '0' || modules[item.module] === false)) {
+            return false;
+        }
+        return true;
+    });
 
     const pinnedItems = pool.filter(a => pinned.includes(a.id));
     const displayItems = pinnedItems.length > 0
         ? pinnedItems
-        : (frequent.length > 0 ? pool.filter(a => frequent.includes(a.id)).slice(0, 4) : pool.slice(0, 4));
+        : (frequent.length > 0 ? pool.filter(a => frequent.includes(a.id)).slice(0, 8) : pool.slice(0, 8));
 
     const toggleSelection = (id: string) => {
         if (selectedItems.includes(id)) {

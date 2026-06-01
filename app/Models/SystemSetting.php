@@ -42,6 +42,7 @@ class SystemSetting extends Model
                      cache()->forget('global_settings');
                      cache()->forget('global_settings_array');
                      cache()->forget('login_settings');
+                     cache()->forget('modules_settings');
                      cache()->forget('security_session_timeout');
                 }
             } catch (\Exception $e) {
@@ -155,6 +156,27 @@ class SystemSetting extends Model
             ->where('key', $key)
             ->active()
             ->first();
+
+        // License check for modules restriction
+        if ($group === 'modules' && $setting) {
+            $isEnabledInDb = ($setting->value === '1' || $setting->value === true);
+            if ($isEnabledInDb) {
+                $licenseKeySetting = self::where('group', 'general')->where('key', 'license_key')->active()->first();
+                $licenseKey = $licenseKeySetting ? $licenseKeySetting->value : null;
+                $isAllowedByLicense = false;
+
+                if ($licenseKey) {
+                    $payload = \App\Services\LicenseService::verifyLicense($licenseKey);
+                    if ($payload && !empty($payload['modules'][$key])) {
+                        $isAllowedByLicense = true;
+                    }
+                }
+
+                if (!$isAllowedByLicense) {
+                    return '0';
+                }
+            }
+        }
 
         if ($setting) {
             return $setting->value;
@@ -315,6 +337,17 @@ class SystemSetting extends Model
                 'provider' => 'mail',
                 'from_address' => 'noreply@clubinex.com',
                 'from_name' => 'Clubinex',
+            ],
+            'modules' => [
+                'enable_referrals' => true,
+                'enable_wallet' => true,
+                'enable_clubs' => true,
+                'enable_products' => true,
+                'enable_rewards' => true,
+                'enable_lucky_wheel' => true,
+                'enable_surveys' => true,
+                'enable_tickets' => true,
+                'enable_reports' => true,
             ],
         ];
     }

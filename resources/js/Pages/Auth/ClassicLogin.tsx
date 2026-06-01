@@ -1,6 +1,6 @@
 import React from 'react';
-import { Head } from '@inertiajs/react';
-import { Smartphone, Mail, UserPlus } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import { Smartphone, Mail, UserPlus, Home } from 'lucide-react';
 import OtpLoginForm from './Partials/OtpLoginForm';
 import EmailLoginForm from './Partials/EmailLoginForm';
 import RegisterForm from './Partials/RegisterForm';
@@ -46,6 +46,15 @@ export default function ClassicLogin({ mode, setMode, captchaUrl, refreshCaptcha
                 className="w-full md:w-1/2 lg:w-[45%] flex flex-col justify-center items-center p-4 relative z-10 transition-all duration-500"
                 style={rightBgStyle}
             >
+                {/* Home Button */}
+                <Link 
+                    href="/" 
+                    className="absolute top-6 right-6 p-2 bg-white/50 hover:bg-white backdrop-blur-sm rounded-full shadow-sm text-gray-700 hover:text-primary-600 transition-all focus:outline-none"
+                    title="بازگشت به صفحه اصلی"
+                >
+                    <Home size={20} />
+                </Link>
+
                 {/* Flat Card */}
                 <div
                     className="w-full max-w-[380px] rounded-2xl border border-gray-100 p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.03)] transition-all duration-300"

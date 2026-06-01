@@ -6,17 +6,19 @@ import React, { useState } from 'react';
 interface Props {
     isCollapsed: boolean;
     isAdmin: boolean;
+    onOpenThemePanel?: () => void;
 }
 
-export default function SidebarFooter({ isCollapsed, isAdmin }: Props) {
+export default function SidebarFooter({ isCollapsed, isAdmin, onOpenThemePanel }: Props) {
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
     const items = [
         {
             key: 'settings',
             icon: Settings,
-            label: 'تنظیمات',
-            href: isAdmin ? route('admin.settings') : route('profile'),
+            label: 'تنظیمات ظاهر',
+            href: isAdmin ? route('admin.settings') : '#',
+            onClick: !isAdmin ? (e: any) => { e.preventDefault(); onOpenThemePanel?.(); } : undefined,
             color: 'hover:text-amber-500 hover:bg-amber-50',
             iconColor: 'text-amber-500'
         },
@@ -50,23 +52,24 @@ export default function SidebarFooter({ isCollapsed, isAdmin }: Props) {
         return (
             <div className="shrink-0 border-t py-4 flex flex-col items-center justify-center relative group/footer cursor-pointer"
                  style={{ borderColor: 'color-mix(in srgb, var(--sidebar-text), transparent 85%)' }}>
-                 
+
                  <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 group-hover/footer:bg-white/10" style={{ color: 'var(--sidebar-text)' }}>
                      <Settings size={22} className="opacity-70 group-hover/footer:opacity-100 transition-opacity" />
                  </div>
-                 
+
                  <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-[calc(100%+8px)] opacity-0 invisible group-hover/footer:opacity-100 group-hover/footer:visible transition-all duration-300 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-2 z-50">
                      <div className="flex items-center gap-2">
                          {items.map(item => {
                              const Icon = item.icon;
                              return (
-                                 <Link 
-                                     key={item.key} 
-                                     href={item.href} 
-                                     method={item.method as any} 
-                                     as={item.as as any} 
+                                 <Link
+                                     key={item.key}
+                                     href={item.href}
+                                     method={item.method as any}
+                                     as={item.as as any}
+                                     onClick={item.onClick}
                                      className={clsx(
-                                         "flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl transition-all duration-200 min-w-[72px]",
+                                         "flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl transition-all duration-200 min-w-[72px] cursor-pointer",
                                          item.color, "hover:scale-105"
                                      )}
                                  >
@@ -97,10 +100,11 @@ export default function SidebarFooter({ isCollapsed, isAdmin }: Props) {
                                 href={item.href}
                                 method={item.method as any}
                                 as={item.as as any}
+                                onClick={item.onClick}
                                 onMouseEnter={() => setHoveredItem(item.key)}
                                 onMouseLeave={() => setHoveredItem(null)}
                                 className={clsx(
-                                    "relative flex items-center justify-center rounded-xl p-2.5 transition-all duration-200",
+                                    "relative flex items-center justify-center rounded-xl p-2.5 transition-all duration-200 cursor-pointer w-full",
                                     item.color.replace('hover:bg-', 'hover:bg-').replace('50', '500/10')
                                 )}
                             >

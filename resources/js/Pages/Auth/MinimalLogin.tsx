@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Head } from '@inertiajs/react';
-import { Smartphone, Mail, UserPlus, Sparkles } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import { Smartphone, Mail, UserPlus, Sparkles, Home } from 'lucide-react';
 import OtpLoginForm from './Partials/OtpLoginForm';
 import EmailLoginForm from './Partials/EmailLoginForm';
 import RegisterForm from './Partials/RegisterForm';
@@ -49,6 +49,15 @@ export default function MinimalLogin({ mode, setMode, captchaUrl, refreshCaptcha
     return (
         <div className="min-h-screen w-full flex items-center justify-center font-sans p-4" style={getBgStyle()} dir="rtl">
             <Head title={mode === 'register' ? 'ثبت نام' : 'ورود به حساب کاربری'} />
+
+            {/* Home Button */}
+            <Link
+                href="/"
+                className="absolute top-6 right-6 p-2 bg-white/70 hover:bg-white backdrop-blur-md rounded-full shadow-sm text-gray-700 hover:text-primary-600 transition-all focus:outline-none z-50 border border-white/60"
+                title="بازگشت به صفحه اصلی"
+            >
+                <Home size={20} />
+            </Link>
 
             <div className={clsx(
                 "w-full max-w-[400px] bg-white/70 backdrop-blur-2xl rounded-[24px] p-6 shadow-xl border border-white/60 transition-all duration-700 transform",

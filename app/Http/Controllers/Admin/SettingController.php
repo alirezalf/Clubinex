@@ -34,12 +34,37 @@ class SettingController extends Controller
             $q->whereIn('name', ['super-admin', 'admin', 'staff']);
         })->select('id', 'first_name', 'last_name', 'email', 'avatar')->get();
 
+        $licenseKey = SystemSetting::getValue('general', 'license_key');
+        $machineId = \App\Services\LicenseService::getMachineId();
+        $licenseStatus = $licenseKey ? \App\Services\LicenseService::verifyLicense($licenseKey) : false;
+
+        $licenseInfo = null;
+        if ($licenseStatus) {
+
+            $expDate = \Morilog\Jalali\Jalalian::forge($licenseStatus['exp'])->format('Y/m/d H:i');
+
+            $licenseInfo = [
+                'isValid' => true,
+                'client_name' => $licenseStatus['client_name'] ?? 'نامشخص',
+                'exp' => $licenseStatus['exp'] ?? null,
+                'exp_formatted' => $expDate,
+                'modules' => $licenseStatus['modules'] ?? []
+            ];
+        } else {
+            $licenseInfo = [
+                'isValid' => false,
+                'isExpired' => !empty($licenseKey),
+            ];
+        }
+
         return Inertia::render('Admin/Settings', [
             'settings' => $settings,
             'notificationTemplates' => $notificationTemplates,
             'emailThemes' => $emailThemes,
             'smsTemplates' => $smsTemplates,
-            'admins' => $admins
+            'admins' => $admins,
+            'machine_id' => $machineId,
+            'license_info' => $licenseInfo
         ]);
     }
 
@@ -55,6 +80,33 @@ class SettingController extends Controller
                 $this->themeService->resetUserTheme(auth()->user());
              }
              unset($data['reset_personal_theme']);
+        }
+
+        // License Key Handling
+        if (isset($data['license_key'])) {
+            $licenseKey = $data['license_key'];
+            $payload = \App\Services\LicenseService::verifyLicense($licenseKey);
+
+            if ($payload !== false) {
+                $modules = $payload['modules'] ?? [];
+                $moduleKeys = [
+                    'enable_referrals', 'enable_wallet', 'enable_clubs',
+                    'enable_products', 'enable_rewards', 'enable_lucky_wheel',
+                    'enable_surveys', 'enable_tickets', 'enable_reports'
+                ];
+
+                SystemSetting::setValue('general', 'license_key', $licenseKey);
+                foreach ($moduleKeys as $key) {
+                    SystemSetting::setValue('modules', $key, !empty($modules[$key]) ? '1' : '0');
+                }
+            } else {
+                return back()->with('error', 'کد لایسنس نامعتبر است یا منقضی شده است و یا متعلق به سرور دیگری است.');
+            }
+
+            unset($data['license_key']);
+            foreach (['enable_referrals', 'enable_wallet', 'enable_clubs', 'enable_products', 'enable_rewards', 'enable_lucky_wheel', 'enable_surveys', 'enable_tickets', 'enable_reports'] as $k) {
+                if(isset($data[$k])) unset($data[$k]);
+            }
         }
 
         // 2. Separate Theme Settings from General Settings
@@ -98,6 +150,8 @@ class SettingController extends Controller
                 $group = 'email';
             } elseif (str_starts_with($key, 'sms_') || $key === 'resend_interval') {
                 $group = 'sms';
+            } elseif (str_starts_with($key, 'enable_')) {
+                $group = 'modules';
             } else {
                 $group = $existingKeys[$key] ?? 'general';
             }
@@ -107,6 +161,8 @@ class SettingController extends Controller
 
         // Clear cache
         cache()->forget('global_settings');
+        cache()->forget('modules_settings');
+        cache()->forget('login_settings');
 
         return back()->with('message', 'تنظیمات با موفقیت ذخیره و اعمال شد.');
     }
@@ -208,12 +264,16 @@ class SettingController extends Controller
     public function backupDatabase()
     {
         try {
+            if (!auth()->user()->hasRole(['super-admin', 'admin'])) {
+                abort(403, 'شما دسترسی به این بخش را ندارید.');
+            }
+
             $filename = "backup-" . date('Y-m-d_H-i-s');
 
-            $dbConnection = env('DB_CONNECTION', 'mysql');
+            $dbConnection = config('database.default', 'mysql');
 
             if ($dbConnection === 'sqlite') {
-                $sqlitePath = database_path('database.sqlite');
+                $sqlitePath = config('database.connections.sqlite.database', database_path('database.sqlite'));
                 if (file_exists($sqlitePath)) {
                     return response()->download($sqlitePath, $filename . '.sqlite');
                 }
@@ -221,19 +281,24 @@ class SettingController extends Controller
             }
 
             if ($dbConnection === 'mysql') {
-                $dbHost = env('DB_HOST', '127.0.0.1');
-                $dbPort = env('DB_PORT', '3306');
-                $dbUser = env('DB_USERNAME', 'root');
-                $dbPass = env('DB_PASSWORD', '');
-                $dbName = env('DB_DATABASE', 'laravel');
+                if (!function_exists('exec') || in_array(strtolower('exec'), array_map('trim', explode(',', ini_get('disable_functions'))))) {
+                    return back()->with('error', 'تابع exec در سرور شما غیرفعال است (احتمالاً هاست اشتراکی هستید). امکان بک‌آپ‌گیری خودکار دیتابیس MySQL در این هاست وجود ندارد، لطفاً از پنل هاست (مانند PhpMyAdmin) پشتیبان بگیرید.');
+                }
+
+                $dbHost = config('database.connections.mysql.host', '127.0.0.1');
+                $dbPort = config('database.connections.mysql.port', '3306');
+                $dbUser = config('database.connections.mysql.username', 'root');
+                $dbPass = config('database.connections.mysql.password', '');
+                $dbName = config('database.connections.mysql.database', 'laravel');
 
                 $path = sys_get_temp_dir() . '/' . $filename . '.sql';
 
-                // For live servers, executing shell commands via PHP might be disabled,
-                // but this is the simplest approach for a native mysqldump without packages.
-                $command = "mysqldump --user={$dbUser} --password={$dbPass} --host={$dbHost} --port={$dbPort} {$dbName} > {$path}";
+                // Use putenv to hide password from ps list
+                putenv("MYSQL_PWD=" . $dbPass);
+                $command = "mysqldump --user=" . escapeshellarg($dbUser) . " --host=" . escapeshellarg($dbHost) . " --port=" . escapeshellarg($dbPort) . " " . escapeshellarg($dbName) . " > " . escapeshellarg($path);
 
                 exec($command, $output, $returnVar);
+                putenv("MYSQL_PWD"); // Unset
 
                 if ($returnVar !== 0) {
                      return back()->with('error', 'اجرای دستور بک‌آپ با خطا مواجه شد. در سرورهای اشتراکی ممکن است دسترسی mysqldump مسدود باشد.');
@@ -249,6 +314,89 @@ class SettingController extends Controller
         } catch (\Exception $e) {
             \Log::error("Database backup failed: " . $e->getMessage());
             return back()->with('error', 'خطا در ایجاد بک‌آپ: ' . $e->getMessage());
+        }
+    }
+
+    public function updateSystem(Request $request)
+    {
+        try {
+            if (!auth()->user()->hasRole(['super-admin', 'admin'])) {
+                abort(403, 'شما دسترسی به این بخش را ندارید.');
+            }
+
+            // Clear all system caches first
+            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+
+            // Runs all outstanding migrations
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+
+            // Clear all system caches to ensure fresh config/routes
+            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+
+            if (function_exists('opcache_reset')) {
+                opcache_reset();
+            }
+
+            return back()->with('message', 'بروزرسانی فایل‌ها، دیتابیس و پاکسازی کش با موفقیت کامل انجام شد.');
+        } catch (\Exception $e) {
+            \Log::error("System Update Error: " . $e->getMessage());
+            return back()->with('error', 'خطا در عملیات بروزرسانی: ' . $e->getMessage());
+        }
+    }
+
+    public function uploadUpdate(Request $request)
+    {
+        $request->validate([
+            'update_file' => 'required|file|mimes:zip|max:102400', // max 100MB
+        ]);
+
+        try {
+            if (!auth()->user()->hasRole(['super-admin', 'admin'])) {
+                abort(403, 'شما دسترسی به این بخش را ندارید.');
+            }
+
+            if (!class_exists('ZipArchive')) {
+                return back()->with('error', 'افزونه ZipArchive در PHP سرور شما فعال نیست. لطفا از هاستینگ بخواهید آن را فعال کند.');
+            }
+
+            $zipPath = $request->file('update_file')->path();
+            $zip = new \ZipArchive;
+
+            if ($zip->open($zipPath) === TRUE) {
+                // Ensure safe extraction (no absolute paths or path traversal)
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $filename = $zip->getNameIndex($i);
+                    // Prevent path traversal
+                    if (str_contains($filename, '..') || str_starts_with($filename, '/') || str_starts_with($filename, '\\')) {
+                        $zip->close();
+                        return back()->with('error', 'فایل آپدیت نامعتبر است (مسیرهای غیرمجاز یافت شد).');
+                    }
+                }
+
+                $zip->extractTo(base_path());
+                $zip->close();
+
+                // Clear Opcache if available to ensure new PHP files are read
+                if (function_exists('opcache_reset')) {
+                    opcache_reset();
+                }
+
+                // Clear all caches first to load new configurations and classes
+                \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+
+                // Run system updates
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+
+                // Final cache clear just in case
+                \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+
+                return back()->with('message', 'برنامه با موفقیت از طریق فایل آپدیت به نسخه جدید بروزرسانی شد.');
+            } else {
+                return back()->with('error', 'امکان باز کردن فایل آپدیت وجود ندارد.');
+            }
+        } catch (\Exception $e) {
+            \Log::error("Update extraction error: " . $e->getMessage());
+            return back()->with('error', 'خطا در فرآیند بروزرسانی: ' . $e->getMessage());
         }
     }
 }

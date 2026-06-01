@@ -115,6 +115,9 @@ class DashboardStatsService
 
             $retentionRate = $totalUsers > 0 ? round(($returningUsers / $totalUsers) * 100) : 0;
 
+            $openTickets = \App\Models\Ticket::whereIn('status', ['open', 'pending', 'customer_reply'])->count();
+            $pendingWithdrawals = \App\Models\WalletWithdrawal::where('status', 'pending')->count();
+
             return [
                 'total_users' => $totalUsers,
                 'new_users_today' => User::whereDate('created_at', today())->count(),
@@ -125,6 +128,8 @@ class DashboardStatsService
                 'retention_rate' => $retentionRate,
                 'point_real_value' => $pointRealValue,
                 'total_redeemed_points' => $totalRedeemedPoints,
+                'open_tickets' => $openTickets,
+                'pending_withdrawals' => $pendingWithdrawals,
             ];
         });
     }

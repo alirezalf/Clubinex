@@ -101,3 +101,9 @@ Thumbs.db
 .Trashes
 ehthumbs.db
 desktop.ini
+
+### امنیتی و لایسنس ###
+License-Generator-Offline.html
+*private*.pem
+*key*.pem
+license-generator.js

@@ -26,6 +26,7 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         icon: UserPlus,
         href: route('referrals.index'),
         group: 'general',
+        module: 'enable_referrals',
         description: 'دعوت دوستان و کسب امتیاز'
     },
     {
@@ -33,6 +34,7 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         icon: Wallet,
         href: route('wallet.index'),
         group: 'general',
+        module: 'enable_wallet',
         description: 'مدیریت اعتبار و پرداخت‌ها'
     },
 
@@ -41,6 +43,7 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         icon: Award,
         href: route('clubs.index'),
         group: 'club',
+        module: 'enable_clubs',
         description: 'مشاهده سطوح باشگاه'
     },
     {
@@ -48,6 +51,7 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         icon: Package,
         href: route('products.index'),
         group: 'club',
+        module: 'enable_products',
         description: 'کسب امتیاز از خریدها'
     },
     {
@@ -55,6 +59,7 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         icon: ShoppingCart,
         href: route('rewards.index'),
         group: 'club',
+        module: 'enable_rewards',
         description: 'تبدیل امتیاز به جایزه'
     },
     {
@@ -62,6 +67,7 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         icon: Dna,
         href: route('lucky-wheel.index'),
         group: 'club',
+        module: 'enable_lucky_wheel',
         description: 'شانس خود را امتحان کنید'
     },
     {
@@ -69,6 +75,7 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         icon: FileQuestion,
         href: route('surveys.index'),
         group: 'club',
+        module: 'enable_surveys',
         description: 'شرکت در مسابقات'
     },
 
@@ -85,6 +92,7 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         icon: MessageSquare,
         href: route('tickets.index'),
         group: 'support',
+        module: 'enable_tickets',
         description: 'ثبت و پیگیری تیکت‌ها'
     },
     {
@@ -123,6 +131,7 @@ export const getAdminItems = (badgeCount: number = 0, rewardsCount: number = 0) 
         icon: Database,
         href: route('admin.products.index'),
         group: 'admin',
+        module: 'enable_products',
         description: 'مدیریت محصولات و امتیازات'
     },
     {
@@ -130,6 +139,7 @@ export const getAdminItems = (badgeCount: number = 0, rewardsCount: number = 0) 
         icon: Gift,
         href: route('admin.rewards.index'),
         group: 'admin',
+        module: 'enable_rewards',
         badge: rewardsCount,
         description: 'مدیریت جوایز فروشگاه'
     },
@@ -145,6 +155,7 @@ export const getAdminItems = (badgeCount: number = 0, rewardsCount: number = 0) 
         icon: Award,
         href: route('admin.club.settings'),
         group: 'admin',
+        module: 'enable_clubs',
         description: 'تنظیمات سطوح باشگاه'
     },
     {
@@ -152,6 +163,7 @@ export const getAdminItems = (badgeCount: number = 0, rewardsCount: number = 0) 
         icon: Gamepad2,
         href: route('admin.gamification.index'),
         group: 'admin',
+        module: 'enable_lucky_wheel',
         description: 'گردونه شانس و بازی‌ها'
     },
     {
@@ -166,6 +178,7 @@ export const getAdminItems = (badgeCount: number = 0, rewardsCount: number = 0) 
         icon: BarChart2,
         href: route('admin.reports.index'),
         group: 'admin',
+        module: 'enable_reports',
         description: 'گزارشات سیستم'
     },
     {
@@ -187,6 +200,7 @@ export const getAdminItems = (badgeCount: number = 0, rewardsCount: number = 0) 
         icon: MessageSquare,
         href: route('admin.tickets.index'),
         group: 'admin',
+        module: 'enable_tickets',
         badge: badgeCount,
         description: 'پاسخ به تیکت‌ها'
     },

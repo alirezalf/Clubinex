@@ -65,6 +65,39 @@ class HandleInertiaRequests extends Middleware
             'loginSettings' => fn () => \Illuminate\Support\Facades\Cache::remember('login_settings', 3600, function () {
                 return SystemSetting::where('group', 'login')->pluck('value', 'key')->toArray();
             }),
+            'site' => fn () => \Illuminate\Support\Facades\Cache::remember('site_settings', 3600, function () {
+                $general = SystemSetting::where('group', 'general')->pluck('value', 'key')->toArray();
+                return [
+                    'name' => $general['site_name'] ?? 'Clubinex',
+                    'logo' => $general['site_logo'] ?? null,
+                    'version' => $general['version'] ?? 'v2.0',
+                ];
+            }),
+            'modules' => fn () => \Illuminate\Support\Facades\Cache::remember('modules_settings', 3600, function () {
+                $dbModules = SystemSetting::where('group', 'modules')->pluck('value', 'key')->toArray();
+                $licenseKey = SystemSetting::getValue('general', 'license_key');
+                $licenseModules = [];
+                if ($licenseKey) {
+                    $payload = \App\Services\LicenseService::verifyLicense($licenseKey);
+                    if ($payload) {
+                        $licenseModules = $payload['modules'] ?? [];
+                    }
+                }
+
+                $effectiveModules = [];
+                // All known modules
+                $moduleKeys = [
+                    'enable_referrals', 'enable_wallet', 'enable_clubs',
+                    'enable_products', 'enable_rewards', 'enable_lucky_wheel',
+                    'enable_surveys', 'enable_tickets', 'enable_reports'
+                ];
+                foreach ($moduleKeys as $k) {
+                    $isEnabledInDb = isset($dbModules[$k]) && ($dbModules[$k] === '1' || $dbModules[$k] === true);
+                    $isAllowedByLicense = !empty($licenseModules[$k]);
+                    $effectiveModules[$k] = $isEnabledInDb && $isAllowedByLicense;
+                }
+                return $effectiveModules;
+            }),
             // 3. دریافت هوشمند اسلایدر برای صفحه جاری (Lazy Evaluation)
             'pageSlider' => fn () => $this->getPageSlider($request),
             'flash' => [
