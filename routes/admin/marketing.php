@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\RewardController;
 use App\Http\Controllers\Admin\ClubSettingController;
 use App\Http\Controllers\Admin\GamificationController;
 use App\Http\Controllers\Admin\SurveyController;
+use App\Http\Controllers\Admin\WalletWithdrawalController;
 
 // --- Rewards ---
 Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
@@ -13,7 +14,7 @@ Route::get('/rewards/user-history/{id}', [RewardController::class, 'userHistory'
 
 // --- Club & Gamification (Super Admin / Admin Only) ---
 Route::middleware(['role:super-admin|admin'])->group(function () {
-    
+
     // Rewards Management
     Route::post('/rewards', [RewardController::class, 'store'])->name('rewards.store');
     Route::post('/rewards/{id}', [RewardController::class, 'update'])->name('rewards.update');
@@ -24,7 +25,7 @@ Route::middleware(['role:super-admin|admin'])->group(function () {
     Route::post('/clubs/{id}', [ClubSettingController::class, 'updateClub'])->name('clubs.update');
     Route::delete('/clubs/{id}', [ClubSettingController::class, 'destroyClub'])->name('clubs.destroy');
     Route::post('/point-rules/{id}', [ClubSettingController::class, 'updateRule'])->name('point-rules.update');
-    
+
     // Gamification (Wheel)
     Route::get('/gamification', [GamificationController::class, 'index'])->name('gamification.index');
     Route::post('/lucky-wheel/prize', [GamificationController::class, 'storeWheelPrize'])->name('lucky-wheel.prize.store');
@@ -42,4 +43,8 @@ Route::middleware(['role:super-admin|admin'])->group(function () {
     Route::post('/surveys/{id}/questions', [SurveyController::class, 'storeQuestion'])->name('surveys.questions.store');
     Route::put('/surveys/questions/{id}', [SurveyController::class, 'updateQuestion'])->name('surveys.questions.update');
     Route::delete('/surveys/questions/{id}', [SurveyController::class, 'destroyQuestion'])->name('surveys.questions.destroy');
+
+    // Withdrawals (Finance)
+    Route::get('/withdrawals', [WalletWithdrawalController::class, 'index'])->name('withdrawals.index');
+    Route::post('/withdrawals/{withdrawal}/status', [WalletWithdrawalController::class, 'updateStatus'])->name('withdrawals.update_status');
 });

@@ -47,6 +47,14 @@ export default function WalletIndex({ wallet, transactions, points, config }: Pr
         points: ''
     });
 
+    const { data: withdrawData, setData: setWithdrawData, post: postWithdraw, processing: processingWithdraw, errors: withdrawErrors, reset: withdrawReset } = useForm({
+        amount: '',
+        bank_name: '',
+        iban_number: '',
+        card_number: '',
+        account_holder: ''
+    });
+
     const submitCharge = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('wallet.charge'));
@@ -60,6 +68,11 @@ export default function WalletIndex({ wallet, transactions, points, config }: Pr
     const submitW2p = (e: React.FormEvent) => {
         e.preventDefault();
         postW2p(route('wallet.wallet_to_points'), { onSuccess: () => w2pReset() });
+    };
+
+    const submitWithdraw = (e: React.FormEvent) => {
+        e.preventDefault();
+        postWithdraw(route('wallet.withdraw'), { onSuccess: () => withdrawReset() });
     };
 
     const getStatusIcon = (status: string) => {
@@ -233,6 +246,85 @@ export default function WalletIndex({ wallet, transactions, points, config }: Pr
                         </form>
                     </div>
                     )}
+
+                    {/* Withdrawal Form */}
+                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <WalletIcon size={20} className="text-rose-500"/> درخواست برداشت وجه
+                        </h3>
+                        <form onSubmit={submitWithdraw} className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="relative">
+                                    <label className="block text-sm text-gray-500 mb-1">مبلغ برداشتی ({config?.currency || 'تومان'})</label>
+                                    <input
+                                        type="number"
+                                        min="1000"
+                                        value={withdrawData.amount}
+                                        onChange={e => setWithdrawData('amount', e.target.value)}
+                                        className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                                        placeholder={`حداقل 1000 ${config?.currency || 'تومان'}`}
+                                    />
+                                    {withdrawErrors.amount && <p className="text-xs text-red-500 mt-1">{withdrawErrors.amount}</p>}
+                                </div>
+                                <div className="relative">
+                                    <label className="block text-sm text-gray-500 mb-1">نام بانک</label>
+                                    <input
+                                        type="text"
+                                        value={withdrawData.bank_name}
+                                        onChange={e => setWithdrawData('bank_name', e.target.value)}
+                                        className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                                        placeholder="مانند: ملی، ملت..."
+                                    />
+                                    {withdrawErrors.bank_name && <p className="text-xs text-red-500 mt-1">{withdrawErrors.bank_name}</p>}
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="relative">
+                                    <label className="block text-sm text-gray-500 mb-1">شماره کارت (۱۶ رقم)</label>
+                                    <input
+                                        type="text"
+                                        maxLength={16}
+                                        value={withdrawData.card_number}
+                                        onChange={e => setWithdrawData('card_number', e.target.value)}
+                                        className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                                        placeholder="1234567812345678"
+                                    />
+                                    {withdrawErrors.card_number && <p className="text-xs text-red-500 mt-1">{withdrawErrors.card_number}</p>}
+                                </div>
+                                <div className="relative">
+                                    <label className="block text-sm text-gray-500 mb-1">نام دارنده حساب</label>
+                                    <input
+                                        type="text"
+                                        value={withdrawData.account_holder}
+                                        onChange={e => setWithdrawData('account_holder', e.target.value)}
+                                        className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                                        placeholder="نام و نام خانوادگی..."
+                                    />
+                                    {withdrawErrors.account_holder && <p className="text-xs text-red-500 mt-1">{withdrawErrors.account_holder}</p>}
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <label className="block text-sm text-gray-500 mb-1">شماره شبا (اختیاری)</label>
+                                <input
+                                    type="text"
+                                    value={withdrawData.iban_number}
+                                    onChange={e => setWithdrawData('iban_number', e.target.value)}
+                                    className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                                    placeholder="IR1234..."
+                                />
+                                {withdrawErrors.iban_number && <p className="text-xs text-red-500 mt-1">{withdrawErrors.iban_number}</p>}
+                            </div>
+                            <div className="text-left mt-2">
+                                <button
+                                    type="submit"
+                                    disabled={processingWithdraw || Number(withdrawData.amount) > Number(wallet?.balance || 0)}
+                                    className="w-full sm:w-auto h-12 px-8 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold shadow-md transition disabled:opacity-50"
+                                >
+                                    ثبت درخواست برداشت
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 

@@ -100,6 +100,7 @@ Route::middleware(['auth', 'active.user'])->group(function () {
     Route::get('/wallet/verify/{transaction}', [\App\Http\Controllers\WalletController::class, 'verify'])->name('wallet.verify');
     Route::post('/wallet/points-to-wallet', [\App\Http\Controllers\WalletController::class, 'convertPointsToWallet'])->name('wallet.points_to_wallet');
     Route::post('/wallet/wallet-to-points', [\App\Http\Controllers\WalletController::class, 'convertWalletToPoints'])->name('wallet.wallet_to_points');
+    Route::post('/wallet/withdraw', [\App\Http\Controllers\WalletController::class, 'withdrawRequest'])->name('wallet.withdraw');
 
     // API Helpers (Internal)
     Route::post('/api/users/lookup', [GeneralController::class, 'lookupUser'])->name('api.users.lookup');

@@ -193,7 +193,7 @@ export default function AdminDashboard({ stats, recentActivities, latestUsers, q
                         trendLabel={stats.pending_withdrawals > 0 ? "در انتظار بررسی" : "موردی نیست"}
                         color="from-indigo-500 to-indigo-600"
                         iconBg="bg-gradient-to-r from-indigo-500 to-indigo-600"
-                        href="/admin/marketing/points/transactions" /* temporary link until withdrawal page is ready */
+                        href="/admin/withdrawals"
                     />
                 )}
             </div>

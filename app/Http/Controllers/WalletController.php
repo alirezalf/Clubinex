@@ -197,4 +197,49 @@ class WalletController extends Controller
         $transaction->update(['status' => 'failed']);
         return redirect()->route('wallet.index')->with('error', $payment['message']);
     }
+
+    public function withdrawRequest(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1000',
+            'bank_name' => 'required|string|max:100',
+            'iban_number' => 'nullable|string|max:50',
+            'card_number' => 'required|string|size:16',
+            'account_holder' => 'required|string|max:100',
+        ]);
+
+        $user = auth()->user();
+        $wallet = $user->wallet()->firstOrCreate(['user_id' => $user->id], ['balance' => 0]);
+
+        if ($wallet->balance < $request->amount) {
+            return back()->with('error', 'موجودی کیف پول شما برای این برداشت کافی نیست.');
+        }
+
+        DB::transaction(function () use ($user, $wallet, $request) {
+            // Deduct the requested amount from the wallet to lock it
+            $wallet->decrement('balance', $request->amount);
+
+            // Record as pending withdrawal in wallet transactions
+            $wallet->transactions()->create([
+                'amount' => clone $request->amount,
+                'type' => 'withdrawal',
+                'status' => 'pending',
+                'description' => 'درخواست برداشت وجه از کیف پول',
+            ]);
+
+            // Save actual withdrawal request
+            \App\Models\WalletWithdrawal::create([
+                'user_id' => $user->id,
+                'wallet_id' => $wallet->id,
+                'amount' => $request->amount,
+                'bank_name' => $request->bank_name,
+                'iban_number' => $request->iban_number,
+                'card_number' => $request->card_number,
+                'account_holder' => $request->account_holder,
+                'status' => 'pending',
+            ]);
+        });
+
+        return back()->with('success', 'درخواست برداشت وجه با موفقیت ثبت شد و در انتظار بررسی است.');
+    }
 }
