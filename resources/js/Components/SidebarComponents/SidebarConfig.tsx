@@ -96,6 +96,13 @@ export const getMenuItems = (badgeCount: number = 0, notificationCount: number =
         description: 'ثبت و پیگیری تیکت‌ها'
     },
     {
+        name: 'راهنمای سیستم',
+        icon: FileText,
+        href: route('help.index'),
+        group: 'support',
+        description: 'آموزش و توسعه'
+    },
+    {
         name: 'درباره ما',
         icon: FileText,
         href: route('about'),

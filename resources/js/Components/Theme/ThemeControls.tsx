@@ -229,6 +229,45 @@ export default function ThemeControls({ data, setData, isAdminContext = false }:
                             </span>
                         </div>
                     </div>
+
+                    <div>
+                        <label className="mb-1 block text-[10px] text-gray-400">
+                            هاور پس‌زمینه (آیتم)
+                        </label>
+                        <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-1">
+                            <input
+                                type="color"
+                                value={data.sidebar_hover_bg && (data.sidebar_hover_bg as string).startsWith('#') ? data.sidebar_hover_bg as string : '#f3f4f6'}
+                                onChange={(e) => setData('sidebar_hover_bg', e.target.value)}
+                                className="h-6 w-6 cursor-pointer rounded border-none p-0"
+                            />
+                            <input
+                                type="text"
+                                value={data.sidebar_hover_bg as string}
+                                onChange={(e) => setData('sidebar_hover_bg', e.target.value)}
+                                className="w-full border-none bg-transparent p-0 font-mono text-[10px] text-gray-500 focus:ring-0"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="mb-1 block text-[10px] text-gray-400">
+                            هاور متن (آیتم)
+                        </label>
+                        <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-1">
+                            <input
+                                type="color"
+                                value={data.sidebar_hover_text && (data.sidebar_hover_text as string).startsWith('#') ? data.sidebar_hover_text as string : '#111827'}
+                                onChange={(e) => setData('sidebar_hover_text', e.target.value)}
+                                className="h-6 w-6 cursor-pointer rounded border-none p-0"
+                            />
+                            <input
+                                type="text"
+                                value={data.sidebar_hover_text as string}
+                                onChange={(e) => setData('sidebar_hover_text', e.target.value)}
+                                className="w-full border-none bg-transparent p-0 font-mono text-[10px] text-gray-500 focus:ring-0"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="mb-4 flex items-center justify-between rounded-xl border border-gray-200 p-3">

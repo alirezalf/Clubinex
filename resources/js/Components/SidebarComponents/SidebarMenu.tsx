@@ -112,20 +112,19 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
                 onMouseEnter={() => setHoveredItem(item.name)}
                 onMouseLeave={() => setHoveredItem(null)}
                 className={clsx(
-                    "relative flex items-center rounded-xl transition-all duration-200 group",
+                    "relative flex items-center rounded-xl transition-all duration-200 group cursor-pointer",
                     isCollapsed ? "justify-center p-2.5" : "justify-between px-3 py-2.5",
                     active
-                        ? isAdminItem
-                            ? "bg-red-50 text-red-700 font-bold shadow-sm"
-                            : "bg-amber-50 text-amber-700 font-bold shadow-sm"
-                        : "opacity-80 hover:opacity-100 hover:bg-black/5"
+                        ? (isAdminItem ? "bg-red-50 font-bold shadow-sm" : "bg-amber-50 font-bold shadow-sm")
+                        : "opacity-80"
                 )}
                 style={{
                     backgroundColor: active
-                        ? isAdminItem
-                            ? 'color-mix(in srgb, #fef2f2, transparent 0%)'
-                            : 'color-mix(in srgb, #fffbeb, transparent 0%)'
-                        : 'transparent'
+                        ? (isAdminItem ? 'color-mix(in srgb, #fef2f2, transparent 0%)' : 'color-mix(in srgb, #fffbeb, transparent 0%)')
+                        : (isHovered ? 'var(--sidebar-hover-bg)' : 'transparent'),
+                    color: active
+                        ? (isAdminItem ? '#dc2626' : '#b45309')
+                        : (isHovered ? 'var(--sidebar-hover-text)' : undefined)
                 }}
                 title={isCollapsed ? item.name : ''}
             >
@@ -236,10 +235,12 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
                         {!isCollapsed && !searchTerm && (
                             <button
                                 onClick={() => toggleGroup(group.id)}
-                                className={clsx(
-                                    "w-full flex items-center justify-between px-3 py-2 mt-2 mb-1 rounded-xl transition-all",
-                                    groupHasActive ? "bg-black/5" : "hover:bg-black/5"
-                                )}
+                                className="w-full flex items-center justify-between px-3 py-2 mt-2 mb-1 rounded-xl transition-all cursor-pointer"
+                                onMouseEnter={() => setHoveredItem('group_' + group.id)}
+                                onMouseLeave={() => setHoveredItem(null)}
+                                style={{
+                                    backgroundColor: groupHasActive ? 'var(--sidebar-hover-bg)' : (hoveredItem === 'group_' + group.id ? 'var(--sidebar-hover-bg)' : 'transparent'),
+                                }}
                             >
                                 <div className="flex items-center gap-2">
                                     {group.icon && (
@@ -277,7 +278,9 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
                     {!isCollapsed && !searchTerm && (
                         <button
                             onClick={() => toggleGroup('admin')}
-                            className="w-full relative mb-3 group/admin"
+                            onMouseEnter={() => setHoveredItem('admin_group')}
+                            onMouseLeave={() => setHoveredItem(null)}
+                            className="w-full relative mb-3 group/admin cursor-pointer"
                         >
                             <div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 to-amber-500/20 rounded-lg blur-sm group-hover/admin:opacity-100 opacity-60 transition-opacity" />
                             <div className="relative bg-gradient-to-r from-red-50 to-amber-50 rounded-lg p-2 border border-red-100 flex items-center gap-2 justify-between">

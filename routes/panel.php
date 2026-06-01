@@ -108,4 +108,7 @@ Route::middleware(['auth', 'active.user'])->group(function () {
 
     // Global Search API (New)
     Route::get('/api/global-search', [GeneralController::class, 'globalSearch'])->name('api.global.search');
+
+    // Help Center
+    Route::get('/help', [\App\Http\Controllers\HelpController::class, 'index'])->name('help.index');
 });

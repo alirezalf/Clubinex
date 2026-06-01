@@ -28,6 +28,8 @@ export default function ThemeSettingsPanel({
         header_bg: currentSettings?.header_bg || 'rgba(255,255,255,0.8)',
         sidebar_bg: currentSettings?.sidebar_bg || '#ffffff',
         sidebar_text: currentSettings?.sidebar_text || '#1f2937',
+        sidebar_hover_bg: currentSettings?.sidebar_hover_bg || 'rgba(0,0,0,0.05)',
+        sidebar_hover_text: currentSettings?.sidebar_hover_text || '#1f2937',
         sidebar_texture: currentSettings?.sidebar_texture || 'none',
         radius_size: currentSettings?.radius_size || '0.75rem',
         card_style: currentSettings?.card_style || 'default',
@@ -48,6 +50,8 @@ export default function ThemeSettingsPanel({
                 header_bg: currentSettings.header_bg || prev.header_bg,
                 sidebar_bg: currentSettings.sidebar_bg || prev.sidebar_bg,
                 sidebar_text: currentSettings.sidebar_text || prev.sidebar_text,
+                sidebar_hover_bg: currentSettings.sidebar_hover_bg || prev.sidebar_hover_bg,
+                sidebar_hover_text: currentSettings.sidebar_hover_text || prev.sidebar_hover_text,
                 sidebar_texture: currentSettings.sidebar_texture || prev.sidebar_texture,
                 radius_size: currentSettings.radius_size || prev.radius_size,
                 card_style: currentSettings.card_style || prev.card_style,
@@ -92,6 +96,8 @@ export default function ThemeSettingsPanel({
         // Vars
         root.style.setProperty('--sidebar-bg', data.sidebar_bg as string);
         root.style.setProperty('--sidebar-text', data.sidebar_text as string);
+        root.style.setProperty('--sidebar-hover-bg', data.sidebar_hover_bg as string);
+        root.style.setProperty('--sidebar-hover-text', data.sidebar_hover_text as string);
         root.style.setProperty(
             '--sidebar-texture',
             data.sidebar_texture as string,
@@ -129,6 +135,8 @@ export default function ThemeSettingsPanel({
             header_bg: 'rgba(255,255,255,0.8)',
             sidebar_bg: '#ffffff',
             sidebar_text: '#1f2937',
+            sidebar_hover_bg: 'rgba(0,0,0,0.05)',
+            sidebar_hover_text: '#1f2937',
             sidebar_texture: 'none',
             radius_size: '0.75rem',
             card_style: 'default',
