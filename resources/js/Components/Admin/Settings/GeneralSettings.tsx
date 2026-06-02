@@ -46,34 +46,6 @@ export default function GeneralSettings({ data, setData }: { data: any, setData:
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
-                        onClick={() => {
-                            window.location.href = route('admin.settings.backup_database');
-                            // Using a post request for downloading file is also possible,
-                            // but form submission via standard form or redirect is easier.
-                            // However the route is post! We should use an invisible form or router.post?
-                            // Wait, inertia router.post can't download files directly easily without setting up blobs.
-                            // Let's create an invisible form and submit it.
-                            const form = document.createElement('form');
-                            form.method = 'POST';
-                            form.action = route('admin.settings.backup_database');
-                            const csrfToken = document.head.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                            if (csrfToken) {
-                                const input = document.createElement('input');
-                                input.type = 'hidden';
-                                input.name = '_token';
-                                input.value = csrfToken;
-                                form.appendChild(input);
-                            }
-                            document.body.appendChild(form);
-                            form.submit();
-                        }}
-                        className="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition"
-                    >
-                        <Globe size={14} className="transform rotate-180" />
-                        دانلود بک‌آپ دیتابیس
-                    </button>
-                    <button
-                        type="button"
                         onClick={handleClearCache}
                         disabled={clearing}
                         className="text-xs bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition disabled:opacity-50"

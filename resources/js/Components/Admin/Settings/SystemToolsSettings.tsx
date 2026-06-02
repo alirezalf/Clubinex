@@ -23,7 +23,7 @@ export default function SystemToolsSettings() {
         e.preventDefault();
         if (!data.update_file) return;
 
-        if(confirm('آیا آماده آپدیت سیستم هستید؟ این عملیات فایل‌های جدید را پردازش می‌کند و سیستم بروزرسانی می‌شود. حتما قبل از این کار از دیتابیس پشتیبان بگیرید.')) {
+        if(confirm('آیا آماده آپدیت سیستم هستید؟ این عملیات فایل‌های جدید را پردازش می‌کند و سیستم بروزرسانی می‌شود.')) {
             post(route('admin.settings.upload_update'), {
                 onSuccess: () => {
                     setData('update_file', null);

@@ -35,7 +35,8 @@ interface Category {
 }
 
 interface RegisteredProduct {
-  id: number;
+  id: string | number;
+  real_id: number;
   type: "serial" | "registration";
   serial_code: string;
   product_title: string;
@@ -268,7 +269,7 @@ export default function ProductsIndex({
                         <div className="flex items-center gap-2">
                           {item.can_edit && (
                             <button
-                              onClick={() => handleEditRegistration(item.id)}
+                              onClick={() => handleEditRegistration(item.real_id)}
                               className="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition"
                               title="ویرایش درخواست"
                             >
@@ -277,7 +278,7 @@ export default function ProductsIndex({
                           )}
                           {item.can_delete && (
                             <button
-                              onClick={() => handleDeleteRegistration(item.id)}
+                              onClick={() => handleDeleteRegistration(item.real_id)}
                               className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"
                               title="حذف درخواست"
                             >

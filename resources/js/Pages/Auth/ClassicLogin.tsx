@@ -43,12 +43,17 @@ export default function ClassicLogin({ mode, setMode, captchaUrl, refreshCaptcha
 
             {/* Form Container */}
             <div
-                className="w-full md:w-1/2 lg:w-[45%] flex flex-col justify-center items-center p-4 relative z-10 transition-all duration-500"
+                className="w-full md:w-1/2 lg:w-[45%] flex flex-col justify-center items-center p-4 relative z-10 transition-all duration-500 bg-white"
                 style={rightBgStyle}
             >
+                {/* Elegant Striped Pattern from Minimal */}
+                <div className="absolute inset-0 pointer-events-none z-0" style={{
+                    backgroundImage: `repeating-linear-gradient(45deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 2px, transparent 2px, transparent 8px)`
+                }}></div>
+
                 {/* Home Button */}
-                <Link 
-                    href="/" 
+                <Link
+                    href="/"
                     className="absolute top-6 right-6 p-2 bg-white/50 hover:bg-white backdrop-blur-sm rounded-full shadow-sm text-gray-700 hover:text-primary-600 transition-all focus:outline-none"
                     title="بازگشت به صفحه اصلی"
                 >
@@ -57,7 +62,7 @@ export default function ClassicLogin({ mode, setMode, captchaUrl, refreshCaptcha
 
                 {/* Flat Card */}
                 <div
-                    className="w-full max-w-[380px] rounded-2xl border border-gray-100 p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.03)] transition-all duration-300"
+                    className="w-full max-w-[380px] rounded-2xl border border-gray-100 p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.03)] transition-all duration-300 relative z-10"
                     style={{ backgroundColor: settings.login_card_bg || '#ffffff' }}
                 >
                     <div className="text-center mb-6">

@@ -84,35 +84,35 @@ export default function SidebarStyles() {
 
             /* بافت‌های تصویری */
             :root[data-sidebar-texture="sea"] .sidebar-texture {
-                background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80');
+                background-image: url('/images/backgrounds/photo-1507525428034-b723cf961d3e-2.jpg');
                 background-size: cover;
                 background-position: center;
                 opacity: 0.15 !important;
             }
 
             :root[data-sidebar-texture="sunset"] .sidebar-texture {
-                background-image: url('https://images.unsplash.com/photo-1472120435266-53107fd0c44a?auto=format&fit=crop&w=600&q=80');
+                background-image: url('/images/backgrounds/photo-1472120435266-53107fd0c44a-2.jpg');
                 background-size: cover;
                 background-position: center;
                 opacity: 0.15 !important;
             }
 
             :root[data-sidebar-texture="space"] .sidebar-texture {
-                background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80');
+                background-image: url('/images/backgrounds/photo-1451187580459-43490279c0fa-2.jpg');
                 background-size: cover;
                 background-position: center;
                 opacity: 0.2 !important;
             }
 
             :root[data-sidebar-texture="forest"] .sidebar-texture {
-                background-image: url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=1000&q=80');
+                background-image: url('/images/backgrounds/photo-1542273917363-3b1817f69a2d-2.jpg');
                 background-size: cover;
                 background-position: center;
                 opacity: 0.15 !important;
             }
 
             :root[data-sidebar-texture="abstract"] .sidebar-texture {
-                background-image: url('https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1000&q=80');
+                background-image: url('/images/backgrounds/photo-1541701494587-cb58502866ab-2.jpg');
                 background-size: cover;
                 background-position: center;
                 opacity: 0.1 !important;

@@ -46,10 +46,10 @@ export default function ThemeControls({ data, setData, isAdminContext = false }:
                 .sidebar-texture-grid { background-image: linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px); background-size: 10px 10px; }
                 .sidebar-texture-hex { background-image: url("data:image/svg+xml,%3Csvg width='12' height='20' viewBox='0 0 24 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40c5.523 0 10-4.477 10-10V10c0-5.523-4.477-10-10-10s-10 4.477-10 10v20c0 5.523 4.477 10 10 10z' fill='currentColor' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E"); background-size: 12px 20px; }
                 .sidebar-texture-waves { background: radial-gradient(circle at 100% 50%, transparent 20%, currentColor 21%, currentColor 34%, transparent 35%, transparent), radial-gradient(circle at 0% 50%, transparent 20%, currentColor 21%, currentColor 34%, transparent 35%, transparent) 0 -50px; background-size: 15px 50px; }
-                .sidebar-texture-sea { background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=300&q=80'); background-size: cover; opacity: 0.5; }
-                .sidebar-texture-sunset { background-image: url('https://images.unsplash.com/photo-1472120435266-53107fd0c44a?auto=format&fit=crop&w=300&q=80'); background-size: cover; opacity: 0.5; }
-                .sidebar-texture-space { background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=300&q=80'); background-size: cover; opacity: 0.5; }
-                .sidebar-texture-forest { background-image: url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=300&q=80'); background-size: cover; opacity: 0.8; }
+                .sidebar-texture-sea { background-image: url('/images/backgrounds/photo-1507525428034-b723cf961d3e.jpg'); background-size: cover; opacity: 0.5; }
+                .sidebar-texture-sunset { background-image: url('/images/backgrounds/photo-1472120435266-53107fd0c44a.jpg'); background-size: cover; opacity: 0.5; }
+                .sidebar-texture-space { background-image: url('/images/backgrounds/photo-1451187580459-43490279c0fa.jpg'); background-size: cover; opacity: 0.5; }
+                .sidebar-texture-forest { background-image: url('/images/backgrounds/photo-1542273917363-3b1817f69a2d.jpg'); background-size: cover; opacity: 0.8; }
             `}</style>
 
             {/* Primary Color & Radius */}

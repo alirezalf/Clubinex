@@ -22,6 +22,8 @@ class ProcessInternalCrons
             try {
                 $this->expirePoints();
                 $this->tagUsers();
+                $this->autoCloseTickets();
+                $this->pruneSystem();
             } catch (\Exception $e) {
                 \Log::error('خطا در اجرای توابع داخلی روزانه (Internal Crons): ' . $e->getMessage());
             }
@@ -145,5 +147,46 @@ class ProcessInternalCrons
                 }
             }
         });
+    }
+
+    private function autoCloseTickets()
+    {
+        $hours = \App\Models\SystemSetting::getValue('support', 'ticket_auto_close_hours');
+        if (!$hours || !is_numeric($hours) || $hours <= 0) return;
+
+        $cutoffTime = now()->subHours($hours);
+        $tickets = \App\Models\Ticket::where('status', 'answered')
+            ->where('updated_at', '<', $cutoffTime)
+            ->get();
+
+        foreach ($tickets as $ticket) {
+            $ticket->update(['status' => 'closed']);
+            \App\Models\ActivityLog::log(
+                'ticket.auto_closed',
+                "تیکت #{$ticket->id} به دلیل عدم پاسخ کاربر پس از {$hours} ساعت به صورت خودکار بسته شد",
+                [
+                    'model_type' => \App\Models\Ticket::class,
+                    'model_id' => $ticket->id,
+                    'user_id' => $ticket->user_id
+                ]
+            );
+        }
+    }
+
+    private function pruneSystem()
+    {
+        $days = 90; // پیش‌فرض 90 روز
+        $date = now()->subDays($days);
+        $sessionDate = now()->subDays(30);
+
+        \App\Models\ActivityLog::where('created_at', '<', $date)->delete();
+        \App\Models\SmsLog::where('created_at', '<', $date)->delete();
+        \App\Models\EmailLog::where('created_at', '<', $date)->delete();
+        \App\Models\UserSession::where('started_at', '<', $sessionDate)->delete();
+
+        \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('created_at', '<', $date)
+            ->whereNotNull('read_at')
+            ->delete();
     }
 }

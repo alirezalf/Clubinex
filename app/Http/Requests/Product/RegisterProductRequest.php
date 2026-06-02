@@ -36,7 +36,7 @@ class RegisterProductRequest extends FormRequest
             'guarantee_status' => 'required|in:no_guarantee,reg_guarantee,pre_guarantee',
         ];
 
-        if ($this->routeIs('products.update_registration') || $this->has('_method') && $this->input('_method') === 'PUT') {
+        if ($this->routeIs('products.registrations.update') || $this->has('_method') && $this->input('_method') === 'PUT') {
              $rules['invoice_file'] = 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120';
         } else {
              $rules['invoice_file'] = 'required|file|mimes:jpeg,png,jpg,pdf|max:5120'; // 5MB (اجباری)

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { usePage, router } from '@inertiajs/react';
 import clsx from 'clsx';
 import type { ReactNode } from 'react';
@@ -67,10 +68,15 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
             router.reload({
                 only: ['unreadNotificationsCount', 'badges']
             });
+
+            // اجرای اتوماتیک صف‌های پس‌زمینه (جاب‌ها) روی هاست اشتراکی - فقط برای ادمین
+            if (auth.user?.roles?.includes('super-admin') || auth.user?.roles?.includes('admin')) {
+                axios.post('/admin/system/run-queue').catch(() => {});
+            }
         }, 60000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [auth]);
 
     const [isThemePanelOpen, setIsThemePanelOpen] = useState(false);
     const [currentDate, setCurrentDate] = useState('');

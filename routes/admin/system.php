@@ -63,6 +63,26 @@ Route::middleware(['role:super-admin|admin'])->group(function () {
     // Logs
     Route::get('/logs', [SystemLogController::class, 'index'])->name('logs');
 
+    // System Queue Worker endpoint for shared hosting
+    Route::post('/system/run-queue', function () {
+        // اجرا به صورت defer تا پاسخ سریع ارسال شود
+        if (function_exists('defer')) {
+            defer(function () {
+                \Illuminate\Support\Facades\Artisan::call('queue:work', [
+                    '--stop-when-empty' => true,
+                    '--max-time' => 50,
+                ]);
+            });
+        } else {
+             // به عنوان پشتیبان برای نسخه‌های پایین‌تر
+             \Illuminate\Support\Facades\Artisan::call('queue:work', [
+                    '--stop-when-empty' => true,
+                    '--max-time' => 30, // زمان کمتر برای جلوگیری از خطای Timeout در پاسخ
+             ]);
+        }
+        return response()->json(['status' => 'ok', 'message' => 'Queue processed']);
+    })->name('system.run_queue');
+
     // Email Themes
     Route::post('/email-themes', [EmailThemeController::class, 'store'])->name('email-themes.store');
     Route::put('/email-themes/{id}', [EmailThemeController::class, 'update'])->name('email-themes.update');
