@@ -84,97 +84,98 @@ class ReportController extends Controller
         $tab = $request->input('tab', 'transactions');
         $request->merge(['per_page' => 10000]); // to get more records without pagination limit if custom logic uses it
 
-        $data = [];
         $header = [];
 
-        switch ($tab) {
-            case 'transactions':
-                $payload = app(TransactionReportService::class)->getTransactions($request);
-                $records = $payload->items();
-                $header = ['ID', 'User', 'Mobile', 'Amount', 'Type', 'Description', 'Date'];
-                foreach ($records as $row) {
-                    $data[] = [
-                        $row->id,
-                        $row->user ? $row->user->first_name . ' ' . $row->user->last_name : '',
-                        $row->user ? $row->user->mobile : '',
-                        $row->amount_with_sign,
-                        $row->type_farsi,
-                        $row->description,
-                        $row->created_at_jalali
-                    ];
-                }
-                break;
-
-            case 'redemptions':
-                $payload = app(RedemptionReportService::class)->getRedemptions($request);
-                $records = $payload->items();
-                $header = ['ID', 'User', 'Mobile', 'Reward', 'Cost', 'Status', 'Date'];
-                foreach ($records as $row) {
-                    $data[] = [
-                        $row->id,
-                        $row->user ? $row->user->first_name . ' ' . $row->user->last_name : '',
-                        $row->user ? $row->user->mobile : '',
-                        $row->reward ? $row->reward->name : '',
-                        $row->points_cost,
-                        $row->status_farsi,
-                        $row->created_at_jalali
-                    ];
-                }
-                break;
-
-            case 'users':
-                $payload = app(UserReportService::class)->getUsers($request);
-                $records = $payload->items();
-                $header = ['User', 'Mobile', 'Type', 'Status', 'Points', 'Joined Date'];
-                foreach ($records as $row) {
-                    $data[] = [
-                        $row->first_name . ' ' . $row->last_name,
-                        $row->mobile,
-                        $row->user_type,
-                        $row->status ? $row->status->name : '',
-                        $row->current_points,
-                        $row->created_at_jalali
-                    ];
-                }
-                break;
-
-            case 'products':
-                $payload = app(ProductReportService::class)->getProducts($request);
-                $records = isset($payload['data']) ? $payload['data'] : (method_exists($payload, 'items') ? $payload->items() : collect($payload));
-                $header = ['Name/Serial/Model', 'Status', 'Date'];
-                foreach ($records as $row) {
-                    $data[] = [
-                        $row->name ?? $row->serial ?? ($row->model ? $row->model->name : ''),
-                        $row->status ?? '',
-                        $row->created_at_jalali ?? ''
-                    ];
-                }
-                break;
-
-            case 'surveys':
-                $payload = app(SurveyReportService::class)->getSurveys($request);
-                $records = $payload->items();
-                $header = ['Title', 'Type', 'Status', 'Participants', 'Average Score', 'Date'];
-                foreach ($records as $row) {
-                    $data[] = [
-                        $row->title,
-                        $row->type_farsi,
-                        $row->status_farsi,
-                        $row->participants_count,
-                        $row->average_score,
-                        $row->created_at_jalali
-                    ];
-                }
-                break;
-        }
-
-        $callback = function () use ($data, $header) {
+        $callback = function () use ($tab, $request, &$header) {
             $file = fopen('php://output', 'w');
             // Add BOM to fix UTF-8 in Excel
             fputs($file, $bom =(chr(0xEF) . chr(0xBB) . chr(0xBF)));
-            fputcsv($file, $header);
-            foreach ($data as $row) {
-                fputcsv($file, $row);
+
+            // Generate data on the fly to avoid massive arrays in memory
+            switch ($tab) {
+                case 'transactions':
+                    $payload = app(TransactionReportService::class)->getTransactions($request);
+                    $records = $payload->items();
+                    $header = ['ID', 'User', 'Mobile', 'Amount', 'Type', 'Description', 'Date'];
+                    fputcsv($file, $header);
+                    foreach ($records as $row) {
+                        fputcsv($file, [
+                            $row->id,
+                            $row->user ? $row->user->first_name . ' ' . $row->user->last_name : '',
+                            $row->user ? $row->user->mobile : '',
+                            $row->amount_with_sign,
+                            $row->type_farsi,
+                            $row->description,
+                            $row->created_at_jalali
+                        ]);
+                    }
+                    break;
+
+                case 'redemptions':
+                    $payload = app(RedemptionReportService::class)->getRedemptions($request);
+                    $records = $payload->items();
+                    $header = ['ID', 'User', 'Mobile', 'Reward', 'Cost', 'Status', 'Date'];
+                    fputcsv($file, $header);
+                    foreach ($records as $row) {
+                        fputcsv($file, [
+                            $row->id,
+                            $row->user ? $row->user->first_name . ' ' . $row->user->last_name : '',
+                            $row->user ? $row->user->mobile : '',
+                            $row->reward ? $row->reward->name : '',
+                            $row->points_cost,
+                            $row->status_farsi,
+                            $row->created_at_jalali
+                        ]);
+                    }
+                    break;
+
+                case 'users':
+                    $payload = app(UserReportService::class)->getUsers($request);
+                    $records = $payload->items();
+                    $header = ['User', 'Mobile', 'Type', 'Status', 'Points', 'Joined Date'];
+                    fputcsv($file, $header);
+                    foreach ($records as $row) {
+                        fputcsv($file, [
+                            $row->first_name . ' ' . $row->last_name,
+                            $row->mobile,
+                            $row->user_type,
+                            $row->status ? $row->status->name : '',
+                            $row->current_points,
+                            $row->created_at_jalali
+                        ]);
+                    }
+                    break;
+
+                case 'products':
+                    $payload = app(ProductReportService::class)->getProducts($request);
+                    $records = isset($payload['data']) ? $payload['data'] : (method_exists($payload, 'items') ? $payload->items() : collect($payload));
+                    $header = ['Name/Serial/Model', 'Status', 'Date'];
+                    fputcsv($file, $header);
+                    foreach ($records as $row) {
+                        fputcsv($file, [
+                            $row->name ?? $row->serial ?? ($row->model ? $row->model->name : ''),
+                            $row->status ?? '',
+                            $row->created_at_jalali ?? ''
+                        ]);
+                    }
+                    break;
+
+                case 'surveys':
+                    $payload = app(SurveyReportService::class)->getSurveys($request);
+                    $records = $payload->items();
+                    $header = ['Title', 'Type', 'Status', 'Participants', 'Average Score', 'Date'];
+                    fputcsv($file, $header);
+                    foreach ($records as $row) {
+                        fputcsv($file, [
+                            $row->title,
+                            $row->type_farsi,
+                            $row->status_farsi,
+                            $row->participants_count,
+                            $row->average_score,
+                            $row->created_at_jalali
+                        ]);
+                    }
+                    break;
             }
             fclose($file);
         };

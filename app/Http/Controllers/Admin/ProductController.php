@@ -195,8 +195,8 @@ class ProductController extends Controller
                 ]);
             }
 
-            // Fallback
-            SyncWpProducts::dispatch($request->mapping, 1);
+            // Fallback: اجرای غیر مسدود کننده
+            SyncWpProducts::dispatch($request->mapping, 1)->afterResponse();
             return response()->json([
                 'success' => true,
                 'message' => 'همگام‌سازی در پس‌زمینه آغاز شد.'

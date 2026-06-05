@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -10,21 +10,22 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Morilog\Jalali\Jalalian;
 
-class SurveyParticipantsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithEvents
+class SurveyParticipantsExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithEvents
 {
-    protected $data;
+    protected $query;
     protected $surveyTitle;
 
-    public function __construct($data, $surveyTitle)
+    public function __construct($query, $surveyTitle)
     {
-        $this->data = $data;
+        $this->query = $query;
         $this->surveyTitle = $surveyTitle;
     }
 
-    public function collection()
+    public function query()
     {
-        return $this->data;
+        return $this->query;
     }
 
     public function headings(): array
@@ -45,15 +46,15 @@ class SurveyParticipantsExport implements FromCollection, WithHeadings, WithMapp
     public function map($row): array
     {
         return [
-            $row['id'],
-            $row['full_name'],
-            $row['mobile'],
-            $row['national_code'] ?? '-',
-            $row['province'] ?? '-',
-            $row['city'] ?? '-',
-            $row['address'] ?? '-',
-            $row['score'],
-            $row['date'],
+            $row->id,
+            $row->full_name,
+            $row->mobile,
+            $row->national_code ?? '-',
+            $row->province?->name ?? '-',
+            $row->city?->name ?? '-',
+            $row->address ?? '-',
+            $row->surveyAnswers->sum('score'),
+            $row->surveyAnswers->first() ? Jalalian::fromDateTime($row->surveyAnswers->first()->created_at)->format('Y/m/d H:i') : '-',
         ];
     }
 

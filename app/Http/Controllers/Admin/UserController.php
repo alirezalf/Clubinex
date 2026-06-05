@@ -61,16 +61,26 @@ class UserController extends Controller
             return $user;
         });
 
-        $clubs = Club::select('id', 'name')->get();
-        $roles = Role::select('name', 'id')->get();
-        $statuses = UserStatus::select('id', 'name', 'slug')->get();
+        $clubs = \Illuminate\Support\Facades\Cache::remember('admin_users_clubs_list', 3600, function() {
+            return Club::select('id', 'name')->get();
+        });
+
+        $roles = \Illuminate\Support\Facades\Cache::remember('admin_users_roles_list', 3600, function() {
+            return Role::select('name', 'id')->get();
+        });
+
+        $statuses = \Illuminate\Support\Facades\Cache::remember('admin_users_statuses_list', 3600, function() {
+            return UserStatus::select('id', 'name', 'slug')->get();
+        });
 
         // دریافت تمام پرمیشن‌ها و گروه‌بندی آنها برای نمایش در مودال
-        $allPermissions = Permission::all()->map(function($perm) {
-            $parts = explode('.', $perm->name);
-            $perm->group = $parts[0] ?? 'other';
-            return $perm;
-        })->groupBy('group');
+        $allPermissions = \Illuminate\Support\Facades\Cache::remember('admin_users_grouped_permissions', 3600, function() {
+            return Permission::all()->map(function($perm) {
+                $parts = explode('.', $perm->name);
+                $perm->group = $parts[0] ?? 'other';
+                return $perm;
+            })->groupBy('group');
+        });
 
         return Inertia::render('Admin/Users', [
             'users' => $users,

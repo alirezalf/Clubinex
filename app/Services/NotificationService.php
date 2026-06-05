@@ -60,8 +60,8 @@ class NotificationService
                     $message = self::replaceVariables($template->sms_pattern, $data);
                 }
 
-                // دیسپچ کردن جاب به جای ارسال مستقیم
-                SendSms::dispatch($user->mobile, $message, $user->id, $templateId, $parameters);
+                // دیسپچ کردن جاب به صورت Async-like برای هاست اشتراکی
+                SendSms::dispatch($user->mobile, $message, $user->id, $templateId, $parameters)->afterResponse();
 
             } catch (\Exception $e) {
                 Log::error("SMS Dispatch Failure [{$eventName}]: " . $e->getMessage());
@@ -83,7 +83,7 @@ class NotificationService
                 // استفاده از queue() به جای send() برای ارسال در صف
                 $settings = \App\Models\SystemSetting::getAllGroupSettings('email');
 
-                config([
+                $mailConfig = [
                     'mail.default' => 'smtp',
                     'mail.mailers.smtp.transport' => 'smtp',
                     'mail.mailers.smtp.host' => $settings['mail_host'] ?? $settings['host'] ?? config('mail.mailers.smtp.host'),
@@ -93,26 +93,20 @@ class NotificationService
                     'mail.mailers.smtp.password' => $settings['mail_password'] ?? $settings['password'] ?? config('mail.mailers.smtp.password'),
                     'mail.from.address' => $settings['from_address'] ?? $settings['mail_from_address'] ?? config('mail.from.address'),
                     'mail.from.name' => $settings['from_name'] ?? $settings['mail_from_name'] ?? config('mail.from.name'),
-                ]);
+                ];
 
-                \Illuminate\Support\Facades\Mail::purge('smtp');
+                $fromAddress = $mailConfig['mail.from.address'];
+                $fromName = $mailConfig['mail.from.name'];
 
-                $fromAddress = config('mail.from.address');
-                $fromName = config('mail.from.name');
-
-                Mail::html($finalBody, function ($message) use ($user, $subject, $fromAddress, $fromName) {
-                    $message->to($user->email)
-                            ->subject($subject)
-                            ->from($fromAddress, $fromName);
-                });
-
-                \App\Models\EmailLog::logEmail([
+                $loggedEmail = \App\Models\EmailLog::logEmail([
                     'user_id' => $user->id,
                     'email' => $user->email,
                     'subject' => $subject,
                     'content' => $finalBody,
-                    'status' => 'pending' // وضعیت پندینگ تا زمان ارسال واقعی
+                    'status' => 'pending'
                 ]);
+
+                \App\Jobs\SendEmail::dispatch($user->email, $subject, $finalBody, $fromAddress, $fromName, $mailConfig, $loggedEmail->id ?? null)->afterResponse();
             } catch (\Exception $e) {
                 Log::error("Email Dispatch Failure [{$eventName}]: " . $e->getMessage());
             }

@@ -49,9 +49,13 @@ class ProfileController extends Controller
             ];
         }
 
-        $provinces = DB::table('provinces')->where('is_active', true)->select('id', 'name')->get();
+        $provinces = \Illuminate\Support\Facades\Cache::remember('iran_provinces', 86400, function() {
+            return DB::table('provinces')->where('is_active', true)->select('id', 'name')->get();
+        });
         $cities = $user->province_id
-            ? DB::table('cities')->where('province_id', $user->province_id)->select('id', 'name')->get()
+            ? \Illuminate\Support\Facades\Cache::remember('iran_cities_prov_' . $user->province_id, 86400, function() use ($user) {
+                return DB::table('cities')->where('province_id', $user->province_id)->select('id', 'name')->get();
+            })
             : [];
 
         return Inertia::render('Profile', [

@@ -39,7 +39,9 @@ class ProductController extends Controller
         }
 
         $products = $productsQuery->paginate(12)->appends($request->all());
-        $categories = Category::select('id', 'title', 'slug', 'parent_id', 'icon')->get();
+        $categories = \Illuminate\Support\Facades\Cache::remember('product_categories_list', 3600, function() {
+            return Category::select('id', 'title', 'slug', 'parent_id', 'icon')->get();
+        });
 
         $user = Auth::user();
 
@@ -54,13 +56,25 @@ class ProductController extends Controller
         $productNames = $rawRegistrations->pluck('product_name')->map(fn($name) => trim($name))->filter()->unique();
         $exactProducts = $productNames->isNotEmpty() ? Product::whereIn('title', $productNames)->select('id', 'title', 'display_image')->get()->keyBy('title') : collect();
 
-        $myRegistrations = $rawRegistrations->map(function($reg) use ($exactProducts) {
+        $missingNames = $productNames->diff($exactProducts->keys());
+        $partialProducts = collect();
+        if ($missingNames->isNotEmpty()) {
+            $partialQuery = Product::query()->select('id', 'title', 'display_image');
+            foreach ($missingNames as $name) {
+                $partialQuery->orWhere('title', 'like', '%' . $name . '%');
+            }
+            $partialProducts = $partialQuery->get();
+        }
+
+        $myRegistrations = $rawRegistrations->map(function($reg) use ($exactProducts, $partialProducts) {
                 // جستجو برای یافتن محصول سیستمی و خواندن عکس پیش‌فرض آن
                 $trimmedName = trim($reg->product_name);
                 $systemProduct = $exactProducts->get($trimmedName);
 
                 if (!$systemProduct) {
-                    $systemProduct = Product::where('title', 'like', '%' . $trimmedName . '%')->select('id', 'title', 'display_image')->first();
+                    $systemProduct = $partialProducts->first(function($p) use ($trimmedName) {
+                        return str_contains($p->title, $trimmedName);
+                    });
                 }
                 $displayImage = $reg->product_image ?: ($systemProduct ? $systemProduct->display_image : null);
 

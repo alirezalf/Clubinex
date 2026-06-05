@@ -27,6 +27,10 @@ return new class extends Migration
             $table->string('reference_id')->nullable(); // For payment gateways
             $table->string('description')->nullable();
             $table->timestamps();
+
+            $table->index('type');
+            $table->index('status');
+            $table->index('created_at');
         });
 
         Schema::create('wallet_withdrawals', function (Blueprint $table) {
@@ -41,6 +45,9 @@ return new class extends Migration
             $table->string('status')->default('pending'); // pending, approved, rejected
             $table->text('admin_note')->nullable();
             $table->timestamps();
+
+            $table->index('status');
+            $table->index('created_at');
         });
     }
 

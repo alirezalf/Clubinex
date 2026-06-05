@@ -43,14 +43,14 @@ export default function TierCard({ tier, onUpgrade }: Props) {
             <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-inner bg-white" style={{ color: tier.color }}>
                 <Shield size={32} />
             </div>
-            
+
             <h3 className="font-bold text-gray-800 mb-1">{tier.name}</h3>
             <p className="text-xs text-gray-500 mb-3">هزینه ارتقا: {tier.joining_cost.toLocaleString()}</p>
-            
-            <div className="text-xs text-gray-600 space-y-1.5 mb-4 w-full px-1">
+
+            <div className="space-y-2 mb-6 min-h-[60px] w-full px-2 text-right text-gray-600">
                 {tier.benefits && tier.benefits.map((benefit, i) => (
-                    <div key={i} className="flex items-center justify-center gap-1.5">
-                        <CheckCircle size={12} className="text-green-500 shrink-0" />
+                    <div key={i} className="flex items-center gap-2 text-sm">
+                        <CheckCircle size={14} className="text-green-500 shrink-0" />
                         <span>{benefit}</span>
                     </div>
                 ))}
@@ -63,8 +63,8 @@ export default function TierCard({ tier, onUpgrade }: Props) {
                         disabled={!tier.can_upgrade}
                         className={clsx(
                             "w-full py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition shadow-sm",
-                            tier.can_upgrade 
-                                ? "bg-primary-600 text-white hover:bg-primary-700 hover:shadow-md" 
+                            tier.can_upgrade
+                                ? "bg-primary-600 text-white hover:bg-primary-700 hover:shadow-md"
                                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
                         )}
                     >

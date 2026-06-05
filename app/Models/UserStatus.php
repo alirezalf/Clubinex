@@ -110,6 +110,6 @@ class UserStatus extends Model
      */
     public function getUsersList()
     {
-        return $this->users()->with('club')->get();
+        return $this->users()->with('club');
     }
 }

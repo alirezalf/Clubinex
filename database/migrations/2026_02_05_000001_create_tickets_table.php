@@ -19,6 +19,9 @@ return new class extends Migration
             $table->enum('status', ['open', 'pending', 'answered', 'customer_reply', 'closed'])->default('open');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index('status');
+            $table->index('created_at');
         });
 
         Schema::create('ticket_messages', function (Blueprint $table) {

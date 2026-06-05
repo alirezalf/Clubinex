@@ -232,16 +232,14 @@ class UserSession extends Model
      */
     public static function updateActiveSessions()
     {
-        $activeSessions = self::active()->get();
-
-        foreach ($activeSessions as $session) {
-            $duration = $session->started_at->diffInSeconds(now());
-
-            // اگر جلسه بیش از 4 ساعت فعال بوده، آن را پایان دهیم
-            if ($duration > 14400) {
-                $session->endSession();
-            }
-        }
+        // بهینه‌سازی: جلسات منقضی شده را با کوئری فیلتر کرده و با chunk پردازش می‌کنیم
+        self::active()
+            ->where('started_at', '<', now()->subHours(4))
+            ->chunkById(100, function ($staleSessions) {
+                foreach ($staleSessions as $session) {
+                    $session->endSession();
+                }
+            });
     }
 
     /**

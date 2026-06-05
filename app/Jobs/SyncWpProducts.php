@@ -5,13 +5,12 @@ namespace App\Jobs;
 use App\Services\WordPress\WpProductService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class SyncWpProducts implements ShouldQueue
+class SyncWpProducts
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 

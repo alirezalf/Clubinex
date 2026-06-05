@@ -108,25 +108,11 @@ class SurveyReportService
         $survey = Survey::findOrFail($surveyId);
 
         return User::whereHas('surveyAnswers', function ($q) use ($surveyId) {
-            $q->where('survey_id', $surveyId);
-        })
+                $q->where('survey_id', $surveyId);
+            })
             ->with(['province', 'city', 'surveyAnswers' => function ($q) use ($surveyId) {
                 $q->where('survey_id', $surveyId);
-            }])
-            ->get()
-            ->map(function ($u) use ($survey) {
-                return [
-                    'id' => $u->id,
-                    'full_name' => $u->full_name,
-                    'mobile' => $u->mobile,
-                    'national_code' => $u->national_code,
-                    'province' => $u->province?->name ?? '-',
-                    'city' => $u->city?->name ?? '-',
-                    'address' => $u->address,
-                    'score' => $u->surveyAnswers->sum('score'),
-                    'date' => $u->surveyAnswers->first() ? Jalalian::fromDateTime($u->surveyAnswers->first()->created_at)->format('Y/m/d H:i') : '-'
-                ];
-            });
+            }]);
     }
 
     private function analyzeQuestions($survey, $totalParticipants)

@@ -3,11 +3,11 @@
 namespace App\Exports;
 
 use App\Models\PointTransaction;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class TransactionsExport implements FromCollection, WithHeadings, WithMapping
+class TransactionsExport implements FromQuery, WithHeadings, WithMapping
 {
     protected $userId;
 
@@ -16,13 +16,13 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping
         $this->userId = $userId;
     }
 
-    public function collection()
+    public function query()
     {
         $query = PointTransaction::query()->with('user');
         if ($this->userId) {
             $query->where('user_id', $this->userId);
         }
-        return $query->get();
+        return $query;
     }
 
     public function headings(): array
@@ -41,7 +41,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             $transaction->id,
-            $transaction->user->full_name,
+            $transaction->user->full_name ?? '-',
             $transaction->getTypeFarsi(),
             $transaction->amount,
             $transaction->description,

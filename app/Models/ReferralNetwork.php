@@ -532,11 +532,12 @@ class ReferralNetwork extends Model
             ->where('status', 'pending')
             ->count();
 
-        // مجموع کمیسیون‌ها
-        $referrals = self::where('referrer_id', $userId)->get();
-        foreach ($referrals as $referral) {
-            $stats['total_commission'] += $referral->total_commissions;
-        }
+        // مجموع کمیسیون‌ها بدون ایجاد کوئری N+1
+        $stats['total_commission'] = ReferralCommission::whereIn('referral_network_id', function($query) use ($userId) {
+            $query->select('id')
+                  ->from((new self)->getTable())
+                  ->where('referrer_id', $userId);
+        })->sum('earned_points') ?? 0;
 
         return $stats;
     }

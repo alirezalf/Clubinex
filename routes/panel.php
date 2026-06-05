@@ -84,8 +84,8 @@ Route::middleware(['auth', 'active.user'])->group(function () {
     // Support Tickets
     Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
-    Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
-    Route::post('/tickets/{id}/reply', [TicketController::class, 'reply'])->name('tickets.reply');
+    Route::post('/tickets', [TicketController::class, 'store'])->middleware('throttle:10,1')->name('tickets.store');
+    Route::post('/tickets/{id}/reply', [TicketController::class, 'reply'])->middleware('throttle:10,1')->name('tickets.reply');
     Route::post('/tickets/{id}/close', [TicketController::class, 'close'])->name('tickets.close');
 
     // Referral System
@@ -100,7 +100,7 @@ Route::middleware(['auth', 'active.user'])->group(function () {
     Route::get('/wallet/verify/{transaction}', [\App\Http\Controllers\WalletController::class, 'verify'])->name('wallet.verify');
     Route::post('/wallet/points-to-wallet', [\App\Http\Controllers\WalletController::class, 'convertPointsToWallet'])->name('wallet.points_to_wallet');
     Route::post('/wallet/wallet-to-points', [\App\Http\Controllers\WalletController::class, 'convertWalletToPoints'])->name('wallet.wallet_to_points');
-    Route::post('/wallet/withdraw', [\App\Http\Controllers\WalletController::class, 'withdrawRequest'])->name('wallet.withdraw');
+    Route::post('/wallet/withdraw', [\App\Http\Controllers\WalletController::class, 'withdrawRequest'])->middleware('throttle:3,1')->name('wallet.withdraw');
 
     // API Helpers (Internal)
     Route::post('/api/users/lookup', [GeneralController::class, 'lookupUser'])->name('api.users.lookup');

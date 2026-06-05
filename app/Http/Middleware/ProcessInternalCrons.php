@@ -16,34 +16,41 @@ class ProcessInternalCrons
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Cache::has('daily_internal_crons_run')) {
-            Cache::put('daily_internal_crons_run', true, now()->addHours(24));
+        return $next($request);
+    }
 
-            try {
-                $this->expirePoints();
-                $this->tagUsers();
-                $this->autoCloseTickets();
-                $this->pruneSystem();
-            } catch (\Exception $e) {
-                \Log::error('خطا در اجرای توابع داخلی روزانه (Internal Crons): ' . $e->getMessage());
+    public function terminate($request, $response)
+    {
+        if (!Cache::has('daily_internal_crons_run')) {
+            // Use Cache::add to prevent race conditions from concurrent requests
+            if (Cache::add('daily_crons_lock', true, 300)) {
+                Cache::put('daily_internal_crons_run', true, now()->addHours(24));
+
+                try {
+                    $this->expirePoints();
+                    $this->tagUsers();
+                    $this->autoCloseTickets();
+                    $this->pruneSystem();
+                } catch (\Exception $e) {
+                    \Log::error('خطا در اجرای توابع داخلی روزانه (Internal Crons): ' . $e->getMessage());
+                } finally {
+                    Cache::forget('daily_crons_lock');
+                }
             }
         }
-
-        return $next($request);
     }
 
     private function expirePoints()
     {
         $now = Carbon::now();
-        $usersToProcess = User::where('current_points', '>', 0)
+        User::where('current_points', '>', 0)
             ->whereHas('pointTransactions', function($query) use ($now) {
                 $query->where('type', 'earn')
                       ->whereNotNull('expires_at')
                       ->where('expires_at', '<=', $now);
-            })->get();
-
-        foreach ($usersToProcess as $user) {
-            DB::transaction(function() use ($user, $now) {
+            })->chunkById(100, function ($usersToProcess) use ($now) {
+                foreach ($usersToProcess as $user) {
+                    DB::transaction(function() use ($user, $now) {
                 $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
                 if (!$lockedUser || $lockedUser->current_points <= 0) return;
 
@@ -98,7 +105,8 @@ class ProcessInternalCrons
                 }
             });
         }
-    }
+    });
+}
 
     private function tagUsers()
     {
@@ -141,7 +149,8 @@ class ProcessInternalCrons
                     if ($becameInactive && $user->mobile) {
                         try {
                             $message = 'دلتنگ شما هستیم! بیش از یک ماه است که به باشگاه مشتریان سر نزده‌اید. با ورود مجدد از تخفیف‌های ویژه بهره‌مند شوید.';
-                            \App\Jobs\SendSms::dispatch($user->mobile, $message, $user->id);
+                            // اجرای مستقیم (یا همگام) بلامانع است چون این پروسه در متد terminate و پس از ارسال ریسپانس به کاربر در حال اجراست
+                            \App\Jobs\SendSms::dispatchSync($user->mobile, $message, $user->id);
                         } catch (\Exception $e) {}
                     }
                 }
@@ -155,22 +164,22 @@ class ProcessInternalCrons
         if (!$hours || !is_numeric($hours) || $hours <= 0) return;
 
         $cutoffTime = now()->subHours($hours);
-        $tickets = \App\Models\Ticket::where('status', 'answered')
+        \App\Models\Ticket::where('status', 'answered')
             ->where('updated_at', '<', $cutoffTime)
-            ->get();
-
-        foreach ($tickets as $ticket) {
-            $ticket->update(['status' => 'closed']);
-            \App\Models\ActivityLog::log(
-                'ticket.auto_closed',
-                "تیکت #{$ticket->id} به دلیل عدم پاسخ کاربر پس از {$hours} ساعت به صورت خودکار بسته شد",
-                [
-                    'model_type' => \App\Models\Ticket::class,
-                    'model_id' => $ticket->id,
-                    'user_id' => $ticket->user_id
-                ]
-            );
-        }
+            ->chunkById(100, function ($tickets) use ($hours) {
+                foreach ($tickets as $ticket) {
+                    $ticket->update(['status' => 'closed']);
+                    \App\Models\ActivityLog::log(
+                        'ticket.auto_closed',
+                        "تیکت #{$ticket->id} به دلیل عدم پاسخ کاربر پس از {$hours} ساعت به صورت خودکار بسته شد",
+                        [
+                            'model_type' => \App\Models\Ticket::class,
+                            'model_id' => $ticket->id,
+                            'user_id' => $ticket->user_id
+                        ]
+                    );
+                }
+            });
     }
 
     private function pruneSystem()

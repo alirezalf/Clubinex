@@ -146,7 +146,7 @@ export default function WalletIndex({ wallet, transactions, points, config }: Pr
                                     min="1000"
                                     value={data.amount}
                                     onChange={e => setData('amount', e.target.value)}
-                                    className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                                    className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 placeholder:font-sans placeholder:text-right"
                                     placeholder={`مثلاً 50,000 ${config?.currency || 'تومان'}`}
                                 />
                                 {errors.amount && <p className="text-xs text-red-500 mt-1">{errors.amount}</p>}
@@ -192,7 +192,7 @@ export default function WalletIndex({ wallet, transactions, points, config }: Pr
                                         max={points}
                                         value={p2wData.points}
                                         onChange={e => setP2wData('points', e.target.value)}
-                                        className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                        className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder:font-sans placeholder:text-right"
                                         placeholder="تعداد امتیاز"
                                     />
                                     {p2wErrors.points && <p className="text-xs text-red-500 mt-1">{p2wErrors.points}</p>}
@@ -226,7 +226,7 @@ export default function WalletIndex({ wallet, transactions, points, config }: Pr
                                     min="1"
                                     value={w2pData.points}
                                     onChange={e => setW2pData('points', e.target.value)}
-                                    className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                                    className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder:font-sans placeholder:text-right"
                                     placeholder="تعداد امتیاز"
                                 />
                                 {w2pErrors.points && <p className="text-xs text-red-500 mt-1">{w2pErrors.points}</p>}
@@ -261,7 +261,7 @@ export default function WalletIndex({ wallet, transactions, points, config }: Pr
                                         min="1000"
                                         value={withdrawData.amount}
                                         onChange={e => setWithdrawData('amount', e.target.value)}
-                                        className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                                        className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 placeholder:font-sans placeholder:text-right"
                                         placeholder={`حداقل 1000 ${config?.currency || 'تومان'}`}
                                     />
                                     {withdrawErrors.amount && <p className="text-xs text-red-500 mt-1">{withdrawErrors.amount}</p>}
@@ -286,7 +286,7 @@ export default function WalletIndex({ wallet, transactions, points, config }: Pr
                                         maxLength={16}
                                         value={withdrawData.card_number}
                                         onChange={e => setWithdrawData('card_number', e.target.value)}
-                                        className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                                        className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 placeholder:font-sans placeholder:text-right"
                                         placeholder="1234567812345678"
                                     />
                                     {withdrawErrors.card_number && <p className="text-xs text-red-500 mt-1">{withdrawErrors.card_number}</p>}
@@ -309,7 +309,7 @@ export default function WalletIndex({ wallet, transactions, points, config }: Pr
                                     type="text"
                                     value={withdrawData.iban_number}
                                     onChange={e => setWithdrawData('iban_number', e.target.value)}
-                                    className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                                    className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 text-left font-mono dir-ltr focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 placeholder:font-sans placeholder:text-right"
                                     placeholder="IR1234..."
                                 />
                                 {withdrawErrors.iban_number && <p className="text-xs text-red-500 mt-1">{withdrawErrors.iban_number}</p>}

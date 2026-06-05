@@ -61,15 +61,12 @@ class DashboardStatsService
                 ->exists();
 
             if (!$recentlyRewarded) {
-                // Optimized: Fetching timestamps without DB functions to prevent temporary table/filesort
-                $daysCount = PointTransaction::query()
+                // Optimized: Use database to count distinct dates, significantly reduces PHP memory usage
+                $daysCount = DB::table('point_transactions')
                     ->where('user_id', $user->id)
                     ->where('created_at', '>=', now()->subDays(30))
-                    ->select('created_at')
-                    ->get()
-                    ->map(fn($tx) => $tx->created_at->format('Y-m-d'))
-                    ->unique()
-                    ->count();
+                    ->selectRaw('COUNT(DISTINCT DATE(created_at)) as days_count')
+                    ->value('days_count');
 
                 if ($daysCount >= 30) {
                     PointTransaction::awardPoints(
@@ -214,19 +211,21 @@ class DashboardStatsService
 
     public function getRecentActivities()
     {
-        return ActivityLog::with('user')
-            ->latest()
-            ->take(6)
-            ->get()
-            ->map(function ($log) {
-                return [
-                    'id' => $log->id,
-                    'user' => $log->user ? $log->user->full_name : 'سیستم',
-                    'description' => $log->description,
-                    'time' => $log->created_at->diffForHumans(),
-                    'action_group' => $log->action_group
-                ];
-            });
+        return cache()->remember('recent_activities', 60, function () {
+            return ActivityLog::with('user')
+                ->latest()
+                ->take(6)
+                ->get()
+                ->map(function ($log) {
+                    return [
+                        'id' => $log->id,
+                        'user' => $log->user ? $log->user->full_name : 'سیستم',
+                        'description' => $log->description,
+                        'time' => $log->created_at->diffForHumans(),
+                        'action_group' => $log->action_group
+                    ];
+                });
+        });
     }
 
     public function getQuickAccessItems(User $user)

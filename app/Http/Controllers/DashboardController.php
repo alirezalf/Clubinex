@@ -35,14 +35,16 @@ class DashboardController extends Controller
             $stats = $this->statsService->getAdminStats();
             $recent_activities = $this->statsService->getRecentActivities();
 
-            $latest_users = User::latest()->take(5)->get()->map(function($u) {
-                return [
-                    'id' => $u->id,
-                    'name' => $u->full_name,
-                    'mobile' => $u->mobile,
-                    'joined_at' => $u->created_at_jalali,
-                    'avatar' => $u->avatar
-                ];
+            $latest_users = \Illuminate\Support\Facades\Cache::remember('admin_dashboard_latest_users', 300, function() {
+                return User::latest()->take(5)->get()->map(function($u) {
+                    return [
+                        'id' => $u->id,
+                        'name' => $u->full_name,
+                        'mobile' => $u->mobile,
+                        'joined_at' => $u->created_at_jalali,
+                        'avatar' => $u->avatar
+                    ];
+                });
             });
 
             $registration_chart = \Illuminate\Support\Facades\Cache::remember('admin_registration_chart_7days', 3600, function() {
