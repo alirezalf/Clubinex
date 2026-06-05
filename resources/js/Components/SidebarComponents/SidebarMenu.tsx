@@ -27,8 +27,26 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
     const { modules } = usePage<any>().props;
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
-    const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
+        try {
+            const saved = localStorage.getItem('sidebar_expanded_groups');
+            return saved ? JSON.parse(saved) : {};
+        } catch { return {}; }
+    });
+    const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(() => {
+        try {
+            const saved = localStorage.getItem('sidebar_expanded_items');
+            return saved ? JSON.parse(saved) : {};
+        } catch { return {}; }
+    });
+
+    useEffect(() => {
+        localStorage.setItem('sidebar_expanded_groups', JSON.stringify(expandedGroups));
+    }, [expandedGroups]);
+
+    useEffect(() => {
+        localStorage.setItem('sidebar_expanded_items', JSON.stringify(expandedItems));
+    }, [expandedItems]);
 
     // تابع تبدیل اعداد به فارسی
     const toPersianDigits = (num: number) => {
@@ -119,7 +137,7 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
     const toggleGroup = (groupId: string) => {
         if (isCollapsed) return; // Prevent toggle when collapsed
         setExpandedGroups(prev => {
-            const isCurrentlyExpanded = prev[groupId] !== false; // if undefined, it acts as true
+            const isCurrentlyExpanded = prev[groupId] === true; // Default closed
             return {
                 ...prev,
                 [groupId]: !isCurrentlyExpanded
@@ -338,7 +356,7 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
             {menuGroups.map((group, index) => {
                 const items = filterItems(group.items);
                 if (items.length === 0) return null;
-                const isExpanded = isCollapsed ? true : expandedGroups[group.id] !== false; // Default expanded if not set
+                const isExpanded = isCollapsed ? true : expandedGroups[group.id] === true; // Default closed
                 const groupHasActive = items.some(i => isActive(i.href));
 
                 const getGroupStyles = (id: string) => {
@@ -475,7 +493,7 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
                                     <Sparkles size={10} className="text-amber-500" />
                                     <ChevronDown
                                         size={14}
-                                        className={clsx("text-red-500 transition-transform duration-300", expandedGroups['admin'] === false && "rotate-90")}
+                                        className={clsx("text-red-500 transition-transform duration-300", expandedGroups['admin'] !== true && "rotate-90")}
                                     />
                                 </div>
                             </div>
@@ -492,7 +510,7 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
 
                     <div className={clsx(
                         "grid transition-all duration-300 ease-in-out",
-                        (expandedGroups['admin'] === false && !isCollapsed && !searchTerm) ? "grid-rows-[0fr] opacity-0 pointer-events-none" : "grid-rows-[1fr] opacity-100"
+                        (expandedGroups['admin'] !== true && !isCollapsed && !searchTerm) ? "grid-rows-[0fr] opacity-0 pointer-events-none" : "grid-rows-[1fr] opacity-100"
                     )}>
                         <div className="overflow-hidden">
                             <div className="space-y-0.5">

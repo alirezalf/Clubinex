@@ -111,13 +111,11 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
     return (
         <div className="min-h-screen font-sans" dir="rtl" style={{ background: 'var(--body-bg-gradient, #f9fafb)', transition: 'background 0.5s ease' }}>
             <Suspense fallback={null}>
-                {isThemePanelOpen && (
-                    <ThemeSettingsPanel
-                        isOpen={isThemePanelOpen}
-                        onClose={() => setIsThemePanelOpen(false)}
-                        currentSettings={themeSettings}
-                    />
-                )}
+                <ThemeSettingsPanel
+                    isOpen={isThemePanelOpen}
+                    onClose={() => setIsThemePanelOpen(false)}
+                    currentSettings={themeSettings}
+                />
             </Suspense>
 
             <Sidebar
