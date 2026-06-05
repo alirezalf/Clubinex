@@ -38,8 +38,9 @@ class GamificationController extends Controller
             ->withCount('questions')
             ->withSum('questions', 'points')
             ->latest()
-            ->get()
-            ->map(function($survey) {
+            ->paginate(15)
+            ->withQueryString()
+            ->through(function($survey) {
                 $survey->starts_at_jalali = $survey->starts_at_jalali;
                 $survey->ends_at_jalali = $survey->ends_at_jalali;
                 return $survey;

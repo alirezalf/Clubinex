@@ -152,16 +152,24 @@ class SystemSetting extends Model
      */
     public static function getValue($group, $key, $default = null)
     {
-        $setting = self::where('group', $group)
-            ->where('key', $key)
-            ->active()
-            ->first();
+        $cacheKey = "system_setting_{$group}_{$key}";
+
+        $setting = cache()->rememberForever($cacheKey, function () use ($group, $key) {
+            return self::where('group', $group)
+                ->where('key', $key)
+                ->active()
+                ->first();
+        });
 
         // License check for modules restriction
         if ($group === 'modules' && $setting) {
             $isEnabledInDb = ($setting->value === '1' || $setting->value === true);
             if ($isEnabledInDb) {
-                $licenseKeySetting = self::where('group', 'general')->where('key', 'license_key')->active()->first();
+                $licenseCacheKey = "system_setting_general_license_key";
+                $licenseKeySetting = cache()->rememberForever($licenseCacheKey, function () {
+                    return self::where('group', 'general')->where('key', 'license_key')->active()->first();
+                });
+
                 $licenseKey = $licenseKeySetting ? $licenseKeySetting->value : null;
                 $isAllowedByLicense = false;
 
@@ -215,6 +223,9 @@ class SystemSetting extends Model
             ]);
         }
 
+        cache()->forget("system_setting_{$group}_{$key}");
+        cache()->forget("system_setting_group_{$group}");
+
         return $setting;
     }
 
@@ -239,11 +250,13 @@ class SystemSetting extends Model
      */
     public static function getAllGroupSettings($group)
     {
-        return self::where('group', $group)
-            ->active()
-            ->get()
-            ->pluck('value', 'key')
-            ->toArray();
+        return cache()->rememberForever("system_setting_group_{$group}", function () use ($group) {
+            return self::where('group', $group)
+                ->active()
+                ->get()
+                ->pluck('value', 'key')
+                ->toArray();
+        });
     }
 
     /**
@@ -251,18 +264,22 @@ class SystemSetting extends Model
      */
     public static function getSettingsArray($group = null)
     {
-        $query = self::query();
+        $cacheKey = $group ? "system_setting_array_{$group}" : "global_settings_array";
 
-        if ($group) {
-            $query->where('group', $group);
-        }
+        return cache()->rememberForever($cacheKey, function () use ($group) {
+            $query = self::query();
 
-        return $query->active()
-            ->get()
-            ->mapWithKeys(function($setting) {
-                return [$setting->group . '.' . $setting->key => $setting->value];
-            })
-            ->toArray();
+            if ($group) {
+                $query->where('group', $group);
+            }
+
+            return $query->active()
+                ->get()
+                ->mapWithKeys(function($setting) {
+                    return [$setting->group . '.' . $setting->key => $setting->value];
+                })
+                ->toArray();
+        });
     }
 
     /**
@@ -270,6 +287,9 @@ class SystemSetting extends Model
      */
     public static function removeSetting($group, $key)
     {
+        cache()->forget("system_setting_{$group}_{$key}");
+        cache()->forget("system_setting_group_{$group}");
+
         return self::where('group', $group)
             ->where('key', $key)
             ->delete();

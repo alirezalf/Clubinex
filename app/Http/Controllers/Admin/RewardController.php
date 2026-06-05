@@ -181,6 +181,7 @@ class RewardController extends Controller
         $rewards = RewardRedemption::with(['reward', 'spin.prize'])
             ->where('user_id', $id)
             ->latest()
+            ->take(100)
             ->get()
             ->map(function ($r) {
                 $value = 0;
@@ -191,6 +192,7 @@ class RewardController extends Controller
                 }
 
                 return [
+                    'id' => $r->id,
                     'title' => $r->reward ? $r->reward->title : ($r->spin && $r->spin->prize ? $r->spin->prize->title : 'جایزه گردونه'),
                     'points' => $r->points_spent,
                     'reward_value' => $value,
@@ -203,10 +205,12 @@ class RewardController extends Controller
         $products = ProductSerial::with('product')
             ->where('used_by', $id)
             ->latest('used_at')
+            ->take(100)
             ->get()
             ->map(function ($p) {
                 return [
-                    'title' => $p->product->title,
+                    'id' => $p->id,
+                    'title' => $p->product->title ?? 'نامشخص',
                     'serial' => $p->serial_code,
                     'date' => $p->used_at ? Jalalian::fromDateTime($p->used_at)->format('Y/m/d') : '-',
                 ];
@@ -218,6 +222,7 @@ class RewardController extends Controller
             ->paginate(10, ['*'], 'spins_page')
             ->through(function ($s) {
                 return [
+                    'id' => $s->id,
                     'prize' => $s->prize ? $s->prize->title : 'حذف شده',
                     'is_win' => $s->is_win,
                     'cost' => $s->cost_paid,
@@ -228,6 +233,7 @@ class RewardController extends Controller
         $referrals = \App\Models\ReferralNetwork::with('referred')
             ->where('referrer_id', $id)
             ->latest()
+            ->take(100)
             ->get()
             ->map(function ($ref) {
                 return [

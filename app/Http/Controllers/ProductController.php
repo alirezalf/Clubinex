@@ -39,20 +39,28 @@ class ProductController extends Controller
         }
 
         $products = $productsQuery->paginate(12)->appends($request->all());
-        $categories = Category::all();
+        $categories = Category::select('id', 'title', 'slug', 'parent_id', 'icon')->get();
 
         $user = Auth::user();
 
-        $myRegistrations = ProductRegistration::with('category')
+        $rawRegistrations = ProductRegistration::with('category')
             ->where('user_id', $user->id)
             ->where('status', '!=', 'approved') // Only pending/rejected show as hand requests
             ->latest()
-            ->get()
-            ->map(function($reg) {
+            ->take(50)
+            ->get();
+
+        // Pre-fetch exact matching products to reduce N+1 queries
+        $productNames = $rawRegistrations->pluck('product_name')->map(fn($name) => trim($name))->filter()->unique();
+        $exactProducts = $productNames->isNotEmpty() ? Product::whereIn('title', $productNames)->select('id', 'title', 'display_image')->get()->keyBy('title') : collect();
+
+        $myRegistrations = $rawRegistrations->map(function($reg) use ($exactProducts) {
                 // جستجو برای یافتن محصول سیستمی و خواندن عکس پیش‌فرض آن
-                $systemProduct = Product::where('title', trim($reg->product_name))->first();
+                $trimmedName = trim($reg->product_name);
+                $systemProduct = $exactProducts->get($trimmedName);
+
                 if (!$systemProduct) {
-                    $systemProduct = Product::where('title', 'like', '%' . trim($reg->product_name) . '%')->first();
+                    $systemProduct = Product::where('title', 'like', '%' . $trimmedName . '%')->select('id', 'title', 'display_image')->first();
                 }
                 $displayImage = $reg->product_image ?: ($systemProduct ? $systemProduct->display_image : null);
 
@@ -85,6 +93,7 @@ class ProductController extends Controller
             ->where('is_used', true)
             ->where('used_by', $user->id)
             ->latest('used_at')
+            ->take(100)
             ->get()
             ->map(function($serial) {
                 $points = 50;
@@ -139,7 +148,7 @@ class ProductController extends Controller
     public function create()
     {
         return Inertia::render('Products/Create', [
-            'categories' => Category::all(),
+            'categories' => Category::select('id', 'title', 'slug', 'parent_id', 'icon')->get(),
             'agentInfo' => Auth::user()->isAgent() ? ['mobile' => Auth::user()->mobile] : null
         ]);
     }
@@ -166,7 +175,7 @@ class ProductController extends Controller
             ->findOrFail($id);
 
         return Inertia::render('Products/Create', [
-            'categories' => Category::all(),
+            'categories' => Category::select('id', 'title', 'slug', 'parent_id', 'icon')->get(),
             'editingRegistration' => [
                 'id' => $registration->id,
                 'tool_name' => $registration->product_name,

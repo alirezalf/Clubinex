@@ -48,6 +48,7 @@ class RewardController extends Controller
                 $q->withTrashed();
             }])
             ->latest()
+            ->take(100)
             ->get()
             ->map(function ($r) {
                 $value = 0;
@@ -77,10 +78,10 @@ class RewardController extends Controller
                 $r->reward_value = $value;
                 return $r;
             }) : [];
-            
+
         return Inertia::render('Rewards/Index', [
             'rewards' => $rewards,
-            'current_points' => $points, 
+            'current_points' => $points,
             'myRedemptions' => $myRedemptions
         ]);
     }
@@ -89,8 +90,8 @@ class RewardController extends Controller
     {
         try {
             $this->rewardService->redeemReward(
-                auth()->user(), 
-                $id, 
+                auth()->user(),
+                $id,
                 $request->delivery_info
             );
 

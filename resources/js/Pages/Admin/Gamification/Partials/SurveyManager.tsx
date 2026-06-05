@@ -24,7 +24,7 @@ interface Survey {
 }
 
 interface Props {
-    surveys: Survey[];  // فقط آرایه ساده
+    surveys: PaginatedData<Survey>; // Now paginated
 }
 
 export default function SurveyManager({ surveys }: Props) {
@@ -125,8 +125,7 @@ export default function SurveyManager({ surveys }: Props) {
             </div>
 
             <div className="card-base overflow-hidden">
-                {/* اینجا surveys.data رو برداشتم و فقط surveys گذاشتم چون آرایه ساده است */}
-                {(surveys && surveys.length > 0) ? surveys.map((survey) => (
+                {(surveys && surveys.data && surveys.data.length > 0) ? surveys.data.map((survey) => (
                     <div key={survey.id} className="p-4 border-b border-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center last:border-0 hover:bg-gray-50 transition gap-4">
                         <div className="flex-1">
                             <h4 className="font-bold text-gray-800">{survey.title}</h4>
@@ -194,7 +193,12 @@ export default function SurveyManager({ surveys }: Props) {
                 )}
             </div>
 
-            {/* حذف بخش Pagination چون داده‌ها صفحه‌بندی نشده‌اند */}
+            {/* Pagination Component */}
+            {surveys.links && surveys.links.length > 3 && (
+                <div className="mt-4">
+                    <Pagination links={surveys.links} />
+                </div>
+            )}
 
             {/* Survey Modal (Create / Edit) */}
             {showSurveyModal && (

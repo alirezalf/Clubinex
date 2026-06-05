@@ -61,13 +61,17 @@ class DashboardStatsService
                 ->exists();
 
             if (!$recentlyRewarded) {
-                // Optimized Query: Count distinct days directly in SQL
-                $distinctDays = PointTransaction::where('user_id', $user->id)
+                // Optimized: Fetching timestamps without DB functions to prevent temporary table/filesort
+                $daysCount = PointTransaction::query()
+                    ->where('user_id', $user->id)
                     ->where('created_at', '>=', now()->subDays(30))
-                    ->selectRaw('count(distinct date(created_at)) as count')
-                    ->value('count');
+                    ->select('created_at')
+                    ->get()
+                    ->map(fn($tx) => $tx->created_at->format('Y-m-d'))
+                    ->unique()
+                    ->count();
 
-                if ($distinctDays >= 30) {
+                if ($daysCount >= 30) {
                     PointTransaction::awardPoints(
                         $user->id,
                         $streakRule->points,
@@ -86,13 +90,19 @@ class DashboardStatsService
     {
         return cache()->remember('admin_dashboard_stats', 300, function () {
 
-            // Average points
-            $avgPoints = User::avg('current_points') ?? 0;
+            // Average points (Limit to active users to avoid massive scan)
+            $avgPoints = User::where('last_login_at', '>=', now()->subDays(30))->avg('current_points') ?? 0;
 
-            // Inflation calculation (Cash equivalent of points)
-            $totalDistributedPoints = PointTransaction::earned()->sum('amount');
-            $totalRedeemedPoints = RewardRedemption::whereIn('status', ['completed', 'shipped', 'delivered', 'processing'])->sum('points_spent');
+            // Inflation calculation (Only calculate for last 6 months to avoid full table scan)
+            $sixMonthsAgo = now()->subMonths(6);
+            $totalDistributedPoints = PointTransaction::earned()
+                ->where('created_at', '>=', $sixMonthsAgo)
+                ->sum('amount');
+            $totalRedeemedPoints = RewardRedemption::whereIn('status', ['completed', 'shipped', 'delivered', 'processing'])
+                ->where('created_at', '>=', $sixMonthsAgo)
+                ->sum('points_spent');
             $totalRedeemedRewardsCashValue = RewardRedemption::whereIn('reward_redemptions.status', ['completed', 'shipped', 'delivered', 'processing'])
+                ->where('reward_redemptions.created_at', '>=', $sixMonthsAgo)
                 ->join('rewards', 'reward_redemptions.reward_id', '=', 'rewards.id')
                 ->sum('rewards.cash_cost');
 
@@ -100,8 +110,9 @@ class DashboardStatsService
                 ? ($totalRedeemedRewardsCashValue > 0 ? round($totalRedeemedRewardsCashValue / $totalDistributedPoints, 2) : 0)
                 : 0;
 
-            // Most active hours (busiest hour)
+            // Most active hours (busiest hour) - Limit to recent activities
             $busiestHourData = DB::table('activity_logs')
+               ->where('created_at', '>=', now()->subDays(30))
                ->select(DB::raw('HOUR(created_at) as hour'), DB::raw('count(*) as count'))
                ->groupBy('hour')
                ->orderByDesc('count')

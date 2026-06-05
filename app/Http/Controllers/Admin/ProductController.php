@@ -30,7 +30,7 @@ class ProductController extends Controller
 
         $products = collect();
         $registrations = collect();
-        $categories = Category::all();
+        $categories = Category::select('id', 'title', 'slug', 'parent_id', 'is_active')->get();
 
         if ($tab === 'inventory') {
             $products = Product::with('category')->withCount(['serials', 'serials as used_serials_count' => function ($query) {

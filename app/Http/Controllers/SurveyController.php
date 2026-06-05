@@ -16,7 +16,7 @@ class SurveyController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+
         $surveys = Survey::active()
             ->where(function($q) use ($user) {
                 $q->whereNull('required_club_id')
@@ -39,23 +39,31 @@ class SurveyController extends Controller
                     'questions_count' => $survey->questions_count ?? 0,
                     'total_points' => $survey->questions_sum_points ?? 0,
                     'is_participated' => ($survey->user_attempts_count ?? 0) > 0,
-                    'is_available' => $survey->isAvailable(), 
-                    'status_text' => $this->getSurveyStatusText($survey), 
+                    'is_available' => $survey->isAvailable(),
+                    'status_text' => $this->getSurveyStatusText($survey),
                     'starts_at_jalali' => $survey->starts_at_jalali,
                     'ends_at_jalali' => $survey->ends_at_jalali,
                 ];
             });
 
-        // دریافت تاریخچه آزمون‌های شرکت شده کاربر
+        // دریافت تاریخچه آزمون‌های شرکت شده کاربر (فقط 20 مسابقه اخیر برای جلوگیری از لود سنگین)
+        $recentSurveyIds = SurveyAnswer::where('user_id', $user->id)
+            ->select('survey_id', DB::raw('MAX(submitted_at) as last_attempt'))
+            ->groupBy('survey_id')
+            ->orderBy('last_attempt', 'desc')
+            ->take(20)
+            ->pluck('survey_id');
+
         $history = SurveyAnswer::with(['survey', 'survey.questions'])
             ->where('user_id', $user->id)
+            ->whereIn('survey_id', $recentSurveyIds)
             ->latest('submitted_at')
             ->get()
-            ->groupBy('survey_id') 
+            ->groupBy('survey_id')
             ->map(function ($answers) {
                 $firstAns = $answers->first();
                 $survey = $firstAns->survey;
-                
+
                 $score = $answers->sum('score');
                 $maxScore = $survey ? $survey->questions->sum('points') : 0;
                 $percentage = $maxScore > 0 ? round(($score / $maxScore) * 100) : 0;
@@ -72,7 +80,7 @@ class SurveyController extends Controller
                 ];
             })
             ->values();
-            
+
         return Inertia::render('Surveys/Index', [
             'surveys' => $surveys,
             'history' => $history
@@ -82,7 +90,7 @@ class SurveyController extends Controller
     private function getSurveyStatusText($survey)
     {
         if (!$survey->is_active) return 'غیرفعال';
-        
+
         $now = now();
         if ($survey->starts_at && $survey->starts_at > $now) {
             return 'شروع نشده';
@@ -92,7 +100,7 @@ class SurveyController extends Controller
         }
         return 'در حال برگزاری';
     }
-    
+
     public function show(Survey $survey)
     {
         $user = auth()->user();
@@ -113,7 +121,7 @@ class SurveyController extends Controller
         $survey->load(['questions' => function($q) {
             $q->orderBy('order');
         }]);
-        
+
         $survey->total_points = $survey->questions->sum('points');
 
         return Inertia::render('Surveys/Show', [
@@ -134,7 +142,7 @@ class SurveyController extends Controller
         ]);
 
         $user = auth()->user();
-        
+
         if ($survey->getUserAttemptCount($user->id) >= $survey->max_attempts) {
             return back()->with('error', 'شما قبلاً در این آزمون شرکت کرده‌اید.');
         }
@@ -149,20 +157,20 @@ class SurveyController extends Controller
 
             foreach ($request->answers as $ans) {
                 $question = $survey->questions->find($ans['question_id']);
-                
+
                 $answerData = [
                     'user_id' => $user->id,
                     'survey_id' => $survey->id,
                     'survey_question_id' => $question->id,
                     'answer' => is_array($ans['value']) ? $ans['value'] : (
-                        $question->isMultipleChoice() 
-                            ? ['selected_option' => (int)$ans['value']] 
+                        $question->isMultipleChoice()
+                            ? ['selected_option' => (int)$ans['value']]
                             : ['text' => $ans['value']]
                     ),
                 ];
 
                 $submittedAnswer = SurveyAnswer::submitAnswer($answerData);
-                
+
                 if ($survey->isQuiz()) {
                     $totalScore += $submittedAnswer->score;
                     $maxScore += $question->points;
@@ -174,7 +182,7 @@ class SurveyController extends Controller
 
             if ($survey->isQuiz() && $maxScore > 0) {
                 $percentage = ($totalScore / $maxScore) * 100;
-                
+
                 $earnedPoints = $totalScore;
 
                 if ($earnedPoints > 0) {
@@ -189,7 +197,7 @@ class SurveyController extends Controller
             } else {
                 $pointRule = PointRule::where('action_code', 'poll_participation')->first();
                 $earnedPoints = $pointRule ? $pointRule->points : 10;
-                
+
                 PointTransaction::awardPoints(
                     $user->id,
                     $earnedPoints,
