@@ -2,16 +2,17 @@ import axios from 'axios';
 import { usePage, router } from '@inertiajs/react';
 import clsx from 'clsx';
 import type { ReactNode } from 'react';
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import type { BreadcrumbItem } from '@/Components/Breadcrumbs';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import Header from '@/Components/Header';
 import Sidebar from '@/Components/Sidebar';
-import ThemeSettingsPanel from '@/Components/ThemeSettingsPanel';
 import ToastContainer from '@/Components/Dashboard/ToastContainer';
-import DynamicSlider from '@/Components/DynamicSlider'; // اضافه شده
 import type { PageProps } from '@/types';
 import { useThemeSystem, ThemeSettings } from '@/Hooks/useThemeSystem';
+
+const ThemeSettingsPanel = lazy(() => import('@/Components/ThemeSettingsPanel'));
+const DynamicSlider = lazy(() => import('@/Components/DynamicSlider'));
 
 interface DashboardLayoutProps {
     children: ReactNode;
@@ -109,11 +110,15 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
 
     return (
         <div className="min-h-screen font-sans" dir="rtl" style={{ background: 'var(--body-bg-gradient, #f9fafb)', transition: 'background 0.5s ease' }}>
-            <ThemeSettingsPanel
-                isOpen={isThemePanelOpen}
-                onClose={() => setIsThemePanelOpen(false)}
-                currentSettings={themeSettings}
-            />
+            <Suspense fallback={null}>
+                {isThemePanelOpen && (
+                    <ThemeSettingsPanel
+                        isOpen={isThemePanelOpen}
+                        onClose={() => setIsThemePanelOpen(false)}
+                        currentSettings={themeSettings}
+                    />
+                )}
+            </Suspense>
 
             <Sidebar
                 isOpen={isSidebarOpen}
@@ -147,7 +152,9 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
                         {/* 1. Global Page Slider (Inserted Automatically) */}
                         {pageSlider && (
                             <div className="mb-6 animate-in fade-in slide-in-from-top-4">
-                                <DynamicSlider slider={pageSlider} />
+                                <Suspense fallback={<div className="h-48 w-full bg-gray-100/50 animate-pulse rounded-2xl" />}>
+                                    <DynamicSlider slider={pageSlider} />
+                                </Suspense>
                             </div>
                         )}
 

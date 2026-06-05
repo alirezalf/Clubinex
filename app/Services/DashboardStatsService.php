@@ -162,8 +162,15 @@ class DashboardStatsService
 
     public function getUserStats(User $user)
     {
+        if (!$user->relationLoaded('club')) {
+            $user->load('club');
+        }
+
         $currentClub = $user->club;
-        $nextClub = $currentClub ? $currentClub->getNextTier() : Club::tiers()->orderBy('min_points')->first();
+
+        $nextClub = cache()->remember("club_next_tier_" . ($currentClub ? $currentClub->id : 'none'), 3600, function () use ($currentClub) {
+            return $currentClub ? $currentClub->getNextTier() : Club::tiers()->orderBy('min_points')->first();
+        });
 
         $progress = 100;
         $pointsNeeded = 0;
@@ -182,7 +189,9 @@ class DashboardStatsService
 
         return [
             'points' => (int) ($user->current_points ?? 0),
-            'referrals' => $user->getDirectReferralsCountAttribute(),
+            'referrals' => cache()->remember("user_referrals_count_{$user->id}", 3600, function() use ($user) {
+                return $user->getDirectReferralsCountAttribute();
+            }),
             'club' => $currentClub ? $currentClub->name : 'سطح پایه',
             'club_color' => $currentClub ? $currentClub->color : '#64748b',
             'club_icon' => $currentClub ? $currentClub->icon : 'star',

@@ -33,6 +33,20 @@ class ReferralNetwork extends Model
         'activated_at' => 'datetime',   // تبدیل به تاریخ
     ];
 
+    protected static function booted()
+    {
+        $clearCache = function ($referral) {
+            try {
+                if ($referral->referrer_id) {
+                    cache()->forget("user_referrals_count_{$referral->referrer_id}");
+                }
+            } catch (\Exception $e) {}
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
+    }
+
     // ==================== روابط ====================
 
     /**

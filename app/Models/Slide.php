@@ -49,6 +49,22 @@ class Slide extends Model
         'gap_y' => 'integer',
     ];
 
+    protected static function booted()
+    {
+        $clearCache = function ($slide) {
+            try {
+                cache()->forget('home_main_slider');
+                $slider = $slide->slider;
+                if ($slider && $slider->location_key) {
+                    cache()->forget("slider_{$slider->location_key}");
+                }
+            } catch (\Exception $e) {}
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
+    }
+
     public function slider()
     {
         return $this->belongsTo(Slider::class);

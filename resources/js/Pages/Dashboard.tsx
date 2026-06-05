@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Head } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { PageProps } from '@/types';
-import AdminDashboard from './Dashboard/AdminDashboard';
-import UserDashboard from './Dashboard/UserDashboard';
+import { Loader2 } from 'lucide-react';
+
+const AdminDashboard = lazy(() => import('./Dashboard/AdminDashboard'));
+const UserDashboard = lazy(() => import('./Dashboard/UserDashboard'));
 
 type DashboardProps = PageProps<{
     isAdmin: boolean;
@@ -31,11 +33,13 @@ export default function Dashboard(props: DashboardProps) {
 
             {/* محتوای داشبورد با انیمیشن */}
             <div className="animate-in fade-in duration-500">
-                {isAdmin ? (
-                    <AdminDashboard {...(props as any)} />
-                ) : (
-                    <UserDashboard {...(props as any)} />
-                )}
+                <Suspense fallback={<div className="flex h-32 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                    {isAdmin ? (
+                        <AdminDashboard {...(props as any)} />
+                    ) : (
+                        <UserDashboard {...(props as any)} />
+                    )}
+                </Suspense>
             </div>
         </DashboardLayout>
     );

@@ -10,13 +10,13 @@ class Slider extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 
-        'location_key', 
-        'height_class', 
+        'title',
+        'location_key',
+        'height_class',
         'border_radius',
-        'interval', 
+        'interval',
         'is_active',
-        'effect', 
+        'effect',
         'slides_per_view',
         'loop',
         'direction',
@@ -32,6 +32,21 @@ class Slider extends Model
         'slides_per_view' => 'integer',
         'gap' => 'integer',
     ];
+
+    protected static function booted()
+    {
+        $clearCache = function ($slider) {
+            try {
+                cache()->forget('home_main_slider');
+                if ($slider->location_key) {
+                    cache()->forget("slider_{$slider->location_key}");
+                }
+            } catch (\Exception $e) {}
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
+    }
 
     public function slides()
     {

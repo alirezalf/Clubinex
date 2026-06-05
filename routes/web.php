@@ -24,11 +24,14 @@ Route::post('/setup', [SetupController::class, 'store'])->name('setup.store');
 
 // --- Public Routes ---
 Route::get('/', function () {
+    $settings = cache('global_settings', []);
     $seo = [
-        'title' => \App\Models\SystemSetting::getValue('general', 'site_title', 'Clubinex'),
-        'description' => \App\Models\SystemSetting::getValue('general', 'site_description', ''),
+        'title' => $settings['general.site_title'] ?? 'Clubinex',
+        'description' => $settings['general.site_description'] ?? '',
     ];
-    $slider = \App\Models\Slider::with('activeSlides')->where('location_key', 'home_main')->where('is_active', true)->first();
+    $slider = cache()->remember('home_main_slider', 600, function () {
+        return \App\Models\Slider::with('activeSlides')->where('location_key', 'home_main')->where('is_active', true)->first();
+    });
 
     return Inertia::render('Welcome', [
         'seo' => $seo,
@@ -37,11 +40,14 @@ Route::get('/', function () {
 });
 
 Route::get('/home', function () {
+    $settings = cache('global_settings', []);
     $seo = [
-        'title' => \App\Models\SystemSetting::getValue('general', 'site_title', 'Clubinex'),
-        'description' => \App\Models\SystemSetting::getValue('general', 'site_description', ''),
+        'title' => $settings['general.site_title'] ?? 'Clubinex',
+        'description' => $settings['general.site_description'] ?? '',
     ];
-    $slider = \App\Models\Slider::with('activeSlides')->where('location_key', 'home_main')->where('is_active', true)->first();
+    $slider = cache()->remember('home_main_slider', 600, function () {
+        return \App\Models\Slider::with('activeSlides')->where('location_key', 'home_main')->where('is_active', true)->first();
+    });
 
     return Inertia::render('Welcome', [
         'seo' => $seo,

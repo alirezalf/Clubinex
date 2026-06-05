@@ -17,7 +17,7 @@ export default defineConfig({
         }),
         react({
             babel: {
-                plugins: ['babel-plugin-react-compiler'],
+                plugins: [],
             },
         }),
         tailwindcss(),
@@ -32,13 +32,16 @@ export default defineConfig({
             '@': path.resolve(__dirname, 'resources', 'js'),
         },
     },
+    optimizeDeps: {
+        include: [],
+    },
     build: {
+        chunkSizeWarningLimit: 1000,
         rollupOptions: {
             output: {
                 manualChunks: {
                     vendor: ['react', 'react-dom'],
                     inertia: ['@inertiajs/react'],
-                    lucide: ['lucide-react'],
                 },
             },
         },
