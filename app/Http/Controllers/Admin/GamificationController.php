@@ -13,31 +13,41 @@ use Illuminate\Support\Facades\DB;
 
 class GamificationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $wheel = LuckyWheel::with('prizes')->firstOrCreate(
-            ['is_active' => true],
-            ['title' => 'گردونه اصلی', 'cost_per_spin' => 50]
-        );
+        $tab = $request->input('tab', 'wheel');
 
-        if(!$wheel->relationLoaded('prizes')) {
-            $wheel->load('prizes');
+        $wheel = null;
+        $surveys = [];
+
+        if ($tab === 'wheel') {
+            $wheel = LuckyWheel::with('prizes')->firstOrCreate(
+                ['is_active' => true],
+                ['title' => 'گردونه اصلی', 'cost_per_spin' => 50]
+            );
+
+            if(!$wheel->relationLoaded('prizes')) {
+                $wheel->load('prizes');
+            }
         }
 
-        $surveys = Survey::withCount(['answers as participants_count' => function ($query) {
-            $query->select(DB::raw('count(distinct user_id)'));
-        }])
-        ->withCount('questions')
-        ->withSum('questions', 'points')
-        ->latest()
-        ->get()
-        ->map(function($survey) {
-            $survey->starts_at_jalali = $survey->starts_at_jalali;
-            $survey->ends_at_jalali = $survey->ends_at_jalali;
-            return $survey;
-        });
+        if ($tab === 'surveys') {
+            $surveys = Survey::withCount(['answers as participants_count' => function ($query) {
+                $query->select(DB::raw('count(distinct user_id)'));
+            }])
+            ->withCount('questions')
+            ->withSum('questions', 'points')
+            ->latest()
+            ->get()
+            ->map(function($survey) {
+                $survey->starts_at_jalali = $survey->starts_at_jalali;
+                $survey->ends_at_jalali = $survey->ends_at_jalali;
+                return $survey;
+            });
+        }
 
         return Inertia::render('Admin/Gamification/Index', [
+            'activeTab' => $tab,
             'wheel' => $wheel,
             'surveys' => $surveys
         ]);

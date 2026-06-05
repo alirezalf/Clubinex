@@ -23,48 +23,72 @@ class SettingController extends Controller
         $this->themeService = $themeService;
     }
 
-    public function index()
+    public function index($tab = 'general')
     {
         $settings = SystemSetting::all()->groupBy('group');
-        $notificationTemplates = NotificationTemplate::with(['emailTheme', 'smsTemplate'])->get();
-        $emailThemes = EmailTheme::latest()->get();
-        $smsTemplates = SmsTemplate::latest()->get();
-
-        $admins = User::whereHas('roles', function($q) {
-            $q->whereIn('name', ['super-admin', 'admin', 'staff']);
-        })->select('id', 'first_name', 'last_name', 'email', 'avatar')->get();
-
-        $licenseKey = SystemSetting::getValue('general', 'license_key');
-        $machineId = \App\Services\LicenseService::getMachineId();
-        $licenseStatus = $licenseKey ? \App\Services\LicenseService::verifyLicense($licenseKey) : false;
-
+        $admins = collect();
+        $notificationTemplates = collect();
+        $emailThemes = collect();
+        $smsTemplates = collect();
+        $machineId = null;
         $licenseInfo = null;
-        if ($licenseStatus) {
 
-            $expDate = \Morilog\Jalali\Jalalian::forge($licenseStatus['exp'])->format('Y/m/d H:i');
+        if ($tab === 'support') {
+            $admins = User::whereHas('roles', function($q) {
+                $q->whereIn('name', ['super-admin', 'admin', 'staff']);
+            })->select('id', 'first_name', 'last_name', 'email', 'avatar')->get();
+        }
 
-            $licenseInfo = [
-                'isValid' => true,
-                'client_name' => $licenseStatus['client_name'] ?? 'نامشخص',
-                'exp' => $licenseStatus['exp'] ?? null,
-                'exp_formatted' => $expDate,
-                'modules' => $licenseStatus['modules'] ?? []
-            ];
-        } else {
-            $licenseInfo = [
-                'isValid' => false,
-                'isExpired' => !empty($licenseKey),
-            ];
+        if ($tab === 'templates') {
+            $notificationTemplates = NotificationTemplate::with(['emailTheme', 'smsTemplate'])->get();
+            $emailThemes = EmailTheme::latest()->get();
+            $smsTemplates = SmsTemplate::latest()->get();
+        }
+
+        if ($tab === 'email') {
+            $emailThemes = EmailTheme::latest()->get();
+        }
+
+        if ($tab === 'email_themes') {
+            $emailThemes = EmailTheme::latest()->get();
+        }
+
+        if ($tab === 'sms_templates') {
+            $smsTemplates = SmsTemplate::latest()->get();
+        }
+
+        if ($tab === 'modules' || $tab === 'general') {
+            $licenseKey = SystemSetting::getValue('general', 'license_key');
+            $machineId = \App\Services\LicenseService::getMachineId();
+            $licenseStatus = $licenseKey ? \App\Services\LicenseService::verifyLicense($licenseKey) : false;
+
+            if ($licenseStatus) {
+                $expDate = \Morilog\Jalali\Jalalian::forge($licenseStatus['exp'])->format('Y/m/d H:i');
+                $licenseInfo = [
+                    'isValid' => true,
+                    'client_name' => $licenseStatus['client_name'] ?? 'نامشخص',
+                    'exp' => $licenseStatus['exp'] ?? null,
+                    'exp_formatted' => $expDate,
+                    'modules' => $licenseStatus['modules'] ?? []
+                ];
+            } else {
+                $licenseInfo = [
+                    'isValid' => false,
+                    'isExpired' => !empty($licenseKey),
+                ];
+            }
         }
 
         return Inertia::render('Admin/Settings', [
+            'activeTab' => $tab,
             'settings' => $settings,
             'notificationTemplates' => $notificationTemplates,
             'emailThemes' => $emailThemes,
             'smsTemplates' => $smsTemplates,
             'admins' => $admins,
             'machine_id' => $machineId,
-            'license_info' => $licenseInfo
+            'license_info' => $licenseInfo,
+            'availableTabs' => config('settings.tabs', []), // optionally
         ]);
     }
 
@@ -163,6 +187,7 @@ class SettingController extends Controller
         cache()->forget('global_settings');
         cache()->forget('modules_settings');
         cache()->forget('login_settings');
+        cache()->forget('site_settings');
 
         return back()->with('message', 'تنظیمات با موفقیت ذخیره و اعمال شد.');
     }
@@ -253,6 +278,7 @@ class SettingController extends Controller
             // Clear cache
             cache()->forget('global_settings');
             cache()->forget('global_settings_array');
+            cache()->forget('site_settings');
 
             return back()->with('message', "تنظیمات بخش {$group} به حالت پیش‌فرض بازگشت.");
 
@@ -314,6 +340,111 @@ class SettingController extends Controller
         } catch (\Exception $e) {
             \Log::error("Database backup failed: " . $e->getMessage());
             return back()->with('error', 'خطا در ایجاد بک‌آپ: ' . $e->getMessage());
+        }
+    }
+
+    public function createUpdatePackage()
+    {
+        try {
+            if (!auth()->user()->hasRole(['super-admin', 'admin'])) {
+                abort(403, 'شما دسترسی به این بخش را ندارید.');
+            }
+
+            if (!class_exists('ZipArchive')) {
+                return back()->with('error', 'افزونه ZipArchive در PHP سرور شما فعال نیست.');
+            }
+
+            // Create a fixed version name based on the current hour to avoid IDM filename mismatch
+            $version = 'update-' . date('Y-m-d_H') . '.zip';
+            $zipFileName = sys_get_temp_dir() . '/' . $version;
+
+            // If the zip file was created in the last 15 minutes, just return it
+            if (file_exists($zipFileName) && (time() - filemtime($zipFileName)) < 900) {
+                return response()->download($zipFileName, $version, [
+                    'Accept-Ranges' => 'none',
+                ]);
+            }
+
+            $zip = new \ZipArchive();
+            if ($zip->open($zipFileName, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+                return back()->with('error', "خطا در ایجاد فایل فشرده در مسیر موقت.");
+            }
+
+            $basePath = base_path();
+
+            // Directories and files to exclude from the update package
+            $excludes = [
+                '.git',
+                '.env',
+                '.env.example',
+                'storage',
+                'node_modules',
+                'vendor', // Also skip vendor folder, as it can be huge and standard updates usually need composer update
+                'tests',
+                'phpunit.xml',
+                'bootstrap/cache',
+                '.idea',
+                '.vscode',
+                'public/uploads', // User uploads
+                'public/storage', // Storage symlink
+                'database/database.sqlite', // Local DB
+            ];
+
+            $directory = new \RecursiveDirectoryIterator($basePath, \FilesystemIterator::SKIP_DOTS);
+
+            $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) use ($basePath, $excludes, $zipFileName) {
+                if ($current->isLink()) {
+                    return false;
+                }
+
+                $realPath = $current->getRealPath();
+                if ($realPath === false) {
+                    return false;
+                }
+
+                $relativePath = str_replace($basePath . DIRECTORY_SEPARATOR, '', $realPath);
+                $relativePath = str_replace('\\', '/', $relativePath);
+
+                if ($realPath === $zipFileName || str_ends_with($relativePath, '.zip')) {
+                    return false;
+                }
+
+                // If path is exactly in excludes, skip it from recursion/iteration
+                if (in_array($relativePath, $excludes)) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            $iterator = new \RecursiveIteratorIterator($filter, \RecursiveIteratorIterator::SELF_FIRST);
+
+            $count = 0;
+            foreach ($iterator as $file) {
+                $realPath = $file->getRealPath();
+                $relativePath = str_replace($basePath . DIRECTORY_SEPARATOR, '', $realPath);
+                $relativePath = str_replace('\\', '/', $relativePath);
+
+                if ($file->isDir()) {
+                    $zip->addEmptyDir($relativePath);
+                } elseif ($file->isFile()) {
+                    $zip->addFile($realPath, $relativePath);
+                    $count++;
+                }
+            }
+
+            $zip->close();
+
+            if (file_exists($zipFileName)) {
+                return response()->download($zipFileName, $version, [
+                    'Accept-Ranges' => 'none',
+                ]);
+            }
+
+            return back()->with('error', 'فایل بروزرسانی یافت نشد.');
+        } catch (\Exception $e) {
+            \Log::error("Create Update Package Error: " . $e->getMessage());
+            return back()->with('error', 'خطا در ایجاد بسته بروزرسانی: ' . $e->getMessage());
         }
     }
 

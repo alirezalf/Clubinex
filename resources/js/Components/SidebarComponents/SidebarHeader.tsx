@@ -1,6 +1,7 @@
 import { Hexagon, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
 import clsx from 'clsx';
 import React from 'react';
+import MarqueeText from '../MarqueeText';
 
 interface Props {
     isCollapsed: boolean;
@@ -10,7 +11,7 @@ interface Props {
     siteVersion?: string;
 }
 
-export default function SidebarHeader({ isCollapsed, toggleCollapse, siteName = 'Clubinex', siteLogo, siteVersion = 'v2.0' }: Props) {
+export default function SidebarHeader({ isCollapsed, toggleCollapse, siteName = 'Clubinex', siteLogo, siteVersion }: Props) {
     return (
         <div
             className={clsx(
@@ -21,10 +22,10 @@ export default function SidebarHeader({ isCollapsed, toggleCollapse, siteName = 
         >
             {/* Logo Area */}
             <div className={clsx(
-                "flex items-center gap-2.5 overflow-hidden transition-all duration-300 group",
-                isCollapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
+                "flex items-center gap-2.5 overflow-hidden transition-all duration-300 group flex-1 min-w-0 pr-1",
+                isCollapsed ? "opacity-0 w-0" : "opacity-100"
             )}>
-                <div className="relative">
+                <div className="relative shrink-0">
                     <div className="w-10 h-10 bg-gradient-to-tr from-amber-500 to-amber-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/30 shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-transform">
                         {siteLogo ? (
                             <img src={siteLogo} alt="Logo" className="w-full h-full object-contain p-1.5" />
@@ -38,17 +39,17 @@ export default function SidebarHeader({ isCollapsed, toggleCollapse, siteName = 
                     </div>
                 </div>
 
-                <div className="flex flex-col whitespace-nowrap">
-                    <span className="font-extrabold text-[16px] tracking-tight" style={{ color: 'var(--sidebar-text)' }}>
-                        {siteName}
+                <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+                    <span className="font-extrabold text-[16px] tracking-tight block w-full" style={{ color: 'var(--sidebar-text)' }}>
+                        <MarqueeText>{siteName}</MarqueeText>
                     </span>
-                    <div className="flex items-center gap-1 mt-0.5">
+                    <div className="flex items-center gap-1 mt-0.5 shrink-0">
                         <span
-                            className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white"
+                            className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white shrink-0"
                         >
                             PRO
                         </span>
-                        <span className="text-[8px] opacity-40" style={{ color: 'var(--sidebar-text)' }}>{siteVersion}</span>
+                        <span className="text-[8px] opacity-40 shrink-0" style={{ color: 'var(--sidebar-text)' }}>{siteVersion}</span>
                     </div>
                 </div>
             </div>
@@ -57,7 +58,7 @@ export default function SidebarHeader({ isCollapsed, toggleCollapse, siteName = 
             <button
                 onClick={toggleCollapse}
                 className={clsx(
-                    "hidden lg:flex items-center justify-center rounded-xl transition-all duration-200 relative group",
+                    "hidden lg:flex items-center justify-center rounded-xl transition-all duration-200 relative group shrink-0",
                     isCollapsed
                         ? "w-10 h-10 hover:bg-amber-500/10"
                         : "w-8 h-8 opacity-60 hover:opacity-100 hover:bg-amber-500/10"

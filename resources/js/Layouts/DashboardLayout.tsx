@@ -82,10 +82,29 @@ export default function DashboardLayout({ children, breadcrumbs }: DashboardLayo
     const [currentDate, setCurrentDate] = useState('');
 
     useEffect(() => {
-        const date = new Date().toLocaleDateString('fa-IR', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('fa-IR', {
+            calendar: 'persian',
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
         });
-        setCurrentDate(date);
+        const parts = formatter.formatToParts(now);
+
+        let weekday = '', day = '', month = '', year = '';
+
+        parts.forEach(part => {
+            if (part.type === 'weekday') weekday = part.value;
+            if (part.type === 'day') day = part.value;
+            if (part.type === 'month') month = part.value;
+            if (part.type === 'year') year = part.value;
+        });
+
+        // Convert Persian digits to Latin digits
+        const toLatinDigits = (str: string) => str.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString());
+
+        setCurrentDate(`${weekday} ${toLatinDigits(day)} ${month} ${toLatinDigits(year)}`);
     }, []);
 
     return (

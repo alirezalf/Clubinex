@@ -24,30 +24,39 @@ class ProductController extends Controller
         $this->productService = $productService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')->withCount(['serials', 'serials as used_serials_count' => function ($query) {
-            $query->where('is_used', true);
-        }])->latest()->paginate(10, ['*'], 'products_page');
+        $tab = $request->input('tab', 'inventory');
 
-        $registrations = ProductRegistration::with(['user', 'category', 'admin'])
-            ->latest()
-            ->paginate(10, ['*'], 'registrations_page');
-
-        $registrations->getCollection()->transform(function ($reg) {
-            $reg->created_at_jalali = $reg->created_at_jalali;
-            $reg->status_farsi = $reg->status_farsi;
-            $reg->append('estimated_points'); // Explicitly append accessor
-            $reg->append('is_serial_valid'); // Append serial validation result
-            return $reg;
-        });
-
+        $products = collect();
+        $registrations = collect();
         $categories = Category::all();
+
+        if ($tab === 'inventory') {
+            $products = Product::with('category')->withCount(['serials', 'serials as used_serials_count' => function ($query) {
+                $query->where('is_used', true);
+            }])->latest()->paginate(10, ['*'], 'products_page');
+        }
+
+        if ($tab === 'registrations') {
+            $registrations = ProductRegistration::with(['user', 'category', 'admin'])
+                ->latest()
+                ->paginate(10, ['*'], 'registrations_page');
+
+            $registrations->getCollection()->transform(function ($reg) {
+                $reg->created_at_jalali = $reg->created_at_jalali;
+                $reg->status_farsi = $reg->status_farsi;
+                $reg->append('estimated_points'); // Explicitly append accessor
+                $reg->append('is_serial_valid'); // Append serial validation result
+                return $reg;
+            });
+        }
 
         return Inertia::render('Admin/Products/Index', [
             'products' => $products,
             'registrations' => $registrations,
-            'categories' => $categories
+            'categories' => $categories,
+            'activeTab' => $tab,
         ]);
     }
 

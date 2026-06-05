@@ -92,8 +92,8 @@ const TABS = [
 ];
 
 export default function AdminSettings({ settings, notificationTemplates, emailThemes = [], smsTemplates = [], admins = [] }: SettingsProps) {
-    const { themeSettings } = usePage<PageProps<{ themeSettings: any }>>().props;
-    const [activeTab, setActiveTab] = useState('general');
+    const { themeSettings, activeTab: serverActiveTab } = usePage<PageProps<{ themeSettings: any, activeTab: string }>>().props;
+    const activeTab = serverActiveTab || 'general';
 
     // Helper to extract values safely
     const getSettingValue = (group: string, key: string, defaultVal: any) => {
@@ -308,13 +308,6 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
             <Head title="تنظیمات سیستم" />
 
             <div className="flex flex-col lg:flex-row gap-6">
-
-                {/* Sidebar Navigation */}
-                <SettingsSidebar
-                    tabs={TABS}
-                    activeTab={activeTab}
-                    onChange={setActiveTab}
-                />
 
                 {/* Main Content Area */}
                 <div className="flex-1 card-base p-6 min-h-[600px]">

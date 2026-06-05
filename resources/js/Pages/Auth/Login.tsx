@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { usePage } from '@inertiajs/react';
-import ClassicLogin from './ClassicLogin';
-import ModernLogin from './ModernLogin';
-import MinimalLogin from './MinimalLogin';
 import { useThemeSystem } from '@/Hooks/useThemeSystem';
+
+const ClassicLogin = lazy(() => import('./ClassicLogin'));
+const ModernLogin = lazy(() => import('./ModernLogin'));
+const MinimalLogin = lazy(() => import('./MinimalLogin'));
 
 interface LoginProps {
     settings: any;
@@ -36,13 +37,11 @@ export default function Login({ settings, captchaUrl: initialCaptchaUrl }: Login
         settings
     };
 
-    if (theme === 'modern') {
-        return <ModernLogin {...commonProps} />;
-    }
-
-    if (theme === 'minimal') {
-        return <MinimalLogin {...commonProps} />;
-    }
-
-    return <ClassicLogin {...commonProps} />;
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+            {theme === 'modern' ? <ModernLogin {...commonProps} /> :
+             theme === 'minimal' ? <MinimalLogin {...commonProps} /> :
+             <ClassicLogin {...commonProps} />}
+        </Suspense>
+    );
 }

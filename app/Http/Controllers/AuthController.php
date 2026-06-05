@@ -26,7 +26,9 @@ class AuthController extends Controller
     public function showLogin()
     {
         // Fetch all settings flattened by key
-        $settings = \App\Models\SystemSetting::all()->pluck('value', 'key')->toArray();
+        $settings = \Illuminate\Support\Facades\Cache::remember('global_settings_array', 3600, function () {
+            return \App\Models\SystemSetting::all()->pluck('value', 'key')->toArray();
+        });
 
         $captchaEnabled = filter_var($settings['captcha_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $captchaUrl = $captchaEnabled ? captcha_src('flat') : null;

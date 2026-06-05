@@ -53,6 +53,7 @@ class SettingController extends Controller
         }
 
         cache()->forget('global_settings');
+        cache()->forget('site_settings');
 
         return back()->with('message', 'تنظیمات با موفقیت ذخیره شد.');
     }

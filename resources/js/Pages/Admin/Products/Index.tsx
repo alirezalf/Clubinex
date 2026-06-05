@@ -199,7 +199,7 @@ export default function AdminProductsIndex({
                     >
                         <FileText size={16} />
                         درخواست‌ها
-                        {registrations.data.filter(
+                        {registrations?.data?.filter(
                             (r) => r.status === 'pending',
                         ).length > 0 && (
                             <span className="animate-pulse rounded-full bg-red-500 px-1.5 py-0.5 text-[9px] text-white">
@@ -215,26 +215,26 @@ export default function AdminProductsIndex({
             </div>
 
             {/* Content Based on Tab */}
-            {activeTab === 'inventory' && (
+            {activeTab === 'inventory' && products?.data && (
                 <>
                     <ProductTable
-                        products={products}
+                        products={products as PaginatedData<Product>}
                         onImportSerial={openImportModal}
                         onEdit={openEditModal}
                         onDelete={handleDelete}
                         onManageSerials={openSerialModal}
                     />
-                    <Pagination links={products.links} />
+                    <Pagination links={(products as PaginatedData<Product>).links} />
                 </>
             )}
 
-            {activeTab === 'registrations' && (
+            {activeTab === 'registrations' && registrations?.data && (
                 <>
                     <RegistrationTable
-                        registrations={registrations}
+                        registrations={registrations as PaginatedData<ProductRegistration>}
                         onReview={openReviewModal}
                     />
-                    <Pagination links={registrations.links} />
+                    <Pagination links={(registrations as PaginatedData<ProductRegistration>).links} />
                 </>
             )}
 

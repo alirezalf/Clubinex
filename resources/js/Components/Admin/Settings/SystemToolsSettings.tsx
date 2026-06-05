@@ -1,10 +1,18 @@
-import React, { useRef } from 'react';
-import { Database, Download, RefreshCw, AlertTriangle, UploadCloud } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Database, Download, RefreshCw, AlertTriangle, UploadCloud, Archive } from 'lucide-react';
 import { router, useForm } from '@inertiajs/react';
 
 export default function SystemToolsSettings() {
+    const [isCreatingUpdate, setIsCreatingUpdate] = useState(false);
+
     const backupDatabase = () => {
         window.location.href = route('admin.settings.backup_database');
+    };
+
+    const createUpdatePackage = () => {
+        setIsCreatingUpdate(true);
+        window.location.href = route('admin.settings.create_update');
+        setTimeout(() => setIsCreatingUpdate(false), 3000); // Reset state after standard download init
     };
 
     const updateSystem = () => {
@@ -62,6 +70,28 @@ export default function SystemToolsSettings() {
                     >
                         <Database size={18} />
                         دریافت نسخه پشتیبان (Backup)
+                    </button>
+                </div>
+
+                {/* Create Update Package Settings */}
+                <div className="border rounded-2xl p-6 bg-green-50 shadow-sm border-green-200 flex flex-col justify-between">
+                    <div>
+                        <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mb-4">
+                            <Archive size={24} />
+                        </div>
+                        <h4 className="font-bold text-gray-800 text-lg">ساخت بسته بروزرسانی سورس</h4>
+                        <p className="text-sm text-gray-500 mt-2 mb-6 leading-relaxed">
+                            ایجاد بسته فشرده (ZIP) حاوی کدهای فعلی سیستم با حذف پوشه‌های اضافی. مناسب برای ایجاد فایلِ ارتقا جهت ارسال به هاست مشتریان دیگر.
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={createUpdatePackage}
+                        disabled={isCreatingUpdate}
+                        className="bg-green-600 text-white hover:bg-green-700 transition-colors w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        <Archive size={18} />
+                        {isCreatingUpdate ? 'در حال ایجاد فایل...' : 'ساخت و دریافت نصاب بروزرسانی'}
                     </button>
                 </div>
 

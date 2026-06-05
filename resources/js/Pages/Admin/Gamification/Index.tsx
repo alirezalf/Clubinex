@@ -41,24 +41,29 @@ interface Survey {
 }
 
 type Props = PageProps<{
-    wheel: Wheel;
-    surveys: Survey[];
+    activeTab: 'wheel' | 'surveys';
+    wheel?: Wheel;
+    surveys?: Survey[];
 }>;
 
-export default function GamificationIndex({ wheel, surveys }: Props) {
+export default function GamificationIndex({ activeTab, wheel, surveys }: Props) {
     return (
         <DashboardLayout breadcrumbs={[{ label: 'مدیریت بازی‌سازی' }]}>
             <Head title="بازی‌سازی" />
 
             {/* Inline Alerts Removed - Handled by ToastContainer */}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="flex flex-col gap-8">
 
                 {/* Wheel Management */}
-                <WheelManager wheel={wheel} />
+                {activeTab === 'wheel' && wheel && (
+                    <WheelManager wheel={wheel} />
+                )}
 
                 {/* Survey Management */}
-                <SurveyManager surveys={surveys} />
+                {activeTab === 'surveys' && surveys && (
+                    <SurveyManager surveys={surveys} />
+                )}
 
             </div>
         </DashboardLayout>

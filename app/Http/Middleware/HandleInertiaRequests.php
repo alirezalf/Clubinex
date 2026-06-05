@@ -68,9 +68,9 @@ class HandleInertiaRequests extends Middleware
             'site' => fn () => \Illuminate\Support\Facades\Cache::remember('site_settings', 3600, function () {
                 $general = SystemSetting::where('group', 'general')->pluck('value', 'key')->toArray();
                 return [
-                    'name' => $general['site_name'] ?? 'Clubinex',
+                    'name' => $general['app_name'] ?? $general['site_title'] ?? $general['site_name'] ?? 'Clubinex',
                     'logo' => $general['site_logo'] ?? null,
-                    'version' => $general['version'] ?? 'v2.0',
+                    'version' => $general['app_version'] ?? $general['version'] ?? '2.0',
                 ];
             }),
             'modules' => fn () => \Illuminate\Support\Facades\Cache::remember('modules_settings', 3600, function () {
