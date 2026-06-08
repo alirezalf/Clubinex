@@ -18,7 +18,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Fix for shared hosting where public directory might be renamed (e.g. public_html)
+        if (!app()->runningInConsole() && isset($_SERVER['SCRIPT_FILENAME'])) {
+            app()->usePublicPath(dirname($_SERVER['SCRIPT_FILENAME']));
+        }
     }
 
     /**

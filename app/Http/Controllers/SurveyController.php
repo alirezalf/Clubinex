@@ -19,8 +19,10 @@ class SurveyController extends Controller
 
         $surveys = Survey::active()
             ->where(function($q) use ($user) {
-                $q->whereNull('required_club_id')
-                  ->orWhere('required_club_id', '<=', $user->club_id);
+                $q->whereNull('required_club_id');
+                if ($user->club_id !== null) {
+                    $q->orWhere('required_club_id', '<=', $user->club_id);
+                }
             })
             ->withCount('questions')
             ->withSum('questions', 'points')

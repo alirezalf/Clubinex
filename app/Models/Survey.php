@@ -159,8 +159,10 @@ class Survey extends Model
     {
         return $query->available()
             ->where(function($q) use ($clubId) {
-                $q->whereNull('required_club_id')
-                  ->orWhere('required_club_id', '<=', $clubId);
+                $q->whereNull('required_club_id');
+                if ($clubId !== null) {
+                    $q->orWhere('required_club_id', '<=', $clubId);
+                }
             })
             ->whereDoesntHave('answers', function($q) use ($userId) {
                 $q->where('user_id', $userId);

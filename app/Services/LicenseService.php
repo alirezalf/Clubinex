@@ -30,14 +30,28 @@ EOD;
      */
     public static function getMachineId(): string
     {
-        // Use standard server parameters combined with the application's root path
-        // This ensures moving the app to another directory or server changes the ID
-        $components = [
-            php_uname('n'), // Hostname
-            php_uname('s'), // OS Name
-            php_uname('r'), // Release name
-            base_path(),    // Absolute path of the project installation
-        ];
+        // فقط یک بار این تابع نوشته بشه
+        $components = [];
+
+        if (function_exists('php_uname') && php_uname('n') !== false) {
+            $components[] = php_uname('n');
+        } else {
+            $components[] = $_SERVER['SERVER_NAME'] ?? gethostname() ?? 'unknown';
+        }
+
+        if (function_exists('php_uname') && php_uname('s') !== false) {
+            $components[] = php_uname('s');
+        } else {
+            $components[] = PHP_OS;
+        }
+
+        if (function_exists('php_uname') && php_uname('r') !== false) {
+            $components[] = php_uname('r');
+        } else {
+            $components[] = PHP_VERSION;
+        }
+
+        $components[] = base_path();
 
         return hash('sha256', implode('|', $components));
     }
