@@ -69,6 +69,7 @@ interface SettingsProps extends PageProps {
     emailThemes?: EmailTheme[];
     smsTemplates?: SmsTemplate[];
     admins?: User[];
+    roles?: {id: number, name: string}[];
 }
 
 // Tabs Configuration
@@ -91,7 +92,7 @@ const TABS = [
     { id: 'templates', label: 'تنظیمات رویدادها', icon: BellRing },
 ];
 
-export default function AdminSettings({ settings, notificationTemplates, emailThemes = [], smsTemplates = [], admins = [] }: SettingsProps) {
+export default function AdminSettings({ settings, notificationTemplates, emailThemes = [], smsTemplates = [], admins = [], roles = [] }: SettingsProps) {
     const { themeSettings, activeTab: serverActiveTab } = usePage<PageProps<{ themeSettings: any, activeTab: string }>>().props;
     const activeTab = serverActiveTab || 'general';
 
@@ -211,6 +212,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         lockout_time: getSettingValue('security', 'lockout_time', '60'),
         session_timeout: getSettingValue('security', 'session_timeout', '30'),
         captcha_enabled: getSettingValue('security', 'captcha_enabled', '0') === '1',
+        default_role: getSettingValue('security', 'default_role', 'user'),
 
         // Modules
         enable_clubs: getSettingValue('modules', 'enable_clubs', '1') === '1' || getSettingValue('modules', 'enable_clubs', '1') === true,
@@ -240,7 +242,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         email: ['mail_host', 'mail_port', 'mail_username', 'mail_password', 'mail_from_address', 'mail_from_name'],
         wordpress: ['wp_url', 'wp_consumer_key', 'wp_consumer_secret'],
         support: ['ticket_auto_close_hours', 'support_agents'],
-        security: ['max_login_attempts', 'lockout_time', 'session_timeout', 'captcha_enabled'],
+        security: ['max_login_attempts', 'lockout_time', 'session_timeout', 'captcha_enabled', 'default_role'],
     };
 
     const submit = (e: React.FormEvent) => {
@@ -315,17 +317,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
                     {activeTab === 'theme' ? (
                         <ThemeCustomizer data={data} setData={setData} submit={submit} handleFileChange={handleFileChange} />
                     ) : activeTab === 'templates' ? (
-                        <div className="space-y-6 animate-in fade-in">
-                            <div className="border-b pb-4 mb-4">
-                                <h3 className="text-lg font-bold text-gray-800">مدیریت رویدادها و اعلان‌ها</h3>
-                                <p className="text-sm text-gray-500 mt-1">تنظیم متن پیامک، ایمیل و اعلان‌های سیستم برای هر رویداد.</p>
-                            </div>
-                            <div className="space-y-4">
-                                {notificationTemplates.map((template) => (
-                                    <TemplateEditor key={template.id} template={template} emailThemes={emailThemes} smsTemplates={smsTemplates} />
-                                ))}
-                            </div>
-                        </div>
+                        <TemplateEditor templates={notificationTemplates} emailThemes={emailThemes} smsTemplates={smsTemplates} />
                     ) : activeTab === 'email_themes' ? (
                         <EmailThemesManager themes={emailThemes} />
                     ) : activeTab === 'sms_templates' ? (
@@ -334,7 +326,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
                         <form onSubmit={submit} className="space-y-6" encType="multipart/form-data">
 
                             {activeTab === 'security' && (
-                                <SecuritySettings data={data} setData={setData} />
+                                <SecuritySettings data={data} setData={setData} roles={roles} />
                             )}
 
                             {activeTab === 'general' && (

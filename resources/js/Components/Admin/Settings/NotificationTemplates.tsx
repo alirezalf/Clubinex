@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { useForm } from '@inertiajs/react';
-import { BellRing, Edit2 } from 'lucide-react';
+import { useForm, router } from '@inertiajs/react';
+import { BellRing, Edit2, Plus, X, Trash2 } from 'lucide-react';
 
 interface Template {
     id: number;
+    event_name?: string;
     title_fa: string;
     sms_active: boolean;
     sms_pattern: string;
@@ -30,8 +31,107 @@ interface SmsTemplate {
     provider_template_id: string | null;
 }
 
-export default function TemplateEditor({ template, emailThemes, smsTemplates = [] }: { template: Template, emailThemes: EmailTheme[], smsTemplates?: SmsTemplate[] }) {
+export default function NotificationTemplatesManager({ templates, emailThemes, smsTemplates = [] }: { templates: Template[], emailThemes: EmailTheme[], smsTemplates?: SmsTemplate[] }) {
+    const [showCreateModal, setShowCreateModal] = useState(false);
+
+    const { data: newData, setData: setNewData, post: postNew, processing: processingNew, reset: resetNew, errors: errorsNew } = useForm({
+        event_name: '',
+        title_fa: '',
+        variables: '',
+        sms_active: false,
+        email_active: false,
+        database_active: false,
+    });
+
+    const handleCreate = (e: React.FormEvent) => {
+        e.preventDefault();
+        postNew(route('admin.notification-templates.store'), {
+            onSuccess: () => {
+                setShowCreateModal(false);
+                resetNew();
+            },
+            preserveScroll: true
+        });
+    };
+
+    return (
+        <div className="space-y-6 animate-in fade-in">
+            <div className="border-b pb-4 flex justify-between items-center">
+                <div>
+                    <h3 className="text-lg font-bold text-gray-800">مدیریت رویدادها و اعلان‌ها</h3>
+                    <p className="text-sm text-gray-500 mt-1">تنظیم سیستم اطلاع‌رسانی برای هر رویداد (ایمیل، پیامک، اعلان سایت)</p>
+                </div>
+                <button onClick={() => setShowCreateModal(true)} className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-bold flex gap-2 items-center">
+                    <Plus size={16} />
+                    افزودن رویداد اعلان
+                </button>
+            </div>
+
+            <div className="space-y-4">
+                {templates.map((template) => (
+                    <TemplateEditor key={template.id} template={template} emailThemes={emailThemes} smsTemplates={smsTemplates} />
+                ))}
+            </div>
+
+            {showCreateModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="font-bold text-lg">ثبت رویداد جدید</h3>
+                            <button onClick={() => setShowCreateModal(false)}><X className="text-gray-400 hover:text-gray-600" /></button>
+                        </div>
+                        <form onSubmit={handleCreate} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">عنوان فارسی رویداد</label>
+                                <input type="text" value={newData.title_fa} onChange={e => setNewData('title_fa', e.target.value)} className="w-full border rounded-lg px-3 py-2" required placeholder="مثال: تکمیل عضویت" />
+                                {errorsNew.title_fa && <p className="text-red-500 text-xs mt-1">{errorsNew.title_fa}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1 flex justify-between">
+                                    <span>شناسه سیستمی (Event Name)</span>
+                                    <span className="text-xs text-blue-500">فقط انگلیسی</span>
+                                </label>
+                                <input type="text" value={newData.event_name} onChange={e => setNewData('event_name', e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))} className="w-full border rounded-lg px-3 py-2 dir-ltr text-left" required placeholder="مثال: custom_event" list="notification-events" />
+                                {errorsNew.event_name && <p className="text-red-500 text-xs mt-1">{errorsNew.event_name}</p>}
+                                <p className="text-[10px] text-gray-500 mt-1">توابع سیستمی را دقیقاً مطابق نام برنامه‌نویسی وارد کنید. رویدادهای مرسوم: otp_login, welcome_user, reward_redemption, product_registered, ticket_reply, birthday_congratulation</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">متغیرهای قابل استفاده (راهنما)</label>
+                                <input type="text" value={newData.variables} onChange={e => setNewData('variables', e.target.value)} className="w-full border rounded-lg px-3 py-2 dir-ltr text-left" placeholder="{name}, {code}" />
+                            </div>
+
+                            <div>
+                                <p className="block text-sm font-bold mb-2">فعال‌سازی کانال‌های پیش‌فرض:</p>
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 text-sm cursor-pointer border p-2 rounded hover:bg-gray-50">
+                                        <input type="checkbox" checked={newData.sms_active} onChange={e => setNewData('sms_active', e.target.checked)} className="rounded" /> پیامک
+                                    </label>
+                                    <label className="flex items-center gap-2 text-sm cursor-pointer border p-2 rounded hover:bg-gray-50">
+                                        <input type="checkbox" checked={newData.email_active} onChange={e => setNewData('email_active', e.target.checked)} className="rounded" /> ایمیل
+                                    </label>
+                                    <label className="flex items-center gap-2 text-sm cursor-pointer border p-2 rounded hover:bg-gray-50">
+                                        <input type="checkbox" checked={newData.database_active} onChange={e => setNewData('database_active', e.target.checked)} className="rounded" /> داشبورد کاربری
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-4">
+                                <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-gray-600 border rounded-lg hover:bg-gray-50">انصراف</button>
+                                <button disabled={processingNew} className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 flex items-center gap-2">
+                                    {processingNew ? 'در حال ثبت...' : 'درح و ادامه تنظیمات'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function TemplateEditor({ template, emailThemes, smsTemplates = [] }: { template: Template, emailThemes: EmailTheme[], smsTemplates?: SmsTemplate[] }) {
     const [editing, setEditing] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const { data, setData, post, processing } = useForm({
         sms_active: Boolean(template.sms_active),
         sms_pattern: template.sms_pattern || '',
@@ -51,15 +151,30 @@ export default function TemplateEditor({ template, emailThemes, smsTemplates = [
         });
     };
 
+    const handleDelete = () => {
+        if (confirm('آیا از حذف این رویداد اطمینان دارید؟')) {
+            setDeleting(true);
+            router.delete(route('admin.notification-templates.destroy', template.id), {
+                preserveScroll: true,
+                onFinish: () => setDeleting(false),
+            });
+        }
+    };
+
+    const isSystemTemplate = template.event_name && ['otp_login', 'welcome_user'].includes(template.event_name);
+
     if (!editing) {
         return (
-            <div className="border border-gray-200 rounded-xl p-4 flex justify-between items-center hover:shadow-sm transition bg-white group">
+            <div className="border border-gray-200 rounded-xl p-4 flex justify-between items-center hover:shadow-sm transition bg-white group opacity-100">
                 <div className="flex items-center gap-3">
                     <div className="bg-primary-50 text-primary-600 p-2 rounded-lg">
                         <BellRing size={20} />
                     </div>
                     <div>
-                        <h4 className="font-bold text-gray-800">{template.title_fa}</h4>
+                        <h4 className="font-bold text-gray-800 flex gap-2 items-center">
+                            {template.title_fa}
+                            {template.event_name && <span className="text-[10px] text-gray-400 font-mono bg-gray-50 px-1 py-0.5 rounded border">{template.event_name}</span>}
+                        </h4>
                         <div className="flex gap-2 mt-1.5 text-xs text-gray-500">
                             {template.sms_active && <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded">پیامک</span>}
                             {template.database_active && <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">پنل</span>}
@@ -67,10 +182,16 @@ export default function TemplateEditor({ template, emailThemes, smsTemplates = [
                         </div>
                     </div>
                 </div>
-                <button onClick={() => setEditing(true)} className="px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-lg text-sm border border-transparent hover:border-primary-100 transition flex items-center gap-2">
-                    <Edit2 size={16} />
-                    ویرایش
-                </button>
+                <div className="flex gap-2">
+                    <button onClick={() => setEditing(true)} className="px-3 py-2 text-primary-600 hover:bg-primary-50 rounded-lg text-sm border border-transparent hover:border-primary-100 transition flex items-center gap-2">
+                        <Edit2 size={16} />
+                    </button>
+                    {!isSystemTemplate && (
+                        <button onClick={handleDelete} disabled={deleting} className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm border border-transparent hover:border-red-100 transition flex items-center gap-2 disabled:opacity-50">
+                            <Trash2 size={16} />
+                        </button>
+                    )}
+                </div>
             </div>
         );
     }
@@ -78,7 +199,12 @@ export default function TemplateEditor({ template, emailThemes, smsTemplates = [
     return (
         <div className="border border-primary-200 bg-primary-50/20 rounded-xl p-6 space-y-5 animate-in fade-in">
             <div className="flex justify-between items-center border-b border-primary-100 pb-3">
-                <h4 className="font-bold text-primary-800 text-lg">{template.title_fa}</h4>
+                <div>
+                     <h4 className="font-bold text-primary-800 text-lg flex gap-2 items-center">
+                         {template.title_fa}
+                         {template.event_name && <span className="text-[10px] text-primary-500 font-mono bg-primary-100 px-1.5 py-0.5 rounded">{template.event_name}</span>}
+                     </h4>
+                </div>
                 <div className="text-xs text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
                     <span className="font-bold ml-1">متغیرها:</span>
                     <span className="dir-ltr inline-block font-mono text-primary-600">{template.variables}</span>
@@ -160,3 +286,4 @@ export default function TemplateEditor({ template, emailThemes, smsTemplates = [
         </div>
     );
 }
+

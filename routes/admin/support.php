@@ -17,5 +17,7 @@ Route::post('/notifications/send', [NotificationController::class, 'send'])->nam
 
 // Settings (Super Admin / Admin)
 Route::middleware(['role:super-admin|admin'])->group(function () {
+    Route::post('/notification-templates', [NotificationSettingController::class, 'store'])->name('notification-templates.store');
     Route::post('/notification-templates/{id}', [NotificationSettingController::class, 'update'])->name('notification-templates.update');
+    Route::delete('/notification-templates/{id}', [NotificationSettingController::class, 'destroy'])->name('notification-templates.destroy');
 });

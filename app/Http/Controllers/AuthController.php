@@ -148,7 +148,8 @@ class AuthController extends Controller
             'referral_code' => strtoupper(substr(md5($request->mobile . time()), 0, 8)),
         ]);
 
-        $user->assignRole('user');
+        $defaultRole = \App\Models\SystemSetting::getValue('security', 'default_role', 'user');
+        $user->assignRole($defaultRole);
 
         if ($referredById && $referredById !== $user->id) {
             \App\Models\ReferralNetwork::createReferral($referredById, $user->id);

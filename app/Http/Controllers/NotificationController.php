@@ -10,7 +10,7 @@ class NotificationController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+
         // دریافت تمام نوتیفیکیشن‌ها با صفحه‌بندی
         $notifications = $user->notifications()->paginate(15);
 
@@ -28,7 +28,7 @@ class NotificationController extends Controller
             'notifications' => $notifications
         ]);
     }
-    
+
     public function unreadCount()
     {
         return response()->json(['count' => auth()->user()->unreadNotifications()->count()]);

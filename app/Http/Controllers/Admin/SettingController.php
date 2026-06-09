@@ -27,6 +27,7 @@ class SettingController extends Controller
     {
         $settings = SystemSetting::all()->groupBy('group');
         $admins = collect();
+        $roles = collect();
         $notificationTemplates = collect();
         $emailThemes = collect();
         $smsTemplates = collect();
@@ -37,6 +38,10 @@ class SettingController extends Controller
             $admins = User::whereHas('roles', function($q) {
                 $q->whereIn('name', ['super-admin', 'admin', 'staff']);
             })->select('id', 'first_name', 'last_name', 'email', 'avatar')->get();
+        }
+
+        if ($tab === 'security') {
+            $roles = \Spatie\Permission\Models\Role::select('id', 'name')->get();
         }
 
         if ($tab === 'templates') {
@@ -86,6 +91,7 @@ class SettingController extends Controller
             'emailThemes' => $emailThemes,
             'smsTemplates' => $smsTemplates,
             'admins' => $admins,
+            'roles' => $roles ?? [],
             'machine_id' => $machineId,
             'license_info' => $licenseInfo,
             'availableTabs' => config('settings.tabs', []), // optionally

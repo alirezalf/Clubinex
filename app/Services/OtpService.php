@@ -80,7 +80,8 @@ class OtpService
         );
 
         if ($user->wasRecentlyCreated) {
-            $user->assignRole('user');
+            $defaultRole = \App\Models\SystemSetting::getValue('security', 'default_role', 'user');
+            $user->assignRole($defaultRole);
             if ($referredById && $referredById !== $user->id) {
                 \App\Models\ReferralNetwork::createReferral($referredById, $user->id);
             }

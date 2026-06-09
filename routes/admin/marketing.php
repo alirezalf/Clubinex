@@ -24,7 +24,9 @@ Route::middleware(['role:super-admin|admin'])->group(function () {
     Route::post('/clubs', [ClubSettingController::class, 'storeClub'])->name('clubs.store');
     Route::post('/clubs/{id}', [ClubSettingController::class, 'updateClub'])->name('clubs.update');
     Route::delete('/clubs/{id}', [ClubSettingController::class, 'destroyClub'])->name('clubs.destroy');
+    Route::post('/point-rules', [ClubSettingController::class, 'storeRule'])->name('point-rules.store');
     Route::post('/point-rules/{id}', [ClubSettingController::class, 'updateRule'])->name('point-rules.update');
+    Route::delete('/point-rules/{id}', [ClubSettingController::class, 'destroyRule'])->name('point-rules.destroy');
 
     // Gamification (Wheel)
     Route::get('/gamification', [GamificationController::class, 'index'])->name('gamification.index');

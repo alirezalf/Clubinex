@@ -14,13 +14,23 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::with('parent')->withCount('products')->latest()->get();
-        // Parents for dropdown (only root categories or 1 level deep to avoid deep nesting issues in simple UI)
+        $categories = Category::whereNull('parent_id')
+            ->with(['children' => function($q) {
+                $q->withCount('products');
+                $q->with(['children' => function($q2) {
+                     $q2->withCount('products');
+                }]);
+            }])
+            ->withCount('products')
+            ->latest()
+            ->paginate(15);
+
+        // Parents for dropdown
         $parents = Category::whereNull('parent_id')->with('children')->get();
-        
+
         return Inertia::render('Admin/Categories/Index', [
             'categories' => $categories,
-            'parents' => $categories // Sending all for now as requested in UI
+            'parents' => $parents
         ]);
     }
 
@@ -41,11 +51,11 @@ class CategoryController extends Controller
         if ($category->products()->count() > 0) {
             return back()->with('error', 'این دسته‌بندی دارای محصول است و حذف نمی‌شود.');
         }
-        
+
         if ($category->children()->count() > 0) {
             return back()->with('error', 'این دسته‌بندی دارای زیرمجموعه است.');
         }
-        
+
         $category->delete();
         return back()->with('message', 'دسته‌بندی حذف شد.');
     }
@@ -57,13 +67,13 @@ class CategoryController extends Controller
         if (!$sample) {
             return response()->json(['error' => 'خطا در دریافت اطلاعات از وردپرس'], 500);
         }
-        
+
         $keys = array_keys($sample);
         if (!in_array('image.src', $keys)) $keys[] = 'image.src';
-        
+
         // Remove duplicate keys to avoid React warnings
         $keys = array_values(array_unique($keys));
-        
+
         return response()->json(['keys' => $keys]);
     }
 

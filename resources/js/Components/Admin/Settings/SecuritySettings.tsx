@@ -1,13 +1,36 @@
 import React from 'react';
-import { Shield, Lock, Activity, Eye, AlertTriangle } from 'lucide-react';
+import { Shield, Lock, Activity, Eye, AlertTriangle, UserIcon } from 'lucide-react';
 
-export default function SecuritySettings({ data, setData }: { data: any, setData: any }) {
+export default function SecuritySettings({ data, setData, roles }: { data: any, setData: any, roles?: {id: number, name: string}[] }) {
     return (
         <div className="space-y-6 animate-in fade-in">
             <h3 className="text-lg font-bold text-gray-800 border-b pb-2 flex items-center gap-2">
                 <Shield size={20} className="text-red-600" />
-                تنظیمات امنیتی سیستم
+                تنظیمات امنیتی و سطح دسترسی
             </h3>
+
+            {/* Default Role */}
+            <div className="bg-white border border-gray-200 p-4 rounded-xl space-y-4">
+                <div className="flex items-center gap-2 text-gray-800 font-bold mb-2">
+                    <UserIcon size={16} className="text-blue-600" /> نقش پیش‌فرض کاربران جدید
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">نقش دسترسی در هنگام ثبت‌نام</label>
+                    <select
+                        value={data.default_role}
+                        onChange={(e) => setData('default_role', e.target.value)}
+                        className="w-full md:w-1/2 border border-gray-300 rounded-lg px-3 py-2 bg-white"
+                    >
+                        <option value="user">کاربر عادی (user) - پیش‌فرض سیستم</option>
+                        {roles && roles.filter(r => r.name !== 'user').map(role => (
+                            <option key={role.id} value={role.name}>{role.name}</option>
+                        ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-2">
+                        پس از ثبت‌نام موفق، به صورت خودکار این نقش به کاربر داده می‌شود. تغییر این مورد با احتیاط انجام شود.
+                    </p>
+                </div>
+            </div>
 
             {/* General Security */}
             <div className="bg-red-50/50 border border-red-100 p-4 rounded-xl space-y-4">
@@ -17,22 +40,22 @@ export default function SecuritySettings({ data, setData }: { data: any, setData
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">حداکثر تلاش ناموفق (Lockout)</label>
-                        <input 
-                            type="number" 
-                            value={data.max_login_attempts} 
-                            onChange={e => setData('max_login_attempts', e.target.value)} 
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-center" 
+                        <input
+                            type="number"
+                            value={data.max_login_attempts}
+                            onChange={e => setData('max_login_attempts', e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-center"
                             placeholder="5"
                         />
                         <p className="text-xs text-gray-500 mt-1">تعداد دفعاتی که کاربر می‌تواند رمز اشتباه وارد کند.</p>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">مدت زمان قفل شدن (دقیقه)</label>
-                        <input 
-                            type="number" 
-                            value={data.lockout_time} 
-                            onChange={e => setData('lockout_time', e.target.value)} 
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-center" 
+                        <input
+                            type="number"
+                            value={data.lockout_time}
+                            onChange={e => setData('lockout_time', e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-center"
                             placeholder="60"
                         />
                         <p className="text-xs text-gray-500 mt-1">مدت زمانی که کاربر پس از تلاش‌های ناموفق مسدود می‌شود.</p>
@@ -45,15 +68,15 @@ export default function SecuritySettings({ data, setData }: { data: any, setData
                 <div className="flex items-center gap-2 text-gray-800 font-bold mb-2">
                     <Activity size={16} /> نشست‌های کاربری (Session)
                 </div>
-                
+
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">تایم‌اوت قفل صفحه (دقیقه)</label>
                     <div className="flex items-center gap-3">
-                        <input 
-                            type="number" 
-                            value={data.session_timeout} 
-                            onChange={e => setData('session_timeout', e.target.value)} 
-                            className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-center" 
+                        <input
+                            type="number"
+                            value={data.session_timeout}
+                            onChange={e => setData('session_timeout', e.target.value)}
+                            className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-center"
                             placeholder="30"
                         />
                         <span className="text-sm text-gray-600">دقیقه عدم فعالیت</span>
@@ -75,9 +98,9 @@ export default function SecuritySettings({ data, setData }: { data: any, setData
                         <p className="text-xs text-gray-500 mt-1">فعال‌سازی کد امنیتی در فرم‌های ورود و ثبت‌نام برای جلوگیری از ربات‌ها.</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                        <input 
-                            type="checkbox" 
-                            checked={data.captcha_enabled} 
+                        <input
+                            type="checkbox"
+                            checked={data.captcha_enabled}
                             onChange={(e) => setData('captcha_enabled', e.target.checked)}
                             className="sr-only peer"
                         />

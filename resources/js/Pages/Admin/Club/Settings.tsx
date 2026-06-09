@@ -6,9 +6,10 @@ import { Award, Save, Edit2, Shield, Zap, Plus, X, Settings as SettingsIcon, Tra
 
 export default function ClubSettings({ clubs, rules, flash }: any) {
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showCreateRuleModal, setShowCreateRuleModal] = useState(false);
 
     // Create Club Form
-    const { data, setData, post, processing, reset, errors } = useForm({
+    const { data: clubData, setData: setClubData, post: postClub, processing: processingClub, reset: resetClub, errors: errorsClub } = useForm({
         name: '',
         slug: '',
         min_points: '',
@@ -16,41 +17,61 @@ export default function ClubSettings({ clubs, rules, flash }: any) {
         joining_cost: '',
         color: '#000000',
         icon: 'star',
-        is_tier: true, // Default to Tier
+        is_tier: true,
         benefits: [] as string[],
         image: null as File | null
+    });
+
+    // Create Rule Form
+    const { data: ruleData, setData: setRuleData, post: postRule, processing: processingRule, reset: resetRule, errors: errorsRule } = useForm({
+        title: '',
+        action_code: '',
+        points: '',
+        is_active: true,
+        description: ''
     });
 
     const [newBenefit, setNewBenefit] = useState('');
 
     const addBenefit = () => {
         if (newBenefit.trim()) {
-            setData('benefits', [...data.benefits, newBenefit.trim()]);
+            setClubData('benefits', [...clubData.benefits, newBenefit.trim()]);
             setNewBenefit('');
         }
     };
 
     const removeBenefit = (index: number) => {
-        const newBenefits = [...data.benefits];
+        const newBenefits = [...clubData.benefits];
         newBenefits.splice(index, 1);
-        setData('benefits', newBenefits);
+        setClubData('benefits', newBenefits);
     };
 
-    const submitCreate = (e: React.FormEvent) => {
+    const submitCreateClub = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('admin.clubs.store'), {
+        postClub(route('admin.clubs.store'), {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => {
                 setShowCreateModal(false);
-                reset();
+                resetClub();
                 setNewBenefit('');
             }
         });
     };
 
+    const submitCreateRule = (e: React.FormEvent) => {
+        e.preventDefault();
+        postRule(route('admin.point-rules.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setShowCreateRuleModal(false);
+                resetRule();
+            }
+        });
+    };
+
     return (
-        <DashboardLayout breadcrumbs={[{ label: 'تنظیمات باشگاه' }]}>
+        <DashboardLayout breadcrumbs={[{ label: 'تنظیمات باشگاه و امتیازات' }]}>
             <Head title="تنظیمات باشگاه" />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -67,7 +88,7 @@ export default function ClubSettings({ clubs, rules, flash }: any) {
                             سطوح و باشگاه‌ها
                         </h2>
                         <button onClick={() => setShowCreateModal(true)} className="text-sm bg-primary-600 text-white px-3 py-1.5 rounded-lg hover:bg-primary-700 flex items-center gap-1">
-                            <Plus size={16} /> افزودن
+                            <Plus size={16} /> افزودن باشگاه
                         </button>
                     </div>
                     {clubs && clubs.map((club: any) => (
@@ -77,15 +98,80 @@ export default function ClubSettings({ clubs, rules, flash }: any) {
 
                 {/* Point Rules */}
                 <div className="space-y-4">
-                    <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <Zap className="text-amber-500" />
-                        قوانین امتیازدهی
-                    </h2>
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <Zap className="text-amber-500" />
+                            قوانین امتیازدهی (رویدادها)
+                        </h2>
+                        <button onClick={() => setShowCreateRuleModal(true)} className="text-sm bg-amber-500 text-white px-3 py-1.5 rounded-lg hover:bg-amber-600 flex items-center gap-1">
+                            <Plus size={16} /> افزودن رویداد
+                        </button>
+                    </div>
                     {rules && rules.map((rule: any) => (
                         <RuleCard key={rule.id} rule={rule} />
                     ))}
                 </div>
             </div>
+
+            {/* Create Rule Modal */}
+            {showCreateRuleModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-y-auto max-h-[90vh]">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="font-bold text-lg">تعریف رویداد امتیازدهی جدید</h3>
+                            <button onClick={() => setShowCreateRuleModal(false)}><X className="text-gray-400 hover:text-gray-600" /></button>
+                        </div>
+                        <form onSubmit={submitCreateRule} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">عنوان رویداد</label>
+                                <input type="text" value={ruleData.title} onChange={e => setRuleData('title', e.target.value)} className="w-full border rounded-lg px-3 py-2" required placeholder="مثلا: اولین خرید" />
+                                {errorsRule.title && <p className="text-red-500 text-xs mt-1">{errorsRule.title}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1 flex justify-between">
+                                    <span>کد یکتا (Action Code)</span>
+                                    <span className="text-xs text-blue-500">مهم</span>
+                                </label>
+                                <input type="text" value={ruleData.action_code} onChange={e => setRuleData('action_code', e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))} className="w-full border rounded-lg px-3 py-2 dir-ltr text-left" required placeholder="مثال: initial_registration" list="action-codes" />
+                                <datalist id="action-codes">
+                                    <option value="initial_registration">تکمیل ثبت‌نام (initial_registration)</option>
+                                    <option value="referral">معرفی کاربر (referral)</option>
+                                    <option value="daily_login">ورود روزانه (daily_login)</option>
+                                    <option value="profile_completion">تکمیل پروفایل (profile_completion)</option>
+                                    <option value="birthday">روز تولد (birthday)</option>
+                                    <option value="lucky_wheel_spin">چرخش گردونه شانس (lucky_wheel_spin)</option>
+                                    <option value="first_purchase">اولین خرید (first_purchase)</option>
+                                    <option value="purchase">ثبت فاکتور/خرید (purchase)</option>
+                                    <option value="review">ثبت نظر (review)</option>
+                                </datalist>
+                                <p className="text-[10px] text-gray-500 mt-1">توابع سیستمی را دقیقاً با این نام‌ها وارد کنید (مثل: referral برای معرفی کاربر). برای رویدادهای دلخواه نام انگلیسی تایپ کنید.</p>
+                                {errorsRule.action_code && <p className="text-red-500 text-xs mt-1">{errorsRule.action_code}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">امتیاز (مثبت = پاداش، منفی = کسر)</label>
+                                <input type="number" value={ruleData.points} onChange={e => setRuleData('points', e.target.value)} className="w-full border rounded-lg px-3 py-2" required placeholder="مثلا 100" />
+                                {errorsRule.points && <p className="text-red-500 text-xs mt-1">{errorsRule.points}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">توضیحات اختیاری</label>
+                                <textarea value={ruleData.description} onChange={e => setRuleData('description', e.target.value)} className="w-full border rounded-lg px-3 py-2 h-20" placeholder="توضیح مربوط به این عملیات..."></textarea>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                                <input type="checkbox" id="rule_active" checked={ruleData.is_active} onChange={e => setRuleData('is_active', e.target.checked)} className="rounded" />
+                                <label htmlFor="rule_active" className="text-sm cursor-pointer">فعال بودن و اعمال در سیستم</label>
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-4">
+                                <button type="button" onClick={() => setShowCreateRuleModal(false)} className="px-4 py-2 text-gray-600 border rounded-lg hover:bg-gray-50">انصراف</button>
+                                <button disabled={processingRule} className="px-6 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center gap-2">
+                                    {processingRule && <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>}
+                                    ذخیره رویداد
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Create Club Modal */}
             {showCreateModal && (
@@ -390,6 +476,7 @@ const RuleCard = ({ rule }: any) => {
         is_active: Boolean(rule.is_active)
     });
     const [editing, setEditing] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -398,16 +485,34 @@ const RuleCard = ({ rule }: any) => {
         });
     };
 
+    const deleteRule = () => {
+        if(confirm('آیا از حذف این رویداد اطمینان دارید؟')) {
+            setDeleting(true);
+            router.delete(route('admin.point-rules.destroy', rule.id), {
+                preserveScroll: true,
+                onFinish: () => setDeleting(false),
+            });
+        }
+    };
+
     return (
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-2">
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-2 relative group">
             <div className="flex justify-between items-start">
                 <div>
-                    <h4 className="font-bold text-sm">{rule.title}</h4>
-                    <p className="text-xs text-gray-400">{rule.description}</p>
+                    <h4 className="font-bold text-sm flex gap-2 items-center">
+                        {rule.title}
+                        <span className="text-[10px] text-gray-400 font-mono bg-gray-50 px-1 py-0.5 rounded border">{rule.action_code}</span>
+                    </h4>
+                    <p className="text-xs text-gray-400 mt-1">{rule.description}</p>
                 </div>
-                <button onClick={() => setEditing(!editing)} className="text-gray-400 hover:text-primary-600">
-                    <Edit2 size={16} />
-                </button>
+                <div className="flex gap-1">
+                    <button onClick={() => setEditing(!editing)} className="text-gray-400 hover:text-primary-600 p-1">
+                        <Edit2 size={16} />
+                    </button>
+                    <button onClick={deleteRule} disabled={deleting} className="text-gray-400 hover:text-red-600 p-1 disabled:opacity-50">
+                        <Trash2 size={16} />
+                    </button>
+                </div>
             </div>
 
             {editing ? (

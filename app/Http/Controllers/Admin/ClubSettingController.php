@@ -140,6 +140,39 @@ class ClubSettingController extends Controller
         return back()->with('message', 'باشگاه با موفقیت حذف شد.');
     }
 
+    public function storeRule(Request $request)
+    {
+        $validated = $request->validate([
+            'action_code' => 'required|string|unique:point_rules',
+            'title' => 'required|string',
+            'points' => 'required|integer',
+            'is_active' => 'boolean',
+            'type' => 'nullable|string',
+            'description' => 'nullable|string'
+        ]);
+
+        PointRule::create($validated);
+
+        ActivityLog::log('rule.created', "قانون امتیازدهی جدید ایجاد شد: {$validated['title']}", [
+            'admin_id' => auth()->id()
+        ]);
+
+        return back()->with('message', 'قانون امتیازدهی جدید افزوده شد.');
+    }
+
+    public function destroyRule($id)
+    {
+        $rule = PointRule::findOrFail($id);
+
+        $rule->delete();
+
+        ActivityLog::log('rule.deleted', "قانون امتیازدهی {$rule->title} حذف شد", [
+            'admin_id' => auth()->id()
+        ]);
+
+        return back()->with('message', 'قانون امتیازدهی حذف شد.');
+    }
+
     public function updateRule(Request $request, $id)
     {
         $rule = PointRule::findOrFail($id);

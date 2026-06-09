@@ -49,6 +49,7 @@ class WpCategoryService extends BaseWordPressService
 
                     $title = Arr::get($cat, $mapping['title'] ?? 'name');
                     $slug = Arr::get($cat, $mapping['slug'] ?? 'slug');
+                    $slug = urldecode($slug);
                     if (empty($slug) && $title) {
                         $slug = Str::slug($title);
                     }
@@ -73,12 +74,16 @@ class WpCategoryService extends BaseWordPressService
                     if (!$title || !$wpId) continue;
 
                     $slug = Arr::get($cat, $mapping['slug'] ?? 'slug');
+                    $slug = urldecode($slug);
                     if (empty($slug)) {
                         $slug = Str::slug($title);
                     }
 
                     $icon = isset($mapping['image']) ? Arr::get($cat, $mapping['image']) : null;
                     if(is_array($icon)) $icon = $icon['src'] ?? null;
+                    if (empty($icon)) {
+                        $icon = 'folder'; // Default category icon
+                    }
 
                     // جستجو بر اساس wp_id (اولویت) یا slug از مپ
                     $category = $categoriesByWpId->get($wpId);

@@ -68,7 +68,8 @@ class CreateNewUser implements CreatesNewUsers
         ]);
 
         // اختصاص نقش پیش‌فرض
-        $user->assignRole('user');
+        $defaultRole = \App\Models\SystemSetting::getValue('security', 'default_role', 'user');
+        $user->assignRole($defaultRole);
 
         // پردازش کد معرف (Referral System)
         if (!empty($input['referral_code'])) {
