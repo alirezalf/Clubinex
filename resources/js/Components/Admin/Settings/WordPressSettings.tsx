@@ -119,7 +119,7 @@ export default function WordPressSettings({ data, setData }: Props) {
                         <span>{testResult.message}</span>
                         {testResult.success && testResult.info && (
                             <span className="text-xs opacity-80 mr-2">
-                                (WordPress: {testResult.info.wp_version}, WC: {testResult.info.wc_version})
+                                (دسترسی به محصولات تایید شد)
                             </span>
                         )}
                     </div>

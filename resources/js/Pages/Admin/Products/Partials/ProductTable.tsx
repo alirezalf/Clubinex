@@ -22,8 +22,19 @@ export default function ProductTable({ products, onImportSerial, onEdit, onDelet
                             <tr key={product.id} className="hover:bg-gray-50 transition">
                                 <td className="px-6 py-4 text-gray-500">#{product.id}</td>
                                 <td className="px-6 py-4 font-bold">
-                                    {product.title}
-                                    <div className="text-xs text-gray-400 font-normal">{product.model_name}</div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg border bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+                                            {product.display_image ? (
+                                                <img src={product.display_image} alt={product.title} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="text-gray-400 text-[10px]">بدون عکس</span>
+                                            )}
+                                        </div>
+                                        <div>
+                                            {product.title}
+                                            <div className="text-xs text-gray-400 font-normal">{product.model_name}</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4">{product.category?.title || '-'}</td>
                                 <td className="px-6 py-4">{product.points_value}</td>
@@ -40,28 +51,28 @@ export default function ProductTable({ products, onImportSerial, onEdit, onDelet
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-2">
-                                        <button 
+                                        <button
                                             onClick={() => onManageSerials(product)}
                                             className="text-purple-600 hover:bg-purple-50 p-1.5 rounded-lg transition"
                                             title="مدیریت سریال‌ها"
                                         >
                                             <List size={16} />
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => onImportSerial(product)}
                                             className="text-green-600 hover:bg-green-50 p-1.5 rounded-lg transition"
                                             title="ایمپورت اکسل سریال"
                                         >
                                             <FileSpreadsheet size={16} />
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => onEdit(product)}
                                             className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-lg transition"
                                             title="ویرایش محصول"
                                         >
                                             <Edit2 size={16} />
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => onDelete(product.id)}
                                             className="text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition"
                                             title="حذف محصول"

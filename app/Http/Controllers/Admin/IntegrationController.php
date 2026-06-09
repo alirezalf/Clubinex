@@ -24,27 +24,29 @@ class IntegrationController extends Controller
         try {
             $response = Http::withBasicAuth($request->key, $request->secret)
                 ->withOptions(['verify' => app()->isProduction()])
-                ->get(rtrim($request->url, '/') . "/wp-json/wc/v3/system_status", [
-                    'timeout' => 10
+                ->get(rtrim($request->url, '/') . "/wp-json/wc/v3/products", [
+                    'consumer_key' => $request->key,
+                    'consumer_secret' => $request->secret,
+                    'per_page' => 1,
+                    'timeout' => 15
                 ]);
 
             if ($response->successful()) {
-                $data = $response->json();
-                $env = $data['environment'] ?? [];
-
                 return response()->json([
                     'success' => true,
                     'message' => 'اتصال با موفقیت برقرار شد.',
                     'info' => [
-                        'site_url' => $env['site_url'] ?? $request->url,
-                        'wc_version' => $env['version'] ?? 'Unknown',
-                        'wp_version' => $env['wp_version'] ?? 'Unknown',
+                        'site_url' => $request->url,
+                        'status' => 'Connected successfully to WooCommerce REST API',
                     ]
                 ]);
             } else {
+                $errorBody = $response->json();
+                $errorMessage = isset($errorBody['message']) ? $errorBody['message'] : $response->body();
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'خطا در اتصال: ' . $response->status() . ' - ' . $response->body()
+                    'message' => 'خطا در اتصال: ' . $response->status() . ' - ' . $errorMessage
                 ], 400);
             }
         } catch (\Exception $e) {

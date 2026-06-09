@@ -170,13 +170,19 @@ class ProductController extends Controller
         ]);
 
         if ($request->boolean('background')) {
+            $wpKey = \App\Models\SystemSetting::getValue('wordpress', 'wp_consumer_key');
+            $wpSecret = \App\Models\SystemSetting::getValue('wordpress', 'wp_consumer_secret');
+            $wpUrl = \App\Models\SystemSetting::getValue('wordpress', 'wp_url');
+
             // Get total pages by fetching 1 item
-            $response = \Illuminate\Support\Facades\Http::withBasicAuth(env('WP_KEY', config('services.wordpress.key')), env('WP_SECRET', config('services.wordpress.secret')))
+            $response = \Illuminate\Support\Facades\Http::withBasicAuth($wpKey, $wpSecret)
                 ->withOptions(['verify' => app()->isProduction()])
-                ->get(rtrim(env('WP_URL', config('services.wordpress.url')), '/') . '/wp-json/wc/v3/products', [
+                ->get(rtrim($wpUrl, '/') . '/wp-json/wc/v3/products', [
                     'per_page' => 20,
                     'page' => 1,
                     'status' => 'publish',
+                    'consumer_key' => $wpKey,
+                    'consumer_secret' => $wpSecret,
                 ]);
 
             if ($response->successful()) {

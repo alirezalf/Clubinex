@@ -174,6 +174,8 @@ class SettingController extends Controller
                 $group = 'email';
             } elseif (str_starts_with($key, 'sms_') || $key === 'resend_interval') {
                 $group = 'sms';
+            } elseif (str_starts_with($key, 'wp_')) {
+                $group = 'wordpress';
             } elseif (str_starts_with($key, 'enable_')) {
                 $group = 'modules';
             } else {

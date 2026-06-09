@@ -20,6 +20,8 @@ class WpProductService extends BaseWordPressService
                     'per_page' => $perPage,
                     'page' => $page,
                     'status' => 'publish',
+                    'consumer_key' => $this->key,
+                    'consumer_secret' => $this->secret,
                 ]);
 
             if ($response->successful()) {

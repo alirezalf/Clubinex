@@ -52,6 +52,11 @@ class Product extends Model
             return $image;
         }
 
+        // اگر با /uploads شروع می‌شود (فایل‌های آپلود مستقیم)
+        if (str_starts_with($image, '/uploads/')) {
+            return $image;
+        }
+
         // مسیردهی فایل لوکال
         return Storage::url($image);
     }

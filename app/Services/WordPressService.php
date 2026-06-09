@@ -38,7 +38,9 @@ class WordPressService
             $response = Http::withBasicAuth($this->key, $this->secret)
                 ->withOptions(['verify' => app()->isProduction()])
                 ->get(rtrim($this->url, '/') . "/wp-json/wc/v3/{$type}", [
-                    'per_page' => 1
+                    'per_page' => 1,
+                    'consumer_key' => $this->key,
+                    'consumer_secret' => $this->secret,
                 ]);
 
             if ($response->successful()) {
@@ -65,6 +67,8 @@ class WordPressService
                     'per_page' => $perPage,
                     'page' => $page,
                     'hide_empty' => false,
+                    'consumer_key' => $this->key,
+                    'consumer_secret' => $this->secret,
                 ]);
 
             if ($response->successful()) {
@@ -88,7 +92,7 @@ class WordPressService
                     // دریافت ID واقعی وردپرس
                     $wpId = Arr::get($cat, 'id');
                     $title = Arr::get($cat, $mapping['title'] ?? 'name');
-                    
+
                     if (!$title || !$wpId) continue;
 
                     $slug = Arr::get($cat, $mapping['slug'] ?? 'slug');
@@ -104,7 +108,7 @@ class WordPressService
                     $parentId = null;
                     // در ووکامرس 'parent' حاوی ID والد در وردپرس است
                     $wpParentId = isset($cat['parent']) ? (int)$cat['parent'] : 0;
-                    
+
                     if ($wpParentId > 0) {
                         // جستجو در دیتابیس خودمان بر اساس wp_id
                         $parentCat = Category::where('wp_id', $wpParentId)->first();
@@ -115,7 +119,7 @@ class WordPressService
 
                     // تلاش برای پیدا کردن رکورد موجود
                     $category = Category::where('wp_id', $wpId)->first();
-                    
+
                     // اگر با wp_id پیدا نشد، با slug چک کن تا از تکرار جلوگیری شود
                     if (!$category) {
                         $category = Category::where('slug', $slug)->first();
@@ -174,13 +178,15 @@ class WordPressService
                     'per_page' => $perPage,
                     'page' => $page,
                     'status' => 'publish',
+                    'consumer_key' => $this->key,
+                    'consumer_secret' => $this->secret,
                 ]);
 
             if ($response->successful()) {
                 $products = $response->json();
                 $totalProducts = (int) $response->header('X-WP-Total');
                 $totalPages = (int) $response->header('X-WP-TotalPages');
-                
+
                 $created = 0;
                 $updated = 0;
 
@@ -196,16 +202,16 @@ class WordPressService
                 foreach ($products as $prod) {
                     $wpId = Arr::get($prod, 'id');
                     $title = Arr::get($prod, $mapping['title'] ?? 'name');
-                    
+
                     if (!$wpId || !$title) continue;
 
                     $modelName = Arr::get($prod, $mapping['model_name'] ?? 'sku');
                     $description = strip_tags(Arr::get($prod, $mapping['description'] ?? 'short_description'));
                     $image = Arr::get($prod, $mapping['image'] ?? 'images.0.src');
-                    
+
                     // منطق پیدا کردن دسته‌بندی
                     $categoryId = null;
-                    
+
                     // کلید دسته‌بندی در مپینگ (پیش‌فرض 'categories')
                     $catKey = $mapping['category'] ?? 'categories';
                     $rawCats = Arr::get($prod, $catKey);
@@ -216,7 +222,7 @@ class WordPressService
                         // معمولاً اولین دسته، دسته اصلی است
                         $firstCat = $rawCats[0];
                         $wpCatId = isset($firstCat['id']) ? $firstCat['id'] : null;
-                        
+
                         if ($wpCatId) {
                             $category = Category::where('wp_id', $wpCatId)->first();
                             if ($category) {

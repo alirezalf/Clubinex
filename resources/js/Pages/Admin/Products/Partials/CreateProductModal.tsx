@@ -124,6 +124,7 @@ export default function CreateProductModal({ isOpen, onClose, categories, produc
                                     label="تصویر محصول"
                                     onChange={(file) => setData('image', file)}
                                     error={errors.image}
+                                    previewUrl={product?.display_image}
                                 />
                             </div>
 

@@ -31,7 +31,9 @@ class BaseWordPressService
             $response = Http::withBasicAuth($this->key, $this->secret)
                 ->withOptions(['verify' => app()->isProduction()])
                 ->get(rtrim($this->url, '/') . "/wp-json/wc/v3/{$type}", [
-                    'per_page' => 1
+                    'per_page' => 1,
+                    'consumer_key' => $this->key,
+                    'consumer_secret' => $this->secret,
                 ]);
 
             if ($response->successful()) {

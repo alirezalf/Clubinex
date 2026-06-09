@@ -20,6 +20,8 @@ class WpCategoryService extends BaseWordPressService
                     'per_page' => $perPage,
                     'page' => $page,
                     'hide_empty' => false,
+                    'consumer_key' => $this->key,
+                    'consumer_secret' => $this->secret,
                 ]);
 
             if ($response->successful()) {
