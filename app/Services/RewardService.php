@@ -152,6 +152,12 @@ class RewardService
 
             // ارسال نوتیفیکیشن به کاربر
             try {
+                // ارسال اعلان سیستمی (صرف نظر از وجود قالب سفارشی)
+                \Illuminate\Support\Facades\Notification::send($user, new \App\Notifications\SystemNotification(
+                    'دریافت جایزه',
+                    "درخواست شما برای دریافت جایزه '{$reward->title}' با موفقیت ثبت شد."
+                ));
+
                 NotificationService::send('reward_redemption', $user, [
                     'reward_title' => $reward->title,
                     'points' => $reward->points_cost

@@ -73,6 +73,7 @@ Route::middleware(['auth', 'active.user'])->group(function () {
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
     Route::get('/surveys/{survey:slug}', [SurveyController::class, 'show'])->name('surveys.show');
     Route::post('/surveys/{survey}/submit', [SurveyController::class, 'submit'])->name('surveys.submit');
+    Route::get('/surveys/{survey:slug}/result', [SurveyController::class, 'result'])->name('surveys.result');
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

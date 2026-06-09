@@ -83,7 +83,7 @@ export default function SurveysIndex({ surveys, history }: Props) {
 
                             {survey.is_available || survey.is_participated ? (
                                 <Link
-                                    href={route('surveys.show', survey.slug)}
+                                    href={survey.is_participated ? route('surveys.result', survey.slug) : route('surveys.show', survey.slug)}
                                     className={`w-full py-2.5 rounded-xl text-center font-bold text-sm transition flex items-center justify-center gap-2 ${
                                         survey.is_participated
                                         ? 'bg-gray-100 text-gray-500 hover:bg-gray-200'

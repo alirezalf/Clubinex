@@ -32,9 +32,9 @@ export default function RewardItem({ reward, onRedeem, processing, points }: Pro
                 ) : (
                     <Gift size={48} className="text-gray-300 group-hover:scale-110 transition-transform duration-300" />
                 )}
-                
+
                 {reward.club && (
-                    <div 
+                    <div
                         className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm"
                         style={{ backgroundColor: reward.club.color }}
                     >
@@ -55,8 +55,8 @@ export default function RewardItem({ reward, onRedeem, processing, points }: Pro
                         onClick={() => onRedeem(reward.id, reward.title)}
                         disabled={!reward.can_redeem || processing}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2
-                            ${reward.can_redeem 
-                                ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow' 
+                            ${reward.can_redeem
+                                ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow'
                                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                             }`}
                     >
@@ -64,10 +64,10 @@ export default function RewardItem({ reward, onRedeem, processing, points }: Pro
                         دریافت
                     </button>
                 </div>
-                
+
                 {!reward.can_redeem && (
                     <div className="mt-2 text-xs text-red-500 text-center bg-red-50 py-1 rounded">
-                        {points < reward.points_cost ? 'امتیاز ناکافی' : 'عدم دسترسی سطح باشگاه'}
+                        {reward.stock === 0 ? 'ناموجود' : (points < reward.points_cost ? 'امتیاز ناکافی' : 'عدم دسترسی سطح باشگاه')}
                     </div>
                 )}
             </div>

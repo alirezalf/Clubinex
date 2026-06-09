@@ -272,13 +272,13 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
                             "relative flex items-center rounded-xl transition-all duration-200 group cursor-pointer w-full text-right",
                             isCollapsed ? "justify-center p-2.5" : "justify-between px-3 py-2.5",
                             active
-                                ? (isAdminItem ? "bg-red-50/50 font-bold shadow-sm" : "bg-amber-50/50 font-bold shadow-sm")
-                                : "opacity-80"
+                                ? (isAdminItem ? "bg-red-50/50 font-bold shadow-sm border border-red-100" : "bg-amber-50/50 font-bold shadow-sm border border-amber-100")
+                                : "font-semibold border border-transparent shadow-sm bg-gray-50/60"
                         )}
                         style={{
                             backgroundColor: active
                                 ? (isAdminItem ? 'color-mix(in srgb, #fef2f2, transparent 50%)' : 'color-mix(in srgb, #fffbeb, transparent 50%)')
-                                : (isHovered ? 'var(--sidebar-hover-bg)' : 'transparent'),
+                                : (isHovered ? 'var(--sidebar-hover-bg)' : undefined),
                             color: active
                                 ? (isAdminItem ? '#dc2626' : '#b45309')
                                 : (isHovered ? 'var(--sidebar-hover-text)' : undefined)
@@ -322,6 +322,9 @@ export default function SidebarMenu({ isCollapsed, setIsOpen, menuGroups, adminI
                             <div className="pl-2 pr-4 space-y-1 mt-1 border-r-2 border-red-100 pb-1">
                                 {item.subItems!.filter(si => {
                                     if (!searchTerm) return true;
+                                    const parentMatches = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                          (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()));
+                                    if (parentMatches) return true;
                                     return si.name.toLowerCase().includes(searchTerm.toLowerCase());
                                 }).map((sub) => renderItem(sub, isAdminItem, true))}
                             </div>

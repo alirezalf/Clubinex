@@ -131,6 +131,56 @@ class SurveyController extends Controller
         ]);
     }
 
+    public function result(Survey $survey)
+    {
+        $user = auth()->user();
+
+        $answers = SurveyAnswer::with('question')
+            ->where('survey_id', $survey->id)
+            ->where('user_id', $user->id)
+            ->get();
+
+        if ($answers->isEmpty()) {
+            return redirect()->route('surveys.index')->with('error', 'شما در این آزمون شرکت نکرده‌اید.');
+        }
+
+        $totalScore = $answers->sum('score');
+        $maxScore = $survey->questions()->sum('points');
+        $correctCount = $answers->filter(fn($ans) => $ans->isCorrect())->count();
+        $totalQuestions = $answers->count();
+        $earnedPoints = session('earned_points', 0); // Retrieved from session flash data from submit
+
+        $detailedAnswers = [];
+        if ($survey->isQuiz()) {
+            $detailedAnswers = $answers->map(function ($ans) {
+                return [
+                    'question_id' => $ans->survey_question_id,
+                    'question_title' => $ans->question->question,
+                    'is_correct' => $ans->isCorrect(),
+                    'user_answer' => $ans->answer_text,
+                    'feedback' => $ans->feedback,
+                    'options' => $ans->question->options,
+                ];
+            });
+        }
+
+        return Inertia::render('Surveys/Result', [
+            'survey' => [
+                'title' => $survey->title,
+                'type' => $survey->type === 'quiz' ? 'مسابقه' : 'نظرسنجی',
+            ],
+            'result' => [
+                'score' => $totalScore,
+                'max_score' => $maxScore,
+                'correct_count' => $correctCount,
+                'total_questions' => $totalQuestions,
+                'earned_points' => $earnedPoints,
+                'percentage' => $maxScore > 0 ? round(($totalScore / $maxScore) * 100) : 0,
+                'details' => $detailedAnswers,
+            ]
+        ]);
+    }
+
     public function submit(Request $request, Survey $survey)
     {
         if (!$survey->isAvailable()) {
@@ -211,20 +261,7 @@ class SurveyController extends Controller
 
             DB::commit();
 
-            return Inertia::render('Surveys/Result', [
-                'survey' => [
-                    'title' => $survey->title,
-                    'type' => $survey->type === 'quiz' ? 'مسابقه' : 'نظرسنجی',
-                ],
-                'result' => [
-                    'score' => $totalScore,
-                    'max_score' => $maxScore,
-                    'correct_count' => $correctCount,
-                    'total_questions' => count($request->answers),
-                    'earned_points' => $earnedPoints,
-                    'percentage' => $maxScore > 0 ? round(($totalScore / $maxScore) * 100) : 0
-                ]
-            ]);
+            return redirect()->route('surveys.result', $survey->slug)->with('earned_points', $earnedPoints);
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -117,25 +117,19 @@ class HandleInertiaRequests extends Middleware
         $ticketBadges = ['user' => 0, 'admin' => 0, 'rewards' => 0];
 
         if ($user) {
-            $ticketBadges['user'] = \Illuminate\Support\Facades\Cache::remember("user_badges_{$user->id}", 120, function() use ($user) {
-                return Ticket::where('user_id', $user->id)
+            $ticketBadges['user'] = Ticket::where('user_id', $user->id)
                              ->where('status', 'answered')
                              ->count();
-            });
 
             if ($user->hasRole(['super-admin', 'admin', 'staff'])) {
-                $ticketBadges['admin'] = \Illuminate\Support\Facades\Cache::remember("admin_ticket_badges_{$user->id}", 120, function() use ($user) {
-                    $query = Ticket::whereIn('status', ['open', 'customer_reply']);
-                    if (!$user->hasRole('super-admin')) {
-                        $query->where('assigned_to', $user->id);
-                    }
-                    return $query->count();
-                });
+                $query = Ticket::whereIn('status', ['open', 'customer_reply']);
+                if (!$user->hasRole('super-admin')) {
+                    $query->where('assigned_to', $user->id);
+                }
+                $ticketBadges['admin'] = $query->count();
 
                 // Count pending reward redemptions
-                $ticketBadges['rewards'] = \Illuminate\Support\Facades\Cache::remember("admin_reward_badges", 120, function() {
-                    return \App\Models\RewardRedemption::where('status', 'pending')->count();
-                });
+                $ticketBadges['rewards'] = \App\Models\RewardRedemption::where('status', 'pending')->count();
             }
         }
 
