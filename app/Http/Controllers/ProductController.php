@@ -39,9 +39,7 @@ class ProductController extends Controller
         }
 
         $products = $productsQuery->paginate(12)->appends($request->all());
-        $categories = \Illuminate\Support\Facades\Cache::remember('product_categories_list', 3600, function() {
-            return Category::select('id', 'title', 'slug', 'parent_id', 'icon')->get();
-        });
+        $categories = Category::select('id', 'title', 'slug', 'parent_id', 'icon')->get();
 
         $user = Auth::user();
 
@@ -178,7 +176,8 @@ class ProductController extends Controller
             );
             return redirect()->route('products.index')->with('message', 'درخواست ثبت محصول با موفقیت ارسال شد و پس از بررسی تیم پشتیبانی اعمال خواهد شد.');
         } catch (\Exception $e) {
-            return back()->with('error', 'خطا در ثبت محصول: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Product Registration Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return back()->with('error', 'خطا در ثبت محصول. لطفا دوباره تلاش کنید یا با پشتیبانی تماس بگیرید. جزئیات در لاگ سرور ثبت شد.');
         }
     }
 
@@ -226,7 +225,8 @@ class ProductController extends Controller
             );
             return redirect()->route('products.index')->with('message', 'درخواست ثبت محصول با موفقیت ویرایش شد.');
         } catch (\Exception $e) {
-            return back()->with('error', 'خطا در ویرایش محصول: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Product Update Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return back()->with('error', 'خطا در ویرایش محصول. لطفا بررسی کنید یا با پشتیبانی تماس بگیرید. لاگ سرور ثبت شد.');
         }
     }
 

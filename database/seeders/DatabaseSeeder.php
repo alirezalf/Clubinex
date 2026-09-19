@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
         // 4. فراخوانی سایر سیدرها
         $this->call([
             SettingSeeder::class,
-            ProvinceSeeder::class, // Added before UserSeeder
+            ProvinceCitySeeder::class, // Added before UserSeeder
             RoleSeeder::class,
             PointRuleSeeder::class,
             EmailThemeSeeder::class,

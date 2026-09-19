@@ -52,6 +52,8 @@ class RoleController extends Controller
             $role->syncPermissions($validated['permissions']);
         }
 
+        \Illuminate\Support\Facades\Cache::forget('admin_users_roles_list');
+
         return back()->with('message', 'نقش جدید ایجاد شد.');
     }
 
@@ -66,6 +68,8 @@ class RoleController extends Controller
             $role->syncPermissions($validated['permissions']);
         }
 
+        \Illuminate\Support\Facades\Cache::forget('admin_users_roles_list');
+
         return back()->with('message', 'نقش بروزرسانی شد.');
     }
 
@@ -73,6 +77,8 @@ class RoleController extends Controller
     {
         $role = Role::findOrFail($id);
         $role->delete();
+
+        \Illuminate\Support\Facades\Cache::forget('admin_users_roles_list');
 
         return back()->with('message', 'نقش حذف شد.');
     }

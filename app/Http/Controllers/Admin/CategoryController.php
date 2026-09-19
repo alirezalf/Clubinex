@@ -26,7 +26,7 @@ class CategoryController extends Controller
             ->paginate(15);
 
         // Parents for dropdown
-        $parents = Category::whereNull('parent_id')->with('children')->get();
+        $parents = Category::all();
 
         return Inertia::render('Admin/Categories/Index', [
             'categories' => $categories,

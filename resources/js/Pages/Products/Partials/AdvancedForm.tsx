@@ -148,7 +148,35 @@ export default function AdvancedForm({
                         disabled={!!prefilledProduct}
                     >
                         <option value="">انتخاب کنید...</option>
-                        {categories.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+                        {(() => {
+                            // Build tree from flat list
+                            const buildTree = (cats: any[], parentId: number | null = null) => {
+                                return cats
+                                    .filter(c => c.parent_id === parentId)
+                                    .map(c => ({
+                                        ...c,
+                                        children: buildTree(cats, c.id)
+                                    }));
+                            };
+
+                            const categoryTree = buildTree(categories);
+
+                            const renderOptions = (cats: any[], prefix = '') => {
+                                let options: any[] = [];
+                                cats.forEach(c => {
+                                    options.push(
+                                        <option key={c.id} value={c.id}>
+                                            {prefix}{c.title}
+                                        </option>
+                                    );
+                                    if (c.children && c.children.length > 0) {
+                                        options = options.concat(renderOptions(c.children, prefix + '— '));
+                                    }
+                                });
+                                return options;
+                            };
+                            return renderOptions(categoryTree);
+                        })()}
                     </FormSelect>
 
                     <FormInput
