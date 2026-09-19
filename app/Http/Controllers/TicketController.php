@@ -49,7 +49,12 @@ class TicketController extends Controller
                 $q->orderBy('created_at', 'asc');
             }, 'messages.user', 'assignedTo'])
             ->findOrFail($id);
-        
+
+        // اگر تیکت پاسخ ادمین دارد و کاربر آن را مشاهده می‌کند، وضعیت را به pending تغییر بده
+        if ($ticket->status === 'answered') {
+            $ticket->update(['status' => 'pending']);
+        }
+
         $messages = $ticket->messages->map(function($msg) {
             $msg->created_at_jalali = $msg->created_at_jalali;
             return $msg;

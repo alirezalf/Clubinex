@@ -254,7 +254,7 @@ class ProductService
      */
     public function processRegistrationStatus(int $id, string $status, ?string $adminNote, int $adminId)
     {
-        $registration = ProductRegistration::findOrFail($id);
+        $registration = ProductRegistration::with('user')->findOrFail($id);
 
         if ($registration->status !== 'pending') {
             throw new Exception('این درخواست قبلاً بررسی شده است.');

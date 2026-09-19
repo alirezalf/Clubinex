@@ -181,22 +181,18 @@ export default function ClubSettings({ clubs, rules, flash }: any) {
                             <h3 className="font-bold text-lg">تعریف باشگاه جدید</h3>
                             <button onClick={() => setShowCreateModal(false)}><X className="text-gray-400 hover:text-gray-600" /></button>
                         </div>
-                        <form onSubmit={submitCreate} className="p-6 space-y-4">
+                        <form onSubmit={submitCreateClub} className="p-6 space-y-4">
                             <div className="flex gap-4 p-3 bg-gray-50 rounded-lg">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        checked={data.is_tier}
-                                        onChange={() => setData('is_tier', true)}
+                                <label className="flex items-center gap-2 cursor-pointer">                                <input type="radio"
+                                        checked={clubData.is_tier}
+                                        onChange={() => setClubData('is_tier', true)}
                                         className="text-primary-600 focus:ring-primary-500"
                                     />
                                     <span className="text-sm font-bold">سطح اصلی (Level)</span>
                                 </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        checked={!data.is_tier}
-                                        onChange={() => setData('is_tier', false)}
+                                <label className="flex items-center gap-2 cursor-pointer">                                    <input type="radio"
+                                        checked={!clubData.is_tier}
+                                        onChange={() => setClubData('is_tier', false)}
                                         className="text-primary-600 focus:ring-primary-500"
                                     />
                                     <span className="text-sm font-bold">باشگاه ویژه (Room)</span>
@@ -205,34 +201,34 @@ export default function ClubSettings({ clubs, rules, flash }: any) {
 
                             <div>
                                 <label className="block text-sm font-medium mb-1">نام باشگاه</label>
-                                <input type="text" value={data.name} onChange={e => setData('name', e.target.value)} className="w-full border rounded-lg px-3 py-2" required />
-                                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                                <input type="text" value={clubData.name} onChange={e => setClubData('name', e.target.value)} className="w-full border rounded-lg px-3 py-2" required />
+                                {errorsClub.name && <p className="text-red-500 text-xs mt-1">{errorsClub.name}</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1">نامک (انگلیسی)</label>
-                                <input type="text" value={data.slug} onChange={e => setData('slug', e.target.value)} className="w-full border rounded-lg px-3 py-2 dir-ltr text-left" required placeholder="example: gold" />
-                                {errors.slug && <p className="text-red-500 text-xs mt-1">{errors.slug}</p>}
+                                <input type="text" value={clubData.slug} onChange={e => setClubData('slug', e.target.value)} className="w-full border rounded-lg px-3 py-2 dir-ltr text-left" required placeholder="example: gold" />
+                                {errorsClub.slug && <p className="text-red-500 text-xs mt-1">{errorsClub.slug}</p>}
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1">حداقل امتیاز (Tier)</label>
-                                    <input type="number" value={data.min_points} onChange={e => setData('min_points', e.target.value)} className="w-full border rounded-lg px-3 py-2" required />
-                                    {errors.min_points && <p className="text-red-500 text-xs mt-1">{errors.min_points}</p>}
+                                    <input type="number" value={clubData.min_points} onChange={e => setClubData('min_points', e.target.value)} className="w-full border rounded-lg px-3 py-2" required />
+                                    {errorsClub.min_points && <p className="text-red-500 text-xs mt-1">{errorsClub.min_points}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1">هزینه عضویت</label>
-                                    <input type="number" value={data.joining_cost} onChange={e => setData('joining_cost', e.target.value)} className="w-full border rounded-lg px-3 py-2" placeholder="0 = رایگان" />
-                                    {errors.joining_cost && <p className="text-red-500 text-xs mt-1">{errors.joining_cost}</p>}
+                                    <input type="number" value={clubData.joining_cost} onChange={e => setClubData('joining_cost', e.target.value)} className="w-full border rounded-lg px-3 py-2" placeholder="0 = رایگان" />
+                                    {errorsClub.joining_cost && <p className="text-red-500 text-xs mt-1">{errorsClub.joining_cost}</p>}
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1">رنگ</label>
-                                <input type="color" value={data.color} onChange={e => setData('color', e.target.value)} className="w-full h-10 border rounded-lg px-1 py-1" />
+                                <input type="color" value={clubData.color} onChange={e => setClubData('color', e.target.value)} className="w-full h-10 border rounded-lg px-1 py-1" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1">تصویر (اختیاری)</label>
-                                <input type="file" onChange={e => setData('image', e.target.files ? e.target.files[0] : null)} className="w-full border rounded-lg px-3 py-2 text-sm" accept="image/*" />
-                                {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image}</p>}
+                                <input type="file" onChange={e => setClubData('image', e.target.files ? e.target.files[0] : null)} className="w-full border rounded-lg px-3 py-2 text-sm" accept="image/*" />
+                                {errorsClub.image && <p className="text-red-500 text-xs mt-1">{errorsClub.image}</p>}
                             </div>
 
                             {/* Benefits Section */}
@@ -265,8 +261,8 @@ export default function ClubSettings({ clubs, rules, flash }: any) {
 
                             <div className="flex justify-end gap-2 pt-2">
                                 <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-gray-600 border rounded-lg hover:bg-gray-50">انصراف</button>
-                                <button disabled={processing} className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 flex items-center gap-2">
-                                    {processing && <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>}
+                                <button disabled={processingClub} className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 flex items-center gap-2">
+                                    {processingClub && <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>}
                                     ذخیره
                                 </button>
                             </div>

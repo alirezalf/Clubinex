@@ -98,11 +98,10 @@ class ClubSettingController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // حذف تصویر قبلی اگر وجود دارد (اختیاری)
-            // if ($club->image) { Storage::delete(...) }
-
             $path = $request->file('image')->store('public/clubs');
             $validated['image'] = Storage::url($path);
+        } else {
+            unset($validated['image']);
         }
 
         $club->update($validated);

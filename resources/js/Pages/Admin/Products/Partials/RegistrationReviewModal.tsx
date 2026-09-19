@@ -9,14 +9,14 @@ interface Props {
 }
 
 export default function RegistrationReviewModal({ isOpen, onClose, registration }: Props) {
-    if (!isOpen || !registration) return null;
-
     const [isZoomed, setIsZoomed] = useState(false);
 
     const { data, setData, post, processing, reset } = useForm({
         status: '',
         admin_note: ''
     });
+
+    if (!isOpen || !registration) return null;
 
     const handleSubmit = (status: 'approved' | 'rejected') => {
         if (status === 'rejected' && !data.admin_note) {

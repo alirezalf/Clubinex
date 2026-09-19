@@ -157,11 +157,28 @@ class ProductController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        $prefilledProduct = null;
+        if ($request->has('product_id')) {
+            $product = Product::select('id', 'title', 'model_name', 'brand', 'category_id', 'display_image')
+                ->find($request->input('product_id'));
+            if ($product) {
+                $prefilledProduct = [
+                    'id' => $product->id,
+                    'title' => $product->title,
+                    'model_name' => $product->model_name,
+                    'brand' => $product->brand ?? '',
+                    'category_id' => $product->category_id,
+                    'image' => $product->display_image,
+                ];
+            }
+        }
+
         return Inertia::render('Products/Create', [
             'categories' => Category::select('id', 'title', 'slug', 'parent_id', 'icon')->get(),
-            'agentInfo' => Auth::user()->isAgent() ? ['mobile' => Auth::user()->mobile] : null
+            'agentInfo' => Auth::user()->isAgent() ? ['mobile' => Auth::user()->mobile] : null,
+            'prefilledProduct' => $prefilledProduct,
         ]);
     }
 

@@ -33,9 +33,17 @@ class PaymentService
     public function requestPayment($amount, $description, $callbackUrl, $mobile = '', $email = '')
     {
         try {
-            $response = Http::post($this->getBaseUrl() . 'request.json', [
+            if (empty($this->merchantId) || str_contains($this->merchantId, 'xxxxxxxx')) {
+                Log::error('Zarinpal merchant_id is not configured or is placeholder.');
+                return [
+                    'success' => false,
+                    'message' => 'شناسه پذیرنده درگاه پرداخت تنظیم نشده است. لطفاً از بخش تنظیمات درگاه، شناسه صحیح را وارد کنید.'
+                ];
+            }
+
+            $response = Http::timeout(15)->post($this->getBaseUrl() . 'request.json', [
                 'merchant_id' => $this->merchantId,
-                'amount' => $amount, // Amount in Toman or Rial based on setting, Zarinpal normally uses Rial but v4 uses Rial by default, some prefer Toman. let's assume Rial.
+                'amount' => $amount,
                 'description' => $description,
                 'callback_url' => $callbackUrl,
                 'metadata' => [
@@ -54,18 +62,48 @@ class PaymentService
                 ];
             }
 
-            Log::error('Zarinpal request failed: ' . json_encode($result));
+            $errorCode = $result['data']['code'] ?? null;
+            $errorMessage = match($errorCode) {
+                -1 => 'پارامترهای ارسال شده ناقص هستند.',
+                -2 => 'پذیرنده یافت نشد (شناسه پذیرنده نامعتبر است).',
+                -3 => 'حساب پذیرنده غیرفعال است.',
+                -4 => 'شناسه پذیرنده معتبر نیست.',
+                -5 => 'پرداخت با این سقف امکان‌پذیر نیست.',
+                -6 => 'سطوح تخفیف پرداخت معتبر نیست.',
+                -7 => 'آدرس بازگشت نامعتبر است.',
+                -8 => 'توضیحات بیش از حدمجاز است (حداکثر ۲۵۶ کاراکتر).',
+                -9 => 'مبلغ پرداخت باید حداقل یک میلیون ریال (۱۰۰ هزار تومان) باشد.',
+                -10 => 'پذیرنده فقط می‌تواند با یک مرچنت‌کد فعال باشد.',
+                -11 => 'درخواست تکراری است.',
+                -12 => 'عملیات پرداخت قبلاً انجام شده است.',
+                -13 => 'پیکربندی پذیرنده نامعتبر است.',
+                -14 => 'پذیرنده سندی پشتیبانی نمی‌کند.',
+                -15 => 'پذیرنده فقط می‌تواند با سند پشتیبانی کند.',
+                -16 => 'پرداخت قبلاً تایید شده است.',
+                -17 => 'پرداخت هنوز تایید نشده است.',
+                -18 => 'عملیات پرداخت با خطا مواجه شد.',
+                -19 => 'پرداخت منقضی شده است.',
+                -20 => 'خطای احراز هویت رمز پذیرنده.',
+                -21 => 'خطا در دریافت مبلغ پرداختی.',
+                -22 => 'خطای سیستمی. لطفاً مجدداً تلاش کنید.',
+                default => 'خطای ناشناخته (کد: ' . ($errorCode ?? 'نامشخص') . ')'
+            };
+
+            Log::error('Zarinpal request failed', ['code' => $errorCode, 'message' => $errorMessage, 'raw' => $result]);
             return [
                 'success' => false,
-                'message' => 'ارتباط با درگاه پرداخت برقرار نشد.',
-                'error' => $result['errors'] ?? 'Unknown Error'
+                'message' => $errorMessage
             ];
 
         } catch (\Exception $e) {
             Log::error('Zarinpal Exception: ' . $e->getMessage());
+            $userMessage = 'خطا در ارتباط با درگاه پرداخت.';
+            if ($e instanceof \Illuminate\Http\Client\ConnectionException) {
+                $userMessage = 'اتصال با سرور درگاه پرداخت برقرار نشد. لطفاً اتصال اینترنت خود را بررسی کرده و مجدداً تلاش کنید.';
+            }
             return [
                 'success' => false,
-                'message' => 'خطا در ارتباط با درگاه پرداخت.'
+                'message' => $userMessage
             ];
         }
     }

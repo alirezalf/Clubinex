@@ -44,7 +44,7 @@ export default function WheelManager({ wheel }: Props) {
         stock: '',
         color: '#ffffff',
         text_color: '#000000',
-        font_size: 12,
+        font_size: 9,
         text_orientation: 'horizontal',
     });
 

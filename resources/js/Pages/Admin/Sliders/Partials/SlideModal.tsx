@@ -51,6 +51,7 @@ export default function SlideModal({ sliderId, slide, onClose }: Props) {
         const routeParams = isEditing ? slide.id : sliderId;
 
         post(route(routeName, routeParams), {
+            forceFormData: true,
             onSuccess: () => onClose(),
             preserveScroll: true
         });

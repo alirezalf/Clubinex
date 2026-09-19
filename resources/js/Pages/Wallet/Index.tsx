@@ -34,7 +34,7 @@ interface Props {
     };
 }
 
-export default function WalletIndex({ wallet, transactions, points, config }: Props) {
+export default function WalletIndex({ wallet, transactions, points, config, flash }: Props & { flash?: { message?: string; error?: string; success?: string } }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         amount: ''
     });
@@ -102,6 +102,13 @@ export default function WalletIndex({ wallet, transactions, points, config }: Pr
     return (
         <DashboardLayout breadcrumbs={[{ label: 'کیف پول' }]}>
             <Head title="کیف پول من" />
+
+            {/* Flash Messages */}
+            {(flash?.error || flash?.success || flash?.message) && (
+                <div className={`mb-6 p-4 rounded-xl text-sm font-medium ${flash?.error ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-green-50 border border-green-200 text-green-700'}`}>
+                    {flash?.error || flash?.success || flash?.message}
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 {/* Balance Cards */}

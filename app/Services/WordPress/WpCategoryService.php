@@ -113,13 +113,9 @@ class WpCategoryService extends BaseWordPressService
                 }
 
                 // --- مرحله دوم: آپدیت روابط والد/فرزند ---
-                // این مرحله جداگانه انجام می‌شود تا مطمئن شویم والدها حتماً ساخته شده‌اند
-                // مجددا همه دسته‌ها را برای روابط لود می‌کنیم
-                $allAffectedWpIds = array_filter(array_unique(array_merge(
-                    array_column($categories, $mapping['wp_id'] ?? 'id'),
-                    array_column($categories, $mapping['parent_id'] ?? 'parent')
-                )));
-                $refreshCategoriesByWpId = Category::whereIn('wp_id', $allAffectedWpIds)->get()->keyBy('wp_id');
+                // مجددا همه دسته‌ها را از دیتابیس بارگذاری می‌کنیم (نه فقط دسته‌های صفحه جاری)
+                // تا روابط والد/فرزند حتی برای دسته‌هایی که در صفحه‌های قبلی ساخته شده‌اند درست باشد
+                $refreshCategoriesByWpId = Category::whereNotNull('wp_id')->get()->keyBy('wp_id');
 
                 foreach ($categories as $cat) {
                     $wpId = Arr::get($cat, $mapping['wp_id'] ?? 'id');

@@ -13,8 +13,11 @@ class TransactionReportService
 
         if ($request->search) {
             $query->whereHas('user', function ($q) use ($request) {
-                $q->where('mobile', 'like', "%{$request->search}%")
-                  ->orWhere('last_name', 'like', "%{$request->search}%");
+                $q->where(function($u) use ($request) {
+                    $u->where('mobile', 'like', "%{$request->search}%")
+                      ->orWhere('first_name', 'like', "%{$request->search}%")
+                      ->orWhere('last_name', 'like', "%{$request->search}%");
+                });
             });
         }
 

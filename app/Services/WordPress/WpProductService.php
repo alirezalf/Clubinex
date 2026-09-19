@@ -71,7 +71,11 @@ class WpProductService extends BaseWordPressService
                     ->get();
 
                 $productsByWpId = $existingProducts->keyBy('wp_id');
-                $productsByModelName = $existingProducts->whereNotNull('model_name')->keyBy('model_name');
+                // Only use model_name fallback when unique among existing products
+                $modelCounts = $existingProducts->whereNotNull('model_name')->countBy('model_name');
+                $productsByModelName = $existingProducts->whereNotNull('model_name')
+                    ->filter(fn($p) => ($modelCounts[$p->model_name] ?? 0) === 1)
+                    ->keyBy('model_name');
 
                 foreach ($products as $prod) {
                     $wpId = Arr::get($prod, 'id');

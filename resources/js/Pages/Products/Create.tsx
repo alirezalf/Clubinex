@@ -48,8 +48,11 @@ type CustomPageProps = PageProps<{
 export default function ProductCreate({ categories, prefilledProduct, agentInfo, editingRegistration, flash }: CustomPageProps) {
     const { auth } = usePage<PageProps>().props;
 
+    // خواندن mode از URL (مثلاً ?mode=advanced)
+    const urlMode = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('mode') : null;
+
     // اگر محصولی از قبل انتخاب شده باشد یا در حال ویرایش باشیم، مستقیماً به تب پیشرفته می‌رویم
-    const initialMode = (prefilledProduct || editingRegistration) ? 'advanced' : 'simple';
+    const initialMode = (prefilledProduct || editingRegistration) ? 'advanced' : (urlMode === 'advanced' ? 'advanced' : 'simple');
     const [regMode, setRegMode] = useState<'simple' | 'advanced'>(initialMode);
 
     // Determine if the current user is an agent based on profile or role

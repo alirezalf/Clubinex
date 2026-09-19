@@ -18,6 +18,7 @@ Route::middleware(['role:super-admin|admin'])->group(function () {
     // Rewards Management
     Route::post('/rewards', [RewardController::class, 'store'])->name('rewards.store');
     Route::post('/rewards/{id}', [RewardController::class, 'update'])->name('rewards.update');
+    Route::delete('/rewards/{id}', [RewardController::class, 'destroy'])->name('rewards.destroy');
 
     // Club Settings
     Route::get('/club/settings', [ClubSettingController::class, 'index'])->name('club.settings');

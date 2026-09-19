@@ -89,12 +89,16 @@ class TicketController extends Controller
         // وقتی ادمین پاسخ داد، وضعیت به "پاسخ داده شده" تغییر می‌کند
         $ticket->update(['status' => 'answered']);
 
-        NotificationService::send('ticket_reply', $ticket->user, [
-            'ticket_id' => $ticket->id,
-            'subject' => $ticket->subject
-        ]);
+        try {
+            NotificationService::send('ticket_reply', $ticket->user, [
+                'ticket_id' => $ticket->id,
+                'subject' => $ticket->subject
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send ticket reply notification: ' . $e->getMessage());
+        }
 
-        return back()->with('message', 'پاسخ شما با موفقیت ارسال شد و به اطلاع کاربر رسید.');
+        return back()->with('success', 'پاسخ شما با موفقیت ارسال شد و به اطلاع کاربر رسید.');
     }
 
     public function close($id)

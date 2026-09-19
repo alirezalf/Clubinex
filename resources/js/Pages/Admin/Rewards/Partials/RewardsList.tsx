@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
-import { Plus, X, Loader2, Edit2, Gift } from 'lucide-react';
+import { Plus, X, Loader2, Edit2, Gift, Trash2 } from 'lucide-react';
+import { router } from '@inertiajs/react';
 import React, { useState } from 'react';
 import Pagination from '@/Components/Pagination';
 import { PaginatedData } from '@/types';
@@ -61,11 +62,20 @@ export default function RewardsList({ rewards, clubs }: Props) {
         setShowModal(true);
     };
 
+    const handleDelete = (id: number, title: string) => {
+        if (confirm(`آیا از حذف جایزه "${title}" اطمینان دارید؟`)) {
+            router.delete(route('admin.rewards.destroy', id), {
+                preserveScroll: true,
+            });
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (editingReward) {
             post(route('admin.rewards.update', editingReward.id), {
+                forceFormData: true,
                 onSuccess: () => {
                     setShowModal(false);
                     reset();
@@ -170,15 +180,22 @@ export default function RewardsList({ rewards, clubs }: Props) {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <button
-                                            onClick={() =>
-                                                openEditModal(reward)
-                                            }
-                                            className="rounded-lg p-2 text-blue-600 transition hover:bg-blue-50"
-                                            title="ویرایش"
-                                        >
-                                            <Edit2 size={18} />
-                                        </button>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={() => openEditModal(reward)}
+                                                className="rounded-lg p-2 text-blue-600 transition hover:bg-blue-50"
+                                                title="ویرایش"
+                                            >
+                                                <Edit2 size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(reward.id, reward.title)}
+                                                className="rounded-lg p-2 text-red-600 transition hover:bg-red-50"
+                                                title="حذف"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

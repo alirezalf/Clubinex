@@ -13,15 +13,15 @@ interface Props {
 }
 
 export default function BulkActionModal({ isOpen, onClose, selectedIds, actionType, clubs, statuses, onSuccess }: Props) {
-    if (!isOpen || !actionType) return null;
-
     const { data, setData, post, processing, reset, errors } = useForm({
         ids: selectedIds,
-        action: actionType,
+        action: actionType || 'change_status',
         status_id: '',
         club_id: '',
         message: ''
     });
+
+    if (!isOpen || !actionType) return null;
 
     const titles = {
         'change_status': 'تغییر وضعیت گروهی',

@@ -122,21 +122,26 @@ export default function ProductGrid({ products, isLoading }: Props) {
                       {product.model_name || "-"}
                     </span>
 
-                    {/* Quick Register Button */}
+                    {/* Quick Register Button (Serial) */}
                     <button
                       onClick={(e) => handleQuickRegister(e, product.id)}
-                      className="text-xs bg-gray-100 text-gray-600 hover:bg-primary-600 hover:text-white px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1 z-20 relative"
-                      title="ثبت سریال سریع"
+                      className="text-xs bg-green-50 text-green-700 hover:bg-green-600 hover:text-white px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1 z-20 relative border border-green-200"
+                      title="ثبت سریع با کد سریال"
                     >
                       <Barcode size={14} />
                       <span>ثبت سریال</span>
                     </button>
                   </div>
 
-                  {/* Implicit Action Hint */}
-                  <div className="mt-2 text-center text-[10px] text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                    <FileText size={12} />
-                    کلیک برای ثبت فاکتور
+                  {/* Invoice Action Hint - Always visible as secondary button */}
+                  <div className="mt-2">
+                    <button
+                      onClick={() => handleCardClick(product.id)}
+                      className="w-full text-center text-[11px] text-primary-600 bg-primary-50 hover:bg-primary-600 hover:text-white px-2 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1 border border-primary-100"
+                    >
+                      <FileText size={12} />
+                      <span>ثبت با فاکتور</span>
+                    </button>
                   </div>
                 </div>
               </div>

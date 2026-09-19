@@ -116,7 +116,7 @@ class WalletController extends Controller
             // کسر پول
             $wallet->decrement('balance', $amountToPay);
             $wallet->transactions()->create([
-                'amount' => clone $amountToPay,
+                'amount' => $amountToPay,
                 'type' => 'withdrawal',
                 'status' => 'success',
                 'description' => 'خرید امتیاز با کیف پول',
@@ -221,7 +221,7 @@ class WalletController extends Controller
 
             // Record as pending withdrawal in wallet transactions
             $wallet->transactions()->create([
-                'amount' => clone $request->amount,
+                'amount' => $request->amount,
                 'type' => 'withdrawal',
                 'status' => 'pending',
                 'description' => 'درخواست برداشت وجه از کیف پول',

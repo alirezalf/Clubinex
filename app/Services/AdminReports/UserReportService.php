@@ -16,8 +16,11 @@ class UserReportService
             }]);
 
         if ($request->search) {
-            $query->where('mobile', 'like', "%{$request->search}%")
+            $query->where(function($q) use ($request) {
+                $q->where('mobile', 'like', "%{$request->search}%")
+                  ->orWhere('first_name', 'like', "%{$request->search}%")
                   ->orWhere('last_name', 'like', "%{$request->search}%");
+            });
         }
 
         $data = $query->paginate(15)->withQueryString();

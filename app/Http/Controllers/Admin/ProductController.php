@@ -31,17 +31,41 @@ class ProductController extends Controller
         $products = collect();
         $registrations = collect();
         $categories = Category::select('id', 'title', 'slug', 'parent_id', 'is_active')->get();
+        $search = $request->input('search', '');
 
         if ($tab === 'inventory') {
-            $products = Product::with('category')->withCount(['serials', 'serials as used_serials_count' => function ($query) {
+            $query = Product::with('category')->withCount(['serials', 'serials as used_serials_count' => function ($query) {
                 $query->where('is_used', true);
-            }])->latest()->paginate(10, ['*'], 'products_page');
+            }])->latest();
+
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                      ->orWhere('model_name', 'like', "%{$search}%")
+                      ->orWhere('brand', 'like', "%{$search}%");
+                });
+            }
+
+            $products = $query->paginate(10, ['*'], 'products_page');
         }
 
         if ($tab === 'registrations') {
-            $registrations = ProductRegistration::with(['user', 'category', 'admin'])
-                ->latest()
-                ->paginate(10, ['*'], 'registrations_page');
+            $regQuery = ProductRegistration::with(['user', 'category', 'admin'])->latest();
+
+            if ($search) {
+                $regQuery->where(function($q) use ($search) {
+                    $q->where('product_name', 'like', "%{$search}%")
+                      ->orWhere('product_model', 'like', "%{$search}%")
+                      ->orWhere('serial_code', 'like', "%{$search}%")
+                      ->orWhereHas('user', function ($u) use ($search) {
+                          $u->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('mobile', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            $registrations = $regQuery->paginate(10, ['*'], 'registrations_page');
 
             $registrations->getCollection()->transform(function ($reg) {
                 $reg->created_at_jalali = $reg->created_at_jalali;
@@ -92,6 +116,8 @@ class ProductController extends Controller
             $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('uploads/products'), $filename);
             $validated['image'] = '/uploads/products/' . $filename;
+        } else {
+            unset($validated['image']);
         }
 
         $product->update($validated);

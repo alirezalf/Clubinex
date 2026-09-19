@@ -52,6 +52,8 @@ class RewardService
 
             $path = $imageFile->store('public/rewards');
             $data['image'] = Storage::url($path);
+        } else {
+            unset($data['image']);
         }
 
         $reward->update($data);
@@ -92,10 +94,16 @@ class RewardService
      */
     public function redeemReward(User $user, int $rewardId, ?array $deliveryInfo)
     {
-        $lock = \Illuminate\Support\Facades\Cache::lock('reward_redeem_'.$user->id, 10);
-
-        if (!$lock->get()) {
-            throw new Exception('درخواست قبلی شما در حال پردازش است. لطفا چند لحظه شکیبا باشید.');
+        // Lock mechanism with fallback for drivers that don't support locks
+        $lock = null;
+        try {
+            $lock = \Illuminate\Support\Facades\Cache::lock('reward_redeem_'.$user->id, 10);
+            if (!$lock->get()) {
+                throw new Exception('درخواست قبلی شما در حال پردازش است. لطفا چند لحظه شکیبا باشید.');
+            }
+        } catch (\Throwable $e) {
+            // Lock not supported (e.g. file driver) - proceed without lock
+            $lock = null;
         }
 
         try {
@@ -176,7 +184,9 @@ class RewardService
             return $redemption;
         });
         } finally {
-            $lock->release();
+            if ($lock) {
+                try { $lock->release(); } catch (\Throwable $e) {}
+            }
         }
     }
 
@@ -191,16 +201,44 @@ class RewardService
 
             // اگر وضعیت به "رد شده" تغییر کرد و قبلاً رد نشده بود -> برگشت امتیاز به کاربر
             if ($status === 'rejected' && $redemption->status !== 'rejected') {
+                // ۱. برگشت امتیاز اعطایی (اگر قبلاً امتیازی داده شده بود)
+                $previouslyGrantedPoints = 0;
+                if ($redemption->status === 'converted') {
+                    // امتیاز معادل جایزه قبلاً اعطا شده بود → برگشت آن
+                    if ($redemption->lucky_wheel_spin_id) {
+                        $spin = \App\Models\LuckyWheelSpin::with('prize')->find($redemption->lucky_wheel_spin_id);
+                        $previouslyGrantedPoints = ($spin && $spin->prize) ? $spin->prize->value : 0;
+                    } elseif ($redemption->reward && $redemption->reward->points_cost > 0) {
+                        $previouslyGrantedPoints = $redemption->reward->points_cost;
+                    }
+                } elseif ($redemption->status === 'approved' && $redemption->lucky_wheel_spin_id) {
+                    // تایید گردونه → امتیاز معادل کالا اعطا شده
+                    $spin = \App\Models\LuckyWheelSpin::with('prize')->find($redemption->lucky_wheel_spin_id);
+                    $previouslyGrantedPoints = ($spin && $spin->prize) ? $spin->prize->value : 0;
+                }
+
+                if ($previouslyGrantedPoints > 0) {
+                    PointTransaction::deductPoints(
+                        $redemption->user_id,
+                        $previouslyGrantedPoints,
+                        null,
+                        "لغو اعطای امتیاز - رد درخواست جایزه: " . ($redemption->reward ? $redemption->reward->title : 'جایزه گردونه'),
+                        $redemption
+                    );
+                }
+
+                // ۲. برگشت امتیاز کسر شده (هزینه دریافت جایزه)
                 if ($redemption->points_spent > 0) {
                     PointTransaction::awardPoints(
                         $redemption->user_id,
                         $redemption->points_spent,
                         null,
-                        "برگشت امتیاز - رد درخواست جایزه: " . ($redemption->reward ? $redemption->reward->title : 'جایزه حذف شده'),
+                        "برگشت امتیاز هزینه - رد درخواست جایزه: " . ($redemption->reward ? $redemption->reward->title : 'جایزه حذف شده'),
                         $redemption
                     );
                 }
 
+                // ۳. برگشت وجه کیف پول
                 if ($redemption->cash_spent > 0) {
                     $wallet = $redemption->user->wallet()->firstOrCreate(['user_id' => $redemption->user_id], ['balance' => 0]);
                     $wallet->increment('balance', $redemption->cash_spent);
@@ -212,7 +250,7 @@ class RewardService
                     ]);
                 }
 
-                // اگر جایزه وجود داشت، موجودی کالا را برگردان
+                // ۴. برگشت موجودی کالا
                 if ($redemption->reward) {
                     $redemption->reward->increment('stock');
                 }
