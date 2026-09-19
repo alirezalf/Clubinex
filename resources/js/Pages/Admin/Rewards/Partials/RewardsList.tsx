@@ -28,7 +28,7 @@ export default function RewardsList({ rewards, clubs }: Props) {
     const [editingReward, setEditingReward] = useState<Reward | null>(null);
 
     // Form for Creating/Editing Reward
-    const { data, setData, post, processing, reset, clearErrors } = useForm({
+    const { data, setData, post, processing, reset, clearErrors, transform } = useForm({
         title: '',
         points_cost: '',
         type: 'physical',
@@ -74,16 +74,16 @@ export default function RewardsList({ rewards, clubs }: Props) {
         e.preventDefault();
 
         if (editingReward) {
+            // اگر تصویر جدیدی انتخاب نشده، فیلد image را حذف کن تا تصویر قبلی حفظ شود
+            transform((formData: any) => {
+                const payload = { ...formData };
+                if (!payload.image) {
+                    delete payload.image;
+                }
+                return payload;
+            });
             post(route('admin.rewards.update', editingReward.id), {
                 forceFormData: true,
-                transform: (formData: any) => {
-                    const payload = { ...formData };
-                    // اگر تصویر جدیدی انتخاب نشده، فیلد image را حذف کن تا تصویر قبلی حفظ شود
-                    if (!payload.image) {
-                        delete payload.image;
-                    }
-                    return payload;
-                },
                 onSuccess: () => {
                     setShowModal(false);
                     reset();

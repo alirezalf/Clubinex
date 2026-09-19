@@ -137,50 +137,51 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
                                     </div>
                                 </div>
 
-                                {/* Action Form */}
-                                {registration.status === 'pending' ? (
-                                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">یادداشت مدیر</label>
-                                        <textarea
-                                            value={data.admin_note}
-                                            onChange={e => setData('admin_note', e.target.value)}
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 min-h-[80px]"
-                                            placeholder="توضیحات تایید یا دلیل رد درخواست..."
-                                        ></textarea>
-
-                                        <div className="flex gap-3 mt-4">
-                                            <button
-                                                onClick={() => handleSubmit('rejected')}
-                                                disabled={processing}
-                                                className="flex-1 bg-white text-red-600 border border-red-200 py-2.5 rounded-lg hover:bg-red-50 transition flex justify-center items-center gap-2 font-bold text-sm"
-                                            >
-                                                <XCircle size={18} />
-                                                رد درخواست
-                                            </button>
-                                            <button
-                                                onClick={() => handleSubmit('approved')}
-                                                disabled={processing}
-                                                className="flex-[2] bg-green-600 text-white py-2.5 rounded-lg hover:bg-green-700 transition flex justify-center items-center gap-2 font-bold text-sm shadow-lg shadow-green-500/20"
-                                            >
-                                                {processing ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle size={18} />}
-                                                تایید و اعطای امتیاز
-                                            </button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className={`p-4 rounded-xl border text-center ${registration.status === 'approved' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
-                                        <div className="font-bold text-lg mb-1">{registration.status_farsi}</div>
-                                        <div className="text-xs opacity-80 mb-2">
+                                {/* Status Badge */}
+                                {registration.status !== 'pending' && (
+                                    <div className={`p-3 rounded-xl border text-center ${registration.status === 'approved' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
+                                        <div className="font-bold text-sm mb-1">وضعیت فعلی: {registration.status_farsi}</div>
+                                        <div className="text-xs opacity-80">
                                             توسط {registration.admin?.first_name} {registration.admin?.last_name}
                                         </div>
                                         {registration.admin_note && (
-                                            <div className="text-sm bg-white/60 p-3 rounded-lg border border-black/5 text-right text-gray-800">
+                                            <div className="text-sm bg-white/60 p-2 rounded-lg border border-black/5 text-right text-gray-800 mt-2">
                                                 <span className="font-bold block text-xs mb-1 opacity-70">یادداشت:</span>
                                                 {registration.admin_note}
                                             </div>
                                         )}
                                     </div>
                                 )}
+
+                                {/* Action Form - Always show for any status */}
+                                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">یادداشت مدیر</label>
+                                    <textarea
+                                        value={data.admin_note}
+                                        onChange={e => setData('admin_note', e.target.value)}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 min-h-[80px]"
+                                        placeholder="توضیحات تایید یا دلیل رد درخواست..."
+                                    ></textarea>
+
+                                    <div className="flex gap-3 mt-4">
+                                        <button
+                                            onClick={() => handleSubmit('rejected')}
+                                            disabled={processing}
+                                            className="flex-1 bg-white text-red-600 border border-red-200 py-2.5 rounded-lg hover:bg-red-50 transition flex justify-center items-center gap-2 font-bold text-sm"
+                                        >
+                                            <XCircle size={18} />
+                                            رد درخواست
+                                        </button>
+                                        <button
+                                            onClick={() => handleSubmit('approved')}
+                                            disabled={processing}
+                                            className="flex-[2] bg-green-600 text-white py-2.5 rounded-lg hover:bg-green-700 transition flex justify-center items-center gap-2 font-bold text-sm shadow-lg shadow-green-500/20"
+                                        >
+                                            {processing ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle size={18} />}
+                                            تایید و اعطای امتیاز
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -44,11 +44,12 @@ export default function CreateProductModal({ isOpen, onClose, categories, produc
         e.preventDefault();
 
         if (isEditing) {
-            transform((data) => {
-                const payload = { ...data, _method: 'PUT' };
-                // Don't send image field if no new file was selected to preserve existing image
-                if (!payload.image) {
-                    delete payload.image;
+            transform((formData) => {
+                const { image, ...rest } = formData;
+                // Only include image if a new file was selected, otherwise preserve existing
+                const payload: any = { ...rest, _method: 'PUT' };
+                if (image) {
+                    payload.image = image;
                 }
                 return payload;
             });
