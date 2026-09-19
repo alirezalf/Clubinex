@@ -43,7 +43,7 @@ class Reward extends Model
         if ($user->current_points < $this->points_cost) return false;
         
         // بررسی سطح باشگاه
-        if ($this->required_club_id && (!$user->club_id || ($user->club && $user->club->min_points < $this->club->min_points))) {
+        if ($this->required_club_id && (!$user->club_id || !$this->club || ($user->club && $this->club && $user->club->min_points < $this->club->min_points))) {
             return false;
         }
 

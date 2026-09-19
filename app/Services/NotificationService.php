@@ -63,7 +63,7 @@ class NotificationService
                 // دیسپچ کردن جاب به صورت Async-like برای هاست اشتراکی
                 SendSms::dispatch($user->mobile, $message, $user->id, $templateId, $parameters)->afterResponse();
 
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 Log::error("SMS Dispatch Failure [{$eventName}]: " . $e->getMessage());
             }
         }
@@ -107,7 +107,7 @@ class NotificationService
                 ]);
 
                 \App\Jobs\SendEmail::dispatch($user->email, $subject, $finalBody, $fromAddress, $fromName, $mailConfig, $loggedEmail->id ?? null)->afterResponse();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 Log::error("Email Dispatch Failure [{$eventName}]: " . $e->getMessage());
             }
         }
@@ -118,7 +118,7 @@ class NotificationService
                 $message = self::replaceVariables($template->database_message, $data);
                 // SystemNotification خودش ShouldQueue را implement کرده است
                 Notification::send($user, new SystemNotification($template->title_fa, $message));
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 Log::error("DB Notification Failure [{$eventName}]: " . $e->getMessage());
             }
         }

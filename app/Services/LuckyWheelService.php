@@ -232,6 +232,7 @@
               ]);
 
               // ارسال نوتیفیکیشن به ادمین‌ها
+              // نکته مهم: خطای اعلان‌ها نباید هرگز تراکنش چرخش گردونه را با 500 از کار بیندازد
               try {
                   $admins = User::role(['super-admin', 'admin'])->get();
                   if ($admins->isNotEmpty()) {
@@ -240,7 +241,9 @@
                           "کاربر {$user->first_name} {$user->last_name} برنده جایزه '{$prize->title}' در گردونه شانس شد."
                       ));
                   }
-              } catch (Exception $e) {}
+              } catch (\Throwable $e) {
+                  \Illuminate\Support\Facades\Log::error('Lucky wheel prize notification failed: ' . $e->getMessage());
+              }
 
               $message = "تبریک! شما برنده \"{$prize->title}\" شدید. همکاران ما جهت هماهنگی ارسال با شما تماس می‌گیرند.";
               $messageType = 'success';

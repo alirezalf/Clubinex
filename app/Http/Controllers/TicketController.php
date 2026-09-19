@@ -17,6 +17,11 @@ class TicketController extends Controller
 {
     public function index(Request $request)
     {
+        // هنگام مشاهده لیست تیکت‌ها، تمام تیکت‌هایی که پاسخ ادمین دارند را به عنوان خوانده شده علامت‌گذاری کن
+        Ticket::where('user_id', Auth::id())
+            ->where('status', 'answered')
+            ->update(['status' => 'pending']);
+
         $status = $request->input('status', 'active');
         $query = Ticket::where('user_id', Auth::id())->with(['assignedTo'])->latest();
 
@@ -105,7 +110,7 @@ class TicketController extends Controller
     public function reply(ReplyTicketRequest $request, $id)
     {
         $ticket = Ticket::where('user_id', Auth::id())->findOrFail($id);
-        
+
         if ($ticket->status == 'closed') {
             return back()->with('error', 'این تیکت بسته شده است و امکان ارسال پاسخ وجود ندارد.');
         }

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Gift, CheckCircle2, Truck, Clock, XCircle, Package, MessageSquare } from 'lucide-react';
+import React, { useState } from 'react';
+import { Gift, CheckCircle2, Truck, Clock, XCircle, Package, MessageSquare, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 
 interface Redemption {
     id: number;
@@ -24,6 +24,8 @@ interface Props {
 }
 
 export default function RedemptionHistory({ redemptions, onSwitchToStore }: Props) {
+    const [cancellingId, setCancellingId] = useState<number | null>(null);
+
     if (redemptions.length === 0) {
         return (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center text-gray-500">
@@ -36,6 +38,15 @@ export default function RedemptionHistory({ redemptions, onSwitchToStore }: Prop
         );
     }
 
+    const handleCancel = (id: number) => {
+        if (!confirm('آیا از لغو این درخواست اطمینان دارید؟ امتیاز و موجودی به شما برگردانده می‌شود.')) return;
+        setCancellingId(id);
+        router.delete(route('rewards.cancel', id), {
+            preserveScroll: true,
+            onFinish: () => setCancellingId(null),
+        });
+    };
+
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in">
             <div className="overflow-x-auto">
@@ -47,6 +58,7 @@ export default function RedemptionHistory({ redemptions, onSwitchToStore }: Prop
                             <th className="px-6 py-4">وضعیت</th>
                             <th className="px-6 py-4">اطلاعات پیگیری</th>
                             <th className="px-6 py-4">تاریخ درخواست</th>
+                            <th className="px-6 py-4">عملیات</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -69,7 +81,7 @@ export default function RedemptionHistory({ redemptions, onSwitchToStore }: Prop
                                         <span className="text-green-600">+{item.reward_value?.toLocaleString() || 0}</span>
                                     ) : (
                                         <span className={item.points_spent === 0 ? "text-gray-500" : "text-red-500"}>
-                                            {item.points_spent === 0 ? "0" : `-${item.points_spent.toLocaleString()}`}
+                                            {item.points_spent === 0 ? "—" : `-${item.points_spent.toLocaleString()}`}
                                         </span>
                                     )}
                                 </td>
@@ -103,14 +115,14 @@ export default function RedemptionHistory({ redemptions, onSwitchToStore }: Prop
                                         )}
                                         {!item.tracking_code && !item.admin_note && <span className="text-gray-400 text-xs">-</span>}
 
-                                        {/* دکمه پیگیری - Updated to use tickets.index */}
+                                        {/* دکمه پیگیری */}
                                         <div className="pt-1">
                                             {/* @ts-ignore */}
                                             <Link
                                                 href={route('tickets.index', {
                                                     create_ticket: true,
                                                     subject: `پیگیری جایزه: ${item.reward?.title || 'جایزه'} (شناسه: ${item.id})`,
-                                                    message: `با سلام،\nمن در مورد جایزه "${item.reward?.title || 'جایزه'}" با شناسه درخواست ${item.id} سوال دارم.\nوضعیت فعلی: ${item.status_farsi}\nکد رهگیری: ${item.tracking_code || 'ندارد'}\n\nتوضیحات شما:`
+                                                    message: `با سلام،\\nمن در مورد جایزه "${item.reward?.title || 'جایزه'}" با شناسه درخواست ${item.id} سوال دارم.\\nوضعیت فعلی: ${item.status_farsi}\\nکد رهگیری: ${item.tracking_code || 'ندارد'}\\n\\nتوضیحات شما:`
                                                 })}
                                                 className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 transition flex items-center gap-1 w-fit"
                                             >
@@ -122,6 +134,18 @@ export default function RedemptionHistory({ redemptions, onSwitchToStore }: Prop
                                 </td>
                                 <td className="px-6 py-4 text-gray-500 text-xs">
                                     {item.created_at_jalali}
+                                </td>
+                                <td className="px-6 py-4">
+                                    {item.status === 'pending' && (
+                                        <button
+                                            onClick={() => handleCancel(item.id)}
+                                            disabled={cancellingId === item.id}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-xl text-xs font-bold hover:bg-red-100 transition border border-red-100 disabled:opacity-50"
+                                        >
+                                            <Trash2 size={12} />
+                                            {cancellingId === item.id ? 'در حال لغو...' : 'لغو درخواست'}
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}

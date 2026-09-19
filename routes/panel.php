@@ -64,6 +64,7 @@ Route::middleware(['auth', 'active.user'])->group(function () {
     // Rewards & Shop
     Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
     Route::post('/rewards/{reward}/redeem', [RewardController::class, 'redeem'])->name('rewards.redeem');
+    Route::delete('/rewards/redemptions/{redemption}/cancel', [RewardController::class, 'cancel'])->name('rewards.cancel');
 
     // Lucky Wheel (Gamification)
     Route::get('/lucky-wheel', [LuckyWheelController::class, 'index'])->name('lucky-wheel.index');

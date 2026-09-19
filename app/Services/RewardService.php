@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 use Exception;
 
 class RewardService
@@ -159,6 +160,7 @@ class RewardService
             $reward->decrement('stock');
 
             // ارسال نوتیفیکیشن به کاربر
+            // نکته مهم: خطای اعلان‌ها نباید هرگز تراکنش اصلی دریافت جایزه را با 500 از کار بیندازد
             try {
                 // ارسال اعلان سیستمی (صرف نظر از وجود قالب سفارشی)
                 \Illuminate\Support\Facades\Notification::send($user, new \App\Notifications\SystemNotification(
@@ -179,7 +181,9 @@ class RewardService
                         "کاربر {$user->first_name} {$user->last_name} درخواست دریافت جایزه '{$reward->title}' را ثبت کرد."
                     ));
                 }
-            } catch (Exception $e) {}
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Reward redemption notification failed: ' . $e->getMessage());
+            }
 
             return $redemption;
         });
@@ -188,6 +192,85 @@ class RewardService
                 try { $lock->release(); } catch (\Throwable $e) {}
             }
         }
+    }
+
+    /**
+     * لغو درخواست جایزه توسط خود کاربر (فقط وضعیت در انتظار بررسی)
+     * پس از لغو: برگشت امتیاز، وجه نقد و موجودی انبار
+     */
+    public function cancelRedemption(User $user, int $redemptionId)
+    {
+        return DB::transaction(function () use ($user, $redemptionId) {
+            $redemption = RewardRedemption::where('id', $redemptionId)
+                ->where('user_id', $user->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($redemption->status !== 'pending') {
+                throw new Exception('فقط درخواست‌های در انتظار بررسی قابل لغو هستند.');
+            }
+
+            // ۱. برگشت امتیاز کسر شده
+            if ($redemption->points_spent > 0) {
+                PointTransaction::awardPoints(
+                    $redemption->user_id,
+                    $redemption->points_spent,
+                    null,
+                    "برگشت امتیاز - لغو درخواست جایزه: " . ($redemption->reward ? $redemption->reward->title : 'جایزه گردونه'),
+                    $redemption
+                );
+            }
+
+            // ۲. برگشت وجه کیف پول
+            if ($redemption->cash_spent > 0) {
+                $wallet = $user->wallet()->firstOrCreate(['user_id' => $user->id], ['balance' => 0]);
+                $wallet->increment('balance', $redemption->cash_spent);
+                $wallet->transactions()->create([
+                    'amount' => $redemption->cash_spent,
+                    'type' => 'deposit',
+                    'status' => 'success',
+                    'description' => "برگشت وجه - لغو درخواست جایزه: " . ($redemption->reward ? $redemption->reward->title : 'جایزه گردونه'),
+                ]);
+            }
+
+            // ۳. برگشت موجودی انبار جایزه
+            if ($redemption->reward) {
+                $redemption->reward->increment('stock');
+            }
+
+            // ۴. برگشت موجودی جایزه گردونه شانس (اگر مربوط به چرخش باشد)
+            if ($redemption->lucky_wheel_spin_id) {
+                $spin = \App\Models\LuckyWheelSpin::with('prize')->find($redemption->lucky_wheel_spin_id);
+                if ($spin && $spin->prize && $spin->prize->stock !== null) {
+                    $spin->prize->increment('stock');
+                }
+            }
+
+            // ۵. ثبت لاگ فعالیت
+            ActivityLog::log(
+                'reward.cancelled_by_user',
+                "درخواست جایزه #{$redemption->id} توسط کاربر لغو شد.",
+                ['user_id' => $user->id, 'redemption_id' => $redemption->id]
+            );
+
+            // ۶. حذف رکورد درخواست (تاریخچه باقی‌می‌ماند)
+            $redemption->delete();
+
+            // ۷. ارسال نوتیفیکیشن به ادمین‌ها
+            try {
+                $admins = User::role(['super-admin', 'admin'])->get();
+                if ($admins->isNotEmpty()) {
+                    \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\SystemNotification(
+                        'لغو درخواست جایزه',
+                        "کاربر {$user->first_name} {$user->last_name} درخواست جایزه را لغو کرد."
+                    ));
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Cancel redemption notification failed: ' . $e->getMessage());
+            }
+
+            return true;
+        });
     }
 
     /**

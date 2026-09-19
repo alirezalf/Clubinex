@@ -95,7 +95,8 @@ export default function WheelSpinner({ wheel, prizes, rotation, spinning, userPo
 
                                     const color = prize.color || defaultColors[index % defaultColors.length];
                                     const textColor = prize.text_color || '#ffffff';
-                                    const fontSize = (prize.font_size || 9) / 100; // Convert to SVG scale
+                                    const rawFontSize = prize.font_size || 7;
+                                    const fontSize = Math.min(rawFontSize, 10) / 100; // Cap max at 10 and convert to SVG scale
                                     const orientation = prize.text_orientation || 'horizontal';
 
                                     // Text wrapping logic
@@ -116,7 +117,7 @@ export default function WheelSpinner({ wheel, prizes, rotation, spinning, userPo
                                         return lines;
                                     };
 
-                                    const lines = wrapText(prize.title, 12); // Wrap after 12 chars
+                                    const lines = wrapText(prize.title, 14); // Wrap after 14 chars for smaller fonts
 
                                     return (
                                         <g key={prize.id}>

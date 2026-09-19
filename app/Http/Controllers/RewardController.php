@@ -101,4 +101,19 @@ class RewardController extends Controller
             return back()->with('error', $e->getMessage());
         }
     }
+
+    public function cancel($redemptionId)
+    {
+        try {
+            $this->rewardService->cancelRedemption(
+                auth()->user(),
+                $redemptionId
+            );
+
+            return back()->with('message', 'درخواست جایزه با موفقیت لغو شد.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
 }
