@@ -23,7 +23,9 @@ class UpdateUserRequest extends FormRequest
             'email' => ['nullable', 'email', Rule::unique('users')->ignore($userId)],
             'club_id' => 'nullable|exists:clubs,id',
             'current_points' => 'nullable|integer',
-            'role' => 'nullable|exists:roles,name'
+            'role' => 'nullable|exists:roles,name',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'string',
         ];
     }
 }

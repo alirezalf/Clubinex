@@ -112,9 +112,7 @@ class WpCategoryService extends BaseWordPressService
                     }
                 }
 
-                // --- مرحله دوم: آپدیت روابط والد/فرزند ---
-                // مجددا همه دسته‌ها را از دیتابیس بارگذاری می‌کنیم (نه فقط دسته‌های صفحه جاری)
-                // تا روابط والد/فرزند حتی برای دسته‌هایی که در صفحه‌های قبلی ساخته شده‌اند درست باشد
+                // --- مرحله دوم: آپدیت روابط والد/فرزند برای صفحه جاری ---
                 $refreshCategoriesByWpId = Category::whereNotNull('wp_id')->get()->keyBy('wp_id');
 
                 foreach ($categories as $cat) {
@@ -122,16 +120,41 @@ class WpCategoryService extends BaseWordPressService
                     $wpParentId = (int) Arr::get($cat, $mapping['parent_id'] ?? 'parent', 0);
 
                     if ($wpId && $wpParentId > 0) {
-                        // پیدا کردن دسته‌ی فرزند (که همین الان ساختیم/آپدیت کردیم)
                         $currentCat = $refreshCategoriesByWpId->get($wpId);
-
-                        // پیدا کردن دسته‌ی والد در دیتابیس خودمان
                         $parentCat = $refreshCategoriesByWpId->get($wpParentId);
 
                         if ($currentCat && $parentCat) {
-                            // فقط اگر والد تغییر کرده باشد آپدیت می‌کنیم
                             if ($currentCat->parent_id !== $parentCat->id) {
                                 $currentCat->update(['parent_id' => $parentCat->id]);
+                            }
+                        }
+                    }
+                }
+
+                // --- مرحله سوم: اصلاح روابط والد/فرزند برای تمام دسته‌هایی که هنوز parent_id ندارند ---
+                // این مرحله برای دسته‌هایی است که در صفحات قبلی ساخته شده‌اند اما والدشان در صفحه جاری بوده
+                $orphanCats = Category::whereNotNull('wp_id')
+                    ->whereNull('parent_id')
+                    ->where('wp_id', '!=', 0)
+                    ->get();
+
+                if ($orphanCats->isNotEmpty()) {
+                    $allCatsByWpId = Category::whereNotNull('wp_id')->get()->keyBy('wp_id');
+                    foreach ($orphanCats as $orphan) {
+                        // پیدا کردن والد از روی wp_id ذخیره شده در اطلاعات وردپرس
+                        $wpParentId = null;
+                        // جستجو در دسته‌های وردپرس برای پیدا کردن parent
+                        foreach ($categories as $cat) {
+                            $catWpId = Arr::get($cat, $mapping['wp_id'] ?? 'id');
+                            if ($catWpId == $orphan->wp_id) {
+                                $wpParentId = (int) Arr::get($cat, $mapping['parent_id'] ?? 'parent', 0);
+                                break;
+                            }
+                        }
+                        if ($wpParentId > 0) {
+                            $parentCat = $allCatsByWpId->get($wpParentId);
+                            if ($parentCat && $orphan->parent_id !== $parentCat->id) {
+                                $orphan->update(['parent_id' => $parentCat->id]);
                             }
                         }
                     }

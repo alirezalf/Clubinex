@@ -84,8 +84,15 @@ class WpProductService extends BaseWordPressService
                     if (!$wpId || !$title) continue;
 
                     $modelName = Arr::get($prod, $mapping['model_name'] ?? 'sku');
-                    $description = strip_tags(Arr::get($prod, $mapping['description'] ?? 'short_description'));
-                    $image = Arr::get($prod, $mapping['image'] ?? 'images.0.src');
+                    $description = strip_tags(Arr::get($prod, $mapping['description'] ?? 'short_description')) ?? '';
+
+                    // استخراج تصویر با fallback هوشمند
+                    $imageKey = $mapping['image'] ?? 'images.0.src';
+                    $image = Arr::get($prod, $imageKey);
+                    // اگر مسیر نقطه‌ای کار نکرد، سعی کن ساختار آرایه‌ای وردپرس را بررسی کن
+                    if (empty($image) && isset($prod['images']) && is_array($prod['images']) && !empty($prod['images'][0])) {
+                        $image = $prod['images'][0]['src'] ?? ($prod['images'][0]['guid'] ?? null);
+                    }
 
                     // اتصال به دسته‌بندی با استفاده از کشِ لود شده
                     $categoryId = null;

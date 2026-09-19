@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import { X, CheckCircle, Shield, Award, MessageSquare, Loader2 } from 'lucide-react';
 
@@ -20,6 +20,18 @@ export default function BulkActionModal({ isOpen, onClose, selectedIds, actionTy
         club_id: '',
         message: ''
     });
+
+    // همگام‌سازی ids با prop جدید هنگام باز شدن مودال
+    useEffect(() => {
+        if (isOpen) {
+            setData('ids', selectedIds);
+            setData('action', actionType || 'change_status');
+            // ریست کردن فیلدهای اختصاصی هر اکشن
+            setData('status_id', '');
+            setData('club_id', '');
+            setData('message', '');
+        }
+    }, [isOpen, selectedIds, actionType]);
 
     if (!isOpen || !actionType) return null;
 
