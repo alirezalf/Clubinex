@@ -63,6 +63,17 @@ export default function SearchInput({
         }, delay);
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+            }
+            onSearch(localValue);
+        }
+    };
+
     return (
         <div className={clsx("relative w-full", className)}>
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
@@ -72,6 +83,7 @@ export default function SearchInput({
                 type="text"
                 value={localValue}
                 onChange={handleChange}
+                onKeyDown={handleKeyDown}
                 placeholder={placeholder}
                 className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all text-sm bg-white/80 backdrop-blur-sm"
             />

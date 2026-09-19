@@ -180,7 +180,7 @@ export default function AdminProductsIndex({
                         value={searchQuery}
                         onChange={setSearchQuery}
                         onSearch={performSearch}
-                        placeholder="جستجو در نام، مدل یا سریال..."
+                        placeholder="جستجو در نام محصول، مدل، سریال یا نام/موبایل کاربر..."
                         loading={isLoading}
                     />
                 </div>

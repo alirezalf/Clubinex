@@ -76,6 +76,14 @@ export default function RewardsList({ rewards, clubs }: Props) {
         if (editingReward) {
             post(route('admin.rewards.update', editingReward.id), {
                 forceFormData: true,
+                transform: (formData: any) => {
+                    const payload = { ...formData };
+                    // اگر تصویر جدیدی انتخاب نشده، فیلد image را حذف کن تا تصویر قبلی حفظ شود
+                    if (!payload.image) {
+                        delete payload.image;
+                    }
+                    return payload;
+                },
                 onSuccess: () => {
                     setShowModal(false);
                     reset();

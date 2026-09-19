@@ -256,19 +256,22 @@ class ProductService
     {
         $registration = ProductRegistration::with('user')->findOrFail($id);
 
-        if ($registration->status !== 'pending') {
-            throw new Exception('این درخواست قبلاً بررسی شده است.');
-        }
+        $oldStatus = $registration->status;
 
-        return DB::transaction(function () use ($registration, $status, $adminNote, $adminId) {
+        return DB::transaction(function () use ($registration, $status, $adminNote, $adminId, $oldStatus) {
             $registration->update([
                 'status' => $status,
                 'admin_note' => $adminNote,
                 'admin_id' => $adminId
             ]);
 
-            if ($status === 'approved') {
+            if ($status === 'approved' && $oldStatus !== 'approved') {
                 $this->approveRegistrationLogic($registration);
+            }
+
+            // اگر از تایید شده به رد شده تغییر کرد، امتیاز برگردانده شود
+            if ($status === 'rejected' && $oldStatus === 'approved') {
+                $this->revertRegistrationPoints($registration);
             }
 
             return $registration;
@@ -382,6 +385,42 @@ class ProductService
             ]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Product registration notification failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * برگرداندن امتیاز هنگام رد کردن درخواست تایید شده
+     */
+    private function revertRegistrationPoints(ProductRegistration $reg)
+    {
+        $points = $this->calculatePoints(
+            Product::where('title', trim($reg->product_name))->first()
+        );
+
+        // کسر امتیاز از کاربر
+        PointTransaction::deductPoints(
+            $reg->user_id,
+            $points,
+            null,
+            "برگشت امتیاز - رد درخواست ثبت محصول: {$reg->product_name}",
+            $reg
+        );
+
+        // آزادسازی سریال
+        if ($reg->serial_code) {
+            ProductSerial::where('serial_code', $reg->serial_code)
+                ->where('used_by', $reg->user_id)
+                ->update(['is_used' => false, 'used_by' => null, 'used_at' => null]);
+        }
+
+        // ارسال اعلان به کاربر
+        try {
+            NotificationService::send('product_rejected', $reg->user, [
+                'product_name' => $reg->product_name,
+                'points' => $points
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Product rejection notification failed: ' . $e->getMessage());
         }
     }
 }
