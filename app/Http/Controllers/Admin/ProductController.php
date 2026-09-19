@@ -161,8 +161,12 @@ class ProductController extends Controller
             );
 
             return back()->with('message', 'وضعیت درخواست تغییر کرد.');
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Registration approval failed: ' . $e->getMessage(), [
+                'id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->with('error', 'خطا در پردازش درخواست: ' . $e->getMessage());
         }
     }
 

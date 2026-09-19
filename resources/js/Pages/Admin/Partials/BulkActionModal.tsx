@@ -24,14 +24,15 @@ export default function BulkActionModal({ isOpen, onClose, selectedIds, actionTy
     // همگام‌سازی ids با prop جدید هنگام باز شدن مودال
     useEffect(() => {
         if (isOpen) {
-            setData('ids', selectedIds);
-            setData('action', actionType || 'change_status');
-            // ریست کردن فیلدهای اختصاصی هر اکشن
-            setData('status_id', '');
-            setData('club_id', '');
-            setData('message', '');
+            setData({
+                ids: selectedIds,
+                action: actionType || 'change_status',
+                status_id: '',
+                club_id: '',
+                message: '',
+            });
         }
-    }, [isOpen, selectedIds, actionType]);
+    }, [isOpen]); // فقط هنگام باز شدن اجرا شود
 
     if (!isOpen || !actionType) return null;
 
@@ -87,7 +88,7 @@ export default function BulkActionModal({ isOpen, onClose, selectedIds, actionTy
                             >
                                 <option value="">انتخاب کنید...</option>
                                 {statuses.map((s: any) => (
-                                    <option key={s.id} value={s.id}>{s.name}</option>
+                                    <option key={s.id} value={String(s.id)}>{s.name}</option>
                                 ))}
                             </select>
                             {errors.status_id && <p className="text-red-500 text-xs mt-1">{errors.status_id}</p>}
@@ -105,7 +106,7 @@ export default function BulkActionModal({ isOpen, onClose, selectedIds, actionTy
                             >
                                 <option value="">انتخاب کنید...</option>
                                 {clubs.map((c: any) => (
-                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                    <option key={c.id} value={String(c.id)}>{c.name}</option>
                                 ))}
                             </select>
                             {errors.club_id && <p className="text-red-500 text-xs mt-1">{errors.club_id}</p>}

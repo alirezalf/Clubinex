@@ -44,7 +44,14 @@ export default function CreateProductModal({ isOpen, onClose, categories, produc
         e.preventDefault();
 
         if (isEditing) {
-            transform((data) => ({ ...data, _method: 'PUT' }));
+            transform((data) => {
+                const payload = { ...data, _method: 'PUT' };
+                // Don't send image field if no new file was selected to preserve existing image
+                if (!payload.image) {
+                    delete payload.image;
+                }
+                return payload;
+            });
             post(route('admin.products.update', product.id), { forceFormData: true, onSuccess: () => { onClose(); reset(); } });
         } else {
             post(route('admin.products.store'), { onSuccess: () => { onClose(); reset(); } });

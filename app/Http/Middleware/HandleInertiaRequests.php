@@ -115,7 +115,7 @@ class HandleInertiaRequests extends Middleware
 
     private function getBadges($user)
     {
-        $ticketBadges = ['user' => 0, 'admin' => 0, 'rewards' => 0];
+        $ticketBadges = ['user' => 0, 'admin' => 0, 'rewards' => 0, 'registrations' => 0];
 
         if ($user) {
             $ticketBadges['user'] = Ticket::where('user_id', $user->id)
@@ -131,6 +131,9 @@ class HandleInertiaRequests extends Middleware
 
                 // Count pending reward redemptions
                 $ticketBadges['rewards'] = \App\Models\RewardRedemption::where('status', 'pending')->count();
+
+                // Count pending product registrations
+                $ticketBadges['registrations'] = \App\Models\ProductRegistration::where('status', 'pending')->count();
             }
         }
 

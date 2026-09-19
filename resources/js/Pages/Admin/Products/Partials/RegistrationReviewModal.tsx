@@ -25,7 +25,7 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
         }
 
         if (confirm(status === 'approved' ? 'آیا از تایید این درخواست اطمینان دارید؟ امتیاز به کاربر داده می‌شود.' : 'آیا از رد این درخواست اطمینان دارید؟')) {
-            data.status = status;
+            setData({ status, admin_note: data.admin_note });
             post(route('admin.products.registration_status', registration.id), {
                 onSuccess: () => {
                     onClose();

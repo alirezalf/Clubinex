@@ -380,6 +380,8 @@ class ProductService
                 'product_name' => $reg->product_name,
                 'points' => $points
             ]);
-        } catch (Exception $e) {}
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Product registration notification failed: ' . $e->getMessage());
+        }
     }
 }

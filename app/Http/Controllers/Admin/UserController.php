@@ -100,11 +100,7 @@ class UserController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        // $user->assignRole($validated['role']); // This might be causing the 403 if the current user doesn't have permission to assign this role
-
-        // Instead of directly assigning, check if the current user can assign this role
-        // For now, let's assume super-admin can assign any role, and admin can assign specific roles.
-        // Or simply use syncRoles which is safer if the role exists.
+        // انتساب نقش
         $role = Role::findByName($validated['role']);
         if ($role) {
             $user->assignRole($role);
@@ -114,6 +110,9 @@ class UserController extends Controller
         if ($request->has('permissions')) {
             $user->syncPermissions($request->permissions);
         }
+
+        // پاک کردن کش پرمیشن‌ها
+        \Illuminate\Support\Facades\Cache::forget('admin_users_grouped_permissions');
 
         ActivityLog::log('user.created', "کاربر جدید {$user->full_name} ایجاد شد", [
             'admin_id' => auth()->id(),
@@ -141,8 +140,7 @@ class UserController extends Controller
             ]);
         }
 
-        $user->update($validated);
-
+        // همگام‌سازی نقش
         if($request->role) {
             $user->syncRoles([$request->role]);
         }
@@ -151,6 +149,15 @@ class UserController extends Controller
         if ($request->has('permissions')) {
             $user->syncPermissions($request->permissions);
         }
+
+        // بروزرسانی سایر فیلدها (بدون permissions و role که جداگانه پردازش شدند)
+        $fillableData = collect($validated)->except(['permissions', 'role'])->toArray();
+        if (!empty($fillableData)) {
+            $user->update($fillableData);
+        }
+
+        // پاک کردن کش پرمیشن‌ها
+        \Illuminate\Support\Facades\Cache::forget('admin_users_grouped_permissions');
 
         ActivityLog::log('user.updated', "اطلاعات کاربر {$user->full_name} ویرایش شد", [
             'admin_id' => auth()->id(),
@@ -199,9 +206,18 @@ class UserController extends Controller
             'ids' => 'required|array|min:1',
             'ids.*' => 'exists:users,id',
             'action' => 'required|in:change_status,change_club,send_message',
-            'status_id' => 'required_if:action,change_status|exists:user_statuses,id',
-            'club_id' => 'required_if:action,change_club|exists:clubs,id',
-            'message' => 'required_if:action,send_message|string|max:500',
+            'status_id' => [
+                'required_if:action,change_status',
+                \Illuminate\Validation\Rule::when(fn ($input) => $input->action === 'change_status', 'exists:user_statuses,id'),
+            ],
+            'club_id' => [
+                'required_if:action,change_club',
+                \Illuminate\Validation\Rule::when(fn ($input) => $input->action === 'change_club', 'exists:clubs,id'),
+            ],
+            'message' => [
+                'required_if:action,send_message',
+                \Illuminate\Validation\Rule::when(fn ($input) => $input->action === 'send_message', ['string', 'max:500']),
+            ],
         ]);
 
         $ids = $request->ids;

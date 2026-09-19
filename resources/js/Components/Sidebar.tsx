@@ -22,7 +22,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, setIsOpen, isCollapsed, toggleCollapse, onOpenThemePanel }: SidebarProps) {
     // @ts-ignore
-    const { auth, site, badges, unreadNotificationsCount } = usePage<PageProps & { site: any, badges: { user: number, admin: number, rewards: number }, unreadNotificationsCount: number }>().props;
+    const { auth, site, badges, unreadNotificationsCount } = usePage<PageProps & { site: any, badges: { user: number, admin: number, rewards: number, registrations: number }, unreadNotificationsCount: number }>().props;
     const [searchTerm, setSearchTerm] = useState('');
     const [isFocused, setIsFocused] = useState(false);
 
@@ -36,7 +36,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, toggleCollapse
     }, [isOpen]);
 
     const allMenuItems = getMenuItems(badges?.user || 0, unreadNotificationsCount || 0);
-    const allAdminItems = getAdminItems(badges?.admin || 0, badges?.rewards || 0);
+    const allAdminItems = getAdminItems(badges?.admin || 0, badges?.rewards || 0, badges?.registrations || 0);
     const menuGroups = getMenuGroups(allMenuItems);
 
     return (
