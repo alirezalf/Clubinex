@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useRef, useEffect, useCallback } from 'react';
 import { Search, Filter, Download } from 'lucide-react';
 
 const PersianDatePicker = React.lazy(() => import('@/Components/PersianDatePicker'));
@@ -13,9 +13,29 @@ interface Props {
 }
 
 export default function ReportFilters({ params, setParams, currentTab, onApply, onTypeChange }: Props) {
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const searchRef = useRef(params.search);
+
+    // Debounced live search
+    useEffect(() => {
+        if (searchRef.current === params.search) return;
+        searchRef.current = params.search;
+
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
+            onApply();
+        }, 600);
+
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+    }, [params.search]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') onApply();
+        if (e.key === 'Enter') {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            onApply();
+        }
     };
 
     return (
@@ -25,7 +45,7 @@ export default function ReportFilters({ params, setParams, currentTab, onApply, 
                 <div className="relative">
                     <input
                         type="text"
-                        placeholder="نام، موبایل، سریال، توضیحات..."
+                        placeholder="نام کاربر، موبایل، سریال، توضیحات..."
                         value={params.search}
                         onChange={e => setParams({...params, search: e.target.value})}
                         onKeyDown={handleKeyDown}

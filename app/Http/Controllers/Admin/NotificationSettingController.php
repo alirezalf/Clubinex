@@ -32,14 +32,18 @@ class NotificationSettingController extends Controller
         $validated = $request->validate([
             'sms_active' => 'boolean',
             'sms_pattern' => 'nullable|string',
-            'sms_template_id' => 'nullable|exists:sms_templates,id',
+            'sms_template_id' => 'nullable',
             'email_active' => 'boolean',
             'email_subject' => 'nullable|string',
             'email_body' => 'nullable|string',
-            'email_theme_id' => 'nullable|exists:email_themes,id',
+            'email_theme_id' => 'nullable',
             'database_active' => 'boolean',
             'database_message' => 'nullable|string',
         ]);
+
+        // Convert empty strings to null for optional foreign keys
+        if (empty($validated['sms_template_id'])) $validated['sms_template_id'] = null;
+        if (empty($validated['email_theme_id'])) $validated['email_theme_id'] = null;
 
         $template->update($validated);
 

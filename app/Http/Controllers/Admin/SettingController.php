@@ -193,6 +193,7 @@ class SettingController extends Controller
 
         // Clear cache
         cache()->forget('global_settings');
+        cache()->forget('global_settings_array');
         cache()->forget('modules_settings');
         cache()->forget('login_settings');
         cache()->forget('site_settings');
