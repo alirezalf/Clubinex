@@ -133,8 +133,8 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         sidebar_collapsed: getSettingValue('theme', 'sidebar_collapsed', '0') === '1',
 
         reset_personal_theme: false, // Do not reset by default
-        logo_url: null as File | string | null,
-        favicon_url: null as File | string | null,
+        logo_url: getSettingValue('theme', 'logo_url', null) as File | string | null,
+        favicon_url: getSettingValue('theme', 'favicon_url', null) as File | string | null,
 
         // Login Settings
         login_theme: getSettingValue('login', 'login_theme', 'classic'),
@@ -160,6 +160,11 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         login_btn_bg: getSettingValue('login', 'login_btn_bg', '#0284c7'),
         login_btn_text: getSettingValue('login', 'login_btn_text', '#ffffff'),
         login_card_bg: getSettingValue('login', 'login_card_bg', '#ffffff'),
+        login_tab_active_bg: getSettingValue('login', 'login_tab_active_bg', '#0284c7'),
+        login_tab_active_text: getSettingValue('login', 'login_tab_active_text', '#ffffff'),
+        login_tab_inactive_text: getSettingValue('login', 'login_tab_inactive_text', '#6b7280'),
+        login_tab_container_bg: getSettingValue('login', 'login_tab_container_bg', '#f9fafb'),
+        login_card_glass: getSettingValue('login', 'login_card_glass', '0') === '1' || getSettingValue('login', 'login_card_glass', '0') === 'true',
 
         // Contact & Social
         admin_mobile: getSettingValue('contact', 'admin_mobile', ''),
@@ -176,11 +181,11 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         payment_username: getSettingValue('payment', 'payment_username', ''),
         payment_password: getSettingValue('payment', 'payment_password', ''),
         payment_api_key: getSettingValue('payment', 'payment_api_key', ''),
-        payment_sandbox: getSettingValue('payment', 'payment_sandbox', '1') === '1',
+        payment_sandbox: getSettingValue('payment', 'payment_sandbox', '1') === '1' || getSettingValue('payment', 'payment_sandbox', '0') === 'true',
         currency: getSettingValue('finance', 'currency', 'تومان'),
         point_to_currency_rate: getSettingValue('finance', 'point_to_currency_rate', '100'),
-        allow_points_to_wallet: getSettingValue('finance', 'allow_points_to_wallet', '1') === '1' || getSettingValue('finance', 'allow_points_to_wallet', '1') === true,
-        allow_wallet_to_points: getSettingValue('finance', 'allow_wallet_to_points', '1') === '1' || getSettingValue('finance', 'allow_wallet_to_points', '1') === true,
+        allow_points_to_wallet: getSettingValue('finance', 'allow_points_to_wallet', '1') === '1' || getSettingValue('finance', 'allow_points_to_wallet', '1') === 'true',
+        allow_wallet_to_points: getSettingValue('finance', 'allow_wallet_to_points', '1') === '1' || getSettingValue('finance', 'allow_wallet_to_points', '1') === 'true',
 
         // SMS & Email
         sms_provider: getSettingValue('sms', 'sms_provider', 'kavenegar'),
@@ -211,19 +216,19 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         max_login_attempts: getSettingValue('security', 'max_login_attempts', '5'),
         lockout_time: getSettingValue('security', 'lockout_time', '60'),
         session_timeout: getSettingValue('security', 'session_timeout', '30'),
-        captcha_enabled: getSettingValue('security', 'captcha_enabled', '0') === '1',
+        captcha_enabled: getSettingValue('security', 'captcha_enabled', '0') === '1' || getSettingValue('security', 'captcha_enabled', '0') === 'true',
         default_role: getSettingValue('security', 'default_role', 'user'),
 
         // Modules
-        enable_clubs: getSettingValue('modules', 'enable_clubs', '1') === '1' || getSettingValue('modules', 'enable_clubs', '1') === true,
-        enable_lucky_wheel: getSettingValue('modules', 'enable_lucky_wheel', '1') === '1' || getSettingValue('modules', 'enable_lucky_wheel', '1') === true,
-        enable_products: getSettingValue('modules', 'enable_products', '1') === '1' || getSettingValue('modules', 'enable_products', '1') === true,
-        enable_rewards: getSettingValue('modules', 'enable_rewards', '1') === '1' || getSettingValue('modules', 'enable_rewards', '1') === true,
-        enable_wallet: getSettingValue('modules', 'enable_wallet', '1') === '1' || getSettingValue('modules', 'enable_wallet', '1') === true,
-        enable_referrals: getSettingValue('modules', 'enable_referrals', '1') === '1' || getSettingValue('modules', 'enable_referrals', '1') === true,
-        enable_surveys: getSettingValue('modules', 'enable_surveys', '1') === '1' || getSettingValue('modules', 'enable_surveys', '1') === true,
-        enable_tickets: getSettingValue('modules', 'enable_tickets', '1') === '1' || getSettingValue('modules', 'enable_tickets', '1') === true,
-        enable_reports: getSettingValue('modules', 'enable_reports', '1') === '1' || getSettingValue('modules', 'enable_reports', '1') === true,
+        enable_clubs: getSettingValue('modules', 'enable_clubs', '1') === '1' || getSettingValue('modules', 'enable_clubs', '1') === 'true',
+        enable_lucky_wheel: getSettingValue('modules', 'enable_lucky_wheel', '1') === '1' || getSettingValue('modules', 'enable_lucky_wheel', '1') === 'true',
+        enable_products: getSettingValue('modules', 'enable_products', '1') === '1' || getSettingValue('modules', 'enable_products', '1') === 'true',
+        enable_rewards: getSettingValue('modules', 'enable_rewards', '1') === '1' || getSettingValue('modules', 'enable_rewards', '1') === 'true',
+        enable_wallet: getSettingValue('modules', 'enable_wallet', '1') === '1' || getSettingValue('modules', 'enable_wallet', '1') === 'true',
+        enable_referrals: getSettingValue('modules', 'enable_referrals', '1') === '1' || getSettingValue('modules', 'enable_referrals', '1') === 'true',
+        enable_surveys: getSettingValue('modules', 'enable_surveys', '1') === '1' || getSettingValue('modules', 'enable_surveys', '1') === 'true',
+        enable_tickets: getSettingValue('modules', 'enable_tickets', '1') === '1' || getSettingValue('modules', 'enable_tickets', '1') === 'true',
+        enable_reports: getSettingValue('modules', 'enable_reports', '1') === '1' || getSettingValue('modules', 'enable_reports', '1') === 'true',
     };
     }, [settings, themeSettings]);
 
@@ -232,7 +237,7 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         general: ['site_title', 'site_description', 'footer_text', 'meta_keywords', 'og_image', 'app_name', 'support_mobile', 'author', 'app_version', 'app_description'],
         modules: ['license_key', 'enable_clubs', 'enable_lucky_wheel', 'enable_products', 'enable_rewards', 'enable_wallet', 'enable_referrals', 'enable_surveys', 'enable_tickets', 'enable_reports'],
         theme: ['primary_color', 'sidebar_bg', 'sidebar_text', 'sidebar_texture', 'header_bg', 'radius_size', 'card_style', 'card_shadow', 'card_opacity', 'sidebar_collapsed', 'reset_personal_theme', 'logo_url', 'favicon_url'],
-        login: ['login_theme', 'login_layout_reversed', 'login_left_bg_type', 'login_left_image', 'login_left_color', 'login_left_gradient', 'login_right_bg_type', 'login_right_image', 'login_right_color', 'login_right_gradient', 'login_title', 'login_subtitle', 'login_copyright', 'login_slogan_title', 'login_slogan_text', 'login_logo', 'login_title_color', 'login_subtitle_color', 'login_slogan_color', 'login_copyright_color', 'login_btn_bg', 'login_btn_text', 'login_card_bg'],
+        login: ['login_theme', 'login_layout_reversed', 'login_left_bg_type', 'login_left_image', 'login_left_color', 'login_left_gradient', 'login_right_bg_type', 'login_right_image', 'login_right_color', 'login_right_gradient', 'login_title', 'login_subtitle', 'login_copyright', 'login_slogan_title', 'login_slogan_text', 'login_logo', 'login_title_color', 'login_subtitle_color', 'login_slogan_color', 'login_copyright_color', 'login_btn_bg', 'login_btn_text', 'login_card_bg', 'login_tab_active_bg', 'login_tab_active_text', 'login_tab_inactive_text', 'login_tab_container_bg', 'login_card_glass'],
         contact: ['admin_mobile', 'support_email', 'address'],
         social: ['instagram', 'telegram', 'whatsapp', 'linkedin'],
         payment: ['payment_gateway', 'payment_merchant_id', 'payment_username', 'payment_password', 'payment_api_key', 'payment_sandbox', 'currency', 'point_to_currency_rate', 'allow_points_to_wallet', 'allow_wallet_to_points'],

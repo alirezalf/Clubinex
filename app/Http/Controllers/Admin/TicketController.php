@@ -80,20 +80,27 @@ class TicketController extends Controller
             return back()->with('error', 'این تیکت بسته شده است.');
         }
 
-        TicketMessage::create([
-            'ticket_id' => $ticket->id,
-            'user_id' => Auth::id(),
-            'message' => $request->message
-        ]);
+        try {
+            TicketMessage::create([
+                'ticket_id' => $ticket->id,
+                'user_id' => Auth::id(),
+                'message' => $request->message
+            ]);
 
-        // وقتی ادمین پاسخ داد، وضعیت به "پاسخ داده شده" تغییر می‌کند
-        $ticket->update(['status' => 'answered']);
+            // وقتی ادمین پاسخ داد، وضعیت به "پاسخ داده شده" تغییر می‌کند
+            $ticket->update(['status' => 'answered']);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to save ticket reply: ' . $e->getMessage());
+            return back()->with('error', 'خطا در ذخیره پاسخ: ' . $e->getMessage());
+        }
 
         try {
-            NotificationService::send('ticket_reply', $ticket->user, [
-                'ticket_id' => $ticket->id,
-                'subject' => $ticket->subject
-            ]);
+            if ($ticket->user) {
+                NotificationService::send('ticket_reply', $ticket->user, [
+                    'ticket_id' => $ticket->id,
+                    'subject' => $ticket->subject
+                ]);
+            }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Failed to send ticket reply notification: ' . $e->getMessage());
         }

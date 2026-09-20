@@ -1,30 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { Database, Download, RefreshCw, AlertTriangle, UploadCloud, Archive } from 'lucide-react';
-import { router, useForm } from '@inertiajs/react';
+import { router, useForm, usePage } from '@inertiajs/react';
 
 export default function SystemToolsSettings() {
     const [isCreatingUpdate, setIsCreatingUpdate] = useState(false);
 
-    const backupDatabase = async () => {
-        try {
-            const response = await fetch(route('admin.settings.backup_database'));
-            if (response.ok && (response.headers.get('content-type')?.includes('application/') || response.headers.get('content-disposition'))) {
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = response.headers.get('content-disposition')?.match(/filename="?(.+?)"?$/)?.[1] || 'backup.sql';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            } else {
-                const text = await response.text();
-                alert('خطا در ایجاد پشتیبان. لطفاً از پنل هاست (PhpMyAdmin) استفاده کنید.');
-            }
-        } catch (error) {
-            alert('خطا در اتصال به سرور');
-        }
+    const { flash } = usePage().props as any;
+
+    const backupDatabase = () => {
+        window.location.href = route('admin.settings.backup_database');
     };
 
     const createUpdatePackage = () => {
