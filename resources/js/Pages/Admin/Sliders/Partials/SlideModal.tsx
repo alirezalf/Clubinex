@@ -42,7 +42,6 @@ export default function SlideModal({ sliderId, slide, onClose }: Props) {
         order: slide?.order || 0,
         is_active: slide ? Boolean(slide.is_active) : true,
         remove_image: false, // Flag for removal
-        _method: 'POST'
     });
 
     const submit = (e: React.FormEvent) => {

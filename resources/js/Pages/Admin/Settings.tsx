@@ -227,8 +227,6 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
     };
     }, [settings, themeSettings]);
 
-    const { data, setData } = useForm(initialValues);
-
     // Define fields per tab to prevent overwriting unrelated settings
     const TAB_FIELDS: Record<string, string[]> = {
         general: ['site_title', 'site_description', 'footer_text', 'meta_keywords', 'og_image', 'app_name', 'support_mobile', 'author', 'app_version', 'app_description'],
@@ -245,31 +243,36 @@ export default function AdminSettings({ settings, notificationTemplates, emailTh
         security: ['max_login_attempts', 'lockout_time', 'session_timeout', 'captcha_enabled', 'default_role'],
     };
 
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const { data, setData } = useForm(initialValues);
 
-        // Filter data to only include fields for the active tab
+    // Helper: Build FormData from active tab fields to ensure file objects are sent correctly
+    const buildTabFormData = (): FormData => {
         const fieldsToSubmit = TAB_FIELDS[activeTab] || [];
-        const payload: any = { _method: 'post' };
+        const formData = new FormData();
+        formData.append('_method', 'POST');
 
-        // Always include _method
-        // Add only relevant fields
         fieldsToSubmit.forEach(field => {
             // @ts-ignore
             if (data[field] !== undefined) {
                 // @ts-ignore
-                payload[field] = data[field];
+                const val = data[field];
+                if (val instanceof File) {
+                    formData.append(field, val);
+                } else if (val !== null && val !== undefined) {
+                    formData.append(field, String(val));
+                }
             }
         });
+        return formData;
+    };
 
-        // Special case for SEO which is mixed with General in UI but might be separate in logic,
-        // but here we grouped them in TAB_FIELDS.general if they are on the same tab.
-        // The UI shows GeneralSettings component for 'general' tab.
-        // Let's check GeneralSettings component to see if it includes SEO fields.
-        // Yes, usually.
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
 
-        router.post(route('admin.settings.update'), payload, {
-            forceFormData: true,
+        // Build a FormData directly to ensure file objects are sent correctly
+        const formData = buildTabFormData();
+
+        router.post(route('admin.settings.update'), formData as any, {
             preserveScroll: true,
             onSuccess: () => {
                 // Apply theme settings immediately only if on theme tab

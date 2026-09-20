@@ -15,6 +15,12 @@ interface Props {
 export default function ReportFilters({ params, setParams, currentTab, onApply, onTypeChange }: Props) {
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const searchRef = useRef(params.search);
+    const onApplyRef = useRef(onApply);
+
+    // Keep the callback ref up to date
+    useEffect(() => {
+        onApplyRef.current = onApply;
+    }, [onApply]);
 
     // Debounced live search
     useEffect(() => {
@@ -23,7 +29,7 @@ export default function ReportFilters({ params, setParams, currentTab, onApply, 
 
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
-            onApply();
+            onApplyRef.current();
         }, 600);
 
         return () => {

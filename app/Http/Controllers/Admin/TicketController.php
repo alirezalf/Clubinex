@@ -94,7 +94,7 @@ class TicketController extends Controller
                 'ticket_id' => $ticket->id,
                 'subject' => $ticket->subject
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Failed to send ticket reply notification: ' . $e->getMessage());
         }
 

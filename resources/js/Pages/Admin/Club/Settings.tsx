@@ -248,7 +248,7 @@ export default function ClubSettings({ clubs, rules, flash }: any) {
                                     </button>
                                 </div>
                                 <div className="space-y-1">
-                                    {data.benefits.map((b, i) => (
+                                    {clubData.benefits.map((b, i) => (
                                         <div key={i} className="flex justify-between items-center bg-blue-50 px-3 py-1.5 rounded-lg text-sm text-blue-700">
                                             <span>{b}</span>
                                             <button type="button" onClick={() => removeBenefit(i)} className="text-blue-400 hover:text-red-500">

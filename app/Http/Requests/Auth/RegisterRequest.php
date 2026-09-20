@@ -24,7 +24,7 @@ class RegisterRequest extends FormRequest
             'referral_code' => ['nullable', 'string', 'max:50'],
         ];
 
-        if (\App\Models\SystemSetting::getValue('security', 'captcha_enabled', false)) {
+        if (filter_var(\App\Models\SystemSetting::getValue('security', 'captcha_enabled', '0'), FILTER_VALIDATE_BOOLEAN)) {
             $rules['captcha'] = ['required', 'captcha'];
         }
 

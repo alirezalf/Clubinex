@@ -75,11 +75,11 @@ class SliderController extends Controller
     public function storeSlide(Request $request, Slider $slider)
     {
         $request->validate([
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:10240',
             'bg_text' => 'nullable|string',
             'bg_color' => 'nullable|string',
             'title' => 'nullable|string|max:255',
-            'order' => 'integer',
+            'order' => 'required|integer',
         ]);
 
         if (!$request->hasFile('image') && !$request->bg_text && !$request->bg_color) {
@@ -163,7 +163,7 @@ class SliderController extends Controller
 
         // Handle New Image Upload
         if ($request->hasFile('image')) {
-            $request->validate(['image' => 'image|max:2048']);
+            $request->validate(['image' => 'image|max:10240']);
 
             if ($slide->image_path) {
                 $relativePath = str_replace(['/uploads/sliders/', '/storage/sliders/'], 'sliders/', $slide->image_path);

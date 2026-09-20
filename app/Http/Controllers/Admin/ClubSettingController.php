@@ -66,7 +66,7 @@ class ClubSettingController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('public/clubs');
+            $path = $request->file('image')->store('clubs', 'public');
             $validated['image'] = Storage::url($path);
         }
 
@@ -98,7 +98,7 @@ class ClubSettingController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('public/clubs');
+            $path = $request->file('image')->store('clubs', 'public');
             $validated['image'] = Storage::url($path);
         } else {
             unset($validated['image']);

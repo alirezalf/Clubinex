@@ -18,7 +18,7 @@ class LoginRequest extends FormRequest
             'password' => ['required', 'string'],
         ];
 
-        if (\App\Models\SystemSetting::getValue('security', 'captcha_enabled', false)) {
+        if (filter_var(\App\Models\SystemSetting::getValue('security', 'captcha_enabled', '0'), FILTER_VALIDATE_BOOLEAN)) {
             $rules['captcha'] = ['required', 'captcha'];
         }
 
