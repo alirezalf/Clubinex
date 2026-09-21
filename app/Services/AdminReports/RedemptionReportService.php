@@ -12,9 +12,13 @@ class RedemptionReportService
         $query = RewardRedemption::with(['user', 'reward'])->latest();
 
         if ($request->search) {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('mobile', 'like', "%{$request->search}%");
-            })->orWhere('tracking_code', 'like', "%{$request->search}%");
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('user', function ($uq) use ($request) {
+                    $uq->where('mobile', 'like', "%{$request->search}%")
+                      ->orWhere('first_name', 'like', "%{$request->search}%")
+                      ->orWhere('last_name', 'like', "%{$request->search}%");
+                })->orWhere('tracking_code', 'like', "%{$request->search}%");
+            });
         }
 
         if ($request->status && $request->status !== 'all') {

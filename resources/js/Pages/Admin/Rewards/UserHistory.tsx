@@ -138,7 +138,7 @@ export default function UserHistory({ user, stats, transactions, rewards, produc
                                         {spin.prize}
                                     </span>
                                 </td>
-                                <td className="px-4 py-3 text-red-500 text-xs font-bold">{spin.cost > 0 ? spin.cost : 'رایگان'}</td>
+                                <td className="px-4 py-3 text-red-500 text-xs font-bold">{spin.cost > 0 ? spin.cost : '—'}</td>
                                 <td className="px-4 py-3 text-gray-500 text-xs dir-ltr text-right">{spin.date}</td>
                             </tr>
                         )}

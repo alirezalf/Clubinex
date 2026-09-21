@@ -208,15 +208,19 @@ class UserController extends Controller
             'action' => 'required|in:change_status,change_club,send_message',
             'status_id' => [
                 'required_if:action,change_status',
-                \Illuminate\Validation\Rule::when(fn ($input) => $input->action === 'change_status', 'exists:user_statuses,id'),
+                'nullable',
+                'exists:user_statuses,id',
             ],
             'club_id' => [
                 'required_if:action,change_club',
-                \Illuminate\Validation\Rule::when(fn ($input) => $input->action === 'change_club', 'exists:clubs,id'),
+                'nullable',
+                'exists:clubs,id',
             ],
             'message' => [
                 'required_if:action,send_message',
-                \Illuminate\Validation\Rule::when(fn ($input) => $input->action === 'send_message', ['string', 'max:500']),
+                'nullable',
+                'string',
+                'max:500',
             ],
         ]);
 

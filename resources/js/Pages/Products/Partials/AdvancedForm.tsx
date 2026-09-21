@@ -150,7 +150,7 @@ export default function AdvancedForm({
                         <option value="">انتخاب کنید...</option>
                         {(() => {
                             // Build tree from flat list
-                            const buildTree = (cats: any[], parentId: number | null = null) => {
+                            const buildTree = (cats: any[], parentId: number | null = null): any[] => {
                                 return cats
                                     .filter(c => c.parent_id === parentId)
                                     .map(c => ({

@@ -31,7 +31,7 @@ Route::middleware(['auth', 'active.user'])->group(function () {
 
     // Profile & Settings
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
-    Route::post('/profile', [ProfileController::class, 'update']);
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // Changed URI to avoid collision with Fortify's default /user/password route
     Route::post('/profile/security/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');

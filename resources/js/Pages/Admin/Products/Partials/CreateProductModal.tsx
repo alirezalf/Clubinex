@@ -89,7 +89,7 @@ export default function CreateProductModal({ isOpen, onClose, categories, produc
                                 >
                                     <option value="">انتخاب...</option>
                                     {(() => {
-                                        const buildTree = (cats: any[], parentId: number | null = null) => {
+                                        const buildTree = (cats: any[], parentId: number | null = null): any[] => {
                                             return cats
                                                 .filter(c => c.parent_id === parentId)
                                                 .map(c => ({

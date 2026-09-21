@@ -43,7 +43,7 @@ interface Survey {
 type Props = PageProps<{
     activeTab: 'wheel' | 'surveys';
     wheel?: Wheel;
-    surveys?: Survey[];
+    surveys?: PaginatedData<Survey>;
 }>;
 
 export default function GamificationIndex({ activeTab, wheel, surveys }: Props) {

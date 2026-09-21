@@ -64,7 +64,7 @@ export default function CategoryModal({ isOpen, onClose, category, categories }:
                             >
                                 <option value="">بدون والد (ریشه)</option>
                                 {(() => {
-                                    const buildTree = (cats: any[], parentId: number | null = null) => {
+                                    const buildTree = (cats: any[], parentId: number | null = null): any[] => {
                                         return cats
                                             .filter(c => c.parent_id === parentId)
                                             .map(c => ({

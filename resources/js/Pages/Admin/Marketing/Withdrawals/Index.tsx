@@ -58,7 +58,7 @@ export default function WithdrawalsIndex({ withdrawals, filters }: any) {
     };
 
     return (
-        <DashboardLayout breadcrumbs={[{ label: 'امور مالی', url: '#' }, { label: 'درخواست‌های برداشت وجه' }]}>
+        <DashboardLayout breadcrumbs={[{ label: 'امور مالی', href: '#' }, { label: 'درخواست‌های برداشت وجه' }]}>
             <Head title="مدیریت برداشت وجه" />
 
             {/* Header section */}
