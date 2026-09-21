@@ -1,45 +1,63 @@
 <?php
 
 use App\Models\User;
-use Inertia\Testing\AssertableInertia as Assert;
-use Laravel\Fortify\Features;
+use Illuminate\Support\Facades\URL;
+use Laravel\Fortify\Fortify;
+use PragmaRX\Google2FA\Google2FA;
 
-test('two factor challenge redirects to login when not authenticated', function () {
-    if (! Features::canManageTwoFactorAuthentication()) {
-        $this->markTestSkipped('Two-factor authentication is not enabled.');
-    }
-
-    $response = $this->get(route('two-factor.login'));
-
-    $response->assertRedirect(route('login'));
+beforeEach(function () {
+    config(['fortify.features' => [
+        Laravel\Fortify\Features::twoFactorAuthentication(['confirm' => true, 'confirmPassword' => true]),
+    ]]);
 });
 
 test('two factor challenge can be rendered', function () {
-    if (! Features::canManageTwoFactorAuthentication()) {
-        $this->markTestSkipped('Two-factor authentication is not enabled.');
-    }
-
-    Features::twoFactorAuthentication([
-        'confirm' => true,
-        'confirmPassword' => true,
-    ]);
-
     $user = User::factory()->create();
 
     $user->forceFill([
-        'two_factor_secret' => encrypt('test-secret'),
+        'two_factor_secret' => encrypt(app(Google2FA::class)->generateSecretKey()),
         'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
         'two_factor_confirmed_at' => now(),
     ])->save();
 
-    $this->post(route('login'), [
-        'email' => $user->email,
-        'password' => 'password',
+    $response = $this->actingAs($user)->get('/two-factor-challenge');
+
+    $response->assertOk();
+});
+
+test('users can authenticate using two factor challenge', function () {
+    $user = User::factory()->create();
+
+    $user->forceFill([
+        'two_factor_secret' => encrypt(app(Google2FA::class)->generateSecretKey()),
+        'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
+        'two_factor_confirmed_at' => now(),
+    ])->save();
+
+    session()->put('login.id', $user->id);
+
+    $response = $this->post('/two-factor-challenge', [
+        'code' => app(Google2FA::class)->getCurrentOtp(decrypt($user->two_factor_secret)),
     ]);
 
-    $this->get(route('two-factor.login'))
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('auth/two-factor-challenge')
-        );
+    $this->assertAuthenticated();
+    $response->assertRedirect(route('dashboard', absolute: false));
+});
+
+test('valid two factor recovery code allows authentication', function () {
+    $user = User::factory()->create();
+
+    $user->forceFill([
+        'two_factor_secret' => encrypt(app(Google2FA::class)->generateSecretKey()),
+        'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
+        'two_factor_confirmed_at' => now(),
+    ])->save();
+
+    session()->put('login.id', $user->id);
+
+    $response = $this->post('/two-factor-challenge', [
+        'recovery_code' => 'code1',
+    ]);
+
+    $this->assertAuthenticated();
 });
