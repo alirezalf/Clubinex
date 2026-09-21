@@ -17,6 +17,21 @@ pest()->extend(Tests\TestCase::class)
 
 /*
 |--------------------------------------------------------------------------
+| Installed App State
+|--------------------------------------------------------------------------
+|
+| The CheckSetup middleware redirects every web request to /setup while the
+| users table is empty. Each test runs against a freshly migrated in-memory
+| database, so seed one user to simulate a normal (already-installed) app.
+|
+*/
+
+beforeEach(function () {
+    \App\Models\User::factory()->create();
+});
+
+/*
+|--------------------------------------------------------------------------
 | Expectations
 |--------------------------------------------------------------------------
 |

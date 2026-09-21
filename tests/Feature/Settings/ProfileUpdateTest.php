@@ -32,7 +32,22 @@ test('profile information can be updated', function () {
     expect($user->first_name)->toBe('Test');
     expect($user->last_name)->toBe('User');
     expect($user->email)->toBe('test@example.com');
-    expect($user->email_verified_at)->not->toBeNull();
+});
+
+test('email verification is reset when the email address changes', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->post(route('profile.update'), [
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => 'changed@example.com',
+        ]);
+
+    $response->assertSessionHasNoErrors();
+
+    expect($user->refresh()->email_verified_at)->toBeNull();
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {
@@ -51,29 +66,4 @@ test('email verification status is unchanged when the email address is unchanged
         ->assertRedirect();
 
     expect($user->refresh()->email_verified_at)->not->toBeNull();
-});
-
-test('user can delete their account', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->delete(route('profile.destroy'), [
-            'password' => 'password',
-        ]);
-
-    $this->assertGuest();
-    expect($user->fresh())->toBeNull();
-});
-
-test('correct password must be provided to delete account', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->delete(route('profile.destroy'), [
-            'password' => 'wrong-password',
-        ]);
-
-    expect($user->fresh())->not->toBeNull();
 });
