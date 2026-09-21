@@ -36,8 +36,12 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'profile_completed' => $this->faker->boolean(80),
             'national_code' => $this->faker->unique()->numerify('##########'),
-            // مقدار پیش‌فرض برای status_id (معمولاً در UserSeeder اورراید می‌شود)
-            'status_id' => 1, 
+            // Ensure the referenced status row exists so the FK constraint holds
+            // even without running the full seeders (e.g. in tests).
+            'status_id' => \App\Models\UserStatus::query()->firstOrCreate(
+                ['slug' => 'active'],
+                ['name' => 'فعال', 'color' => '#22c55e', 'is_active' => true, 'order' => 1]
+            )->id,
             'current_points' => $this->faker->numberBetween(0, 5000),
         ];
     }
