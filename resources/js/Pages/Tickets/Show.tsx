@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
 import { Send, User, ShieldCheck, XCircle, Headset, RefreshCcw } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 
 export default function TicketShow({ auth, ticket, messages }: PageProps<{ ticket: any, messages: any[] }>) {
     const { data, setData, post, processing, reset } = useForm({

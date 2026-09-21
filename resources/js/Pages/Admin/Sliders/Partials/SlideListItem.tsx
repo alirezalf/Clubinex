@@ -1,5 +1,5 @@
-import React from 'react';
 import { Edit2, Trash2, Copy, Eye, EyeOff } from 'lucide-react';
+import React from 'react';
 
 interface Slide {
     id: number;

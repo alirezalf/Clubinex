@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Plus, ImageIcon } from 'lucide-react';
-import SlideModal from './SlideModal';
-import SlideListItem from './SlideListItem';
 import { router } from '@inertiajs/react';
+import { Plus, ImageIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import SlideListItem from './SlideListItem';
+import SlideModal from './SlideModal';
 
 interface Props {
     slider: any;

@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
 import { useForm } from '@inertiajs/react';
 import { Save, ChevronDown, Check } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ColorPicker } from '@/Components/Admin/Settings/SharedInputs';
 
 interface Props {

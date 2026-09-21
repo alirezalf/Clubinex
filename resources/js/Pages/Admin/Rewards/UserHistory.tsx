@@ -1,11 +1,11 @@
 
-import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
 import { Award, ShoppingBag, Dna, Package, ArrowRight, Users } from 'lucide-react';
-import UserInfoCard from './Partials/UserInfoCard';
+import React from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 import SimpleHistoryTable from './Partials/SimpleHistoryTable';
+import UserInfoCard from './Partials/UserInfoCard';
 
 interface Props extends PageProps {
     user: {

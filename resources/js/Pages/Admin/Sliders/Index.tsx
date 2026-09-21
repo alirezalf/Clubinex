@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
 import { Plus, MonitorPlay, Layers } from 'lucide-react';
-import SliderCard from './Partials/SliderCard';
+import React, { useState } from 'react';
 import ConfirmModal from '@/Components/ConfirmModal';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
+import SliderCard from './Partials/SliderCard';
 
 interface Slider {
     id: number;

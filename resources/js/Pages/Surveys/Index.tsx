@@ -1,9 +1,9 @@
-import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
 import { FileText, Trophy, Clock, CheckCircle, ArrowLeft, Calendar, AlertTriangle } from 'lucide-react';
+import React from 'react';
 import QuizHistoryTable from '@/Components/QuizHistoryTable';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 
 interface SurveyItem {
     id: number;

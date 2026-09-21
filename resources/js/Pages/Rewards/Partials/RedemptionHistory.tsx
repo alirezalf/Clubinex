@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Gift, CheckCircle2, Truck, Clock, XCircle, Package, MessageSquare, Trash2 } from 'lucide-react';
-import clsx from 'clsx';
 import { Link, router } from '@inertiajs/react';
+import clsx from 'clsx';
+import { Gift, CheckCircle2, Truck, Clock, XCircle, Package, MessageSquare, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface Redemption {
     id: number;

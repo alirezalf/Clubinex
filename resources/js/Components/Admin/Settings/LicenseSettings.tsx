@@ -1,7 +1,7 @@
-import React from 'react';
-import clsx from 'clsx';
 import { usePage } from '@inertiajs/react';
+import clsx from 'clsx';
 import { Copy, ShieldCheck, ShieldAlert, KeyRound, Cpu, Calendar, User } from 'lucide-react';
+import React from 'react';
 
 function ToggleIndicator({ label, description, checked, onChange, disabled }: any) {
     return (

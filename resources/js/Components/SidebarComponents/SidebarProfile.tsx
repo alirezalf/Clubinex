@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { Award, ChevronLeft, Sparkles, Crown } from 'lucide-react';
 import clsx from 'clsx';
+import { Award, ChevronLeft, Sparkles, Crown } from 'lucide-react';
 import React from 'react';
 
 interface Props {

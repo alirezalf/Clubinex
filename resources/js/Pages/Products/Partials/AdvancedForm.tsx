@@ -1,10 +1,10 @@
 
-import { http as axios } from '@/Utils/http';
 import { Package, User, Loader2 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import FormFile from '@/Components/Form/FormFile';
 import FormInput from '@/Components/Form/FormInput';
 import FormSelect from '@/Components/Form/FormSelect';
-import FormFile from '@/Components/Form/FormFile';
+import { http as axios } from '@/Utils/http';
 
 interface Props {
     data: any;

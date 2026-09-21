@@ -1,5 +1,5 @@
-import React from 'react';
 import { Gift, ShoppingCart } from 'lucide-react';
+import React from 'react';
 
 interface Reward {
     id: number;

@@ -1,8 +1,8 @@
 
-import React from 'react';
-import { Loader2 } from 'lucide-react';
 import { usePage } from '@inertiajs/react';
-import { PageProps } from '@/types';
+import { Loader2 } from 'lucide-react';
+import React from 'react';
+import type { PageProps } from '@/types';
 
 interface Props {
     wheel: any;

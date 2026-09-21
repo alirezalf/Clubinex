@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
 import {
     CreditCard, Search, Filter, CheckCircle,
     XCircle, Clock, Eye, Download, Wallet
 } from 'lucide-react';
+import React, { useState } from 'react';
 import Pagination from '@/Components/Pagination';
+import DashboardLayout from '@/Layouts/DashboardLayout';
 
 export default function WithdrawalsIndex({ withdrawals, filters }: any) {
     const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);

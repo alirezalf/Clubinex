@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Loader2, Package, User, ChevronRight, Sparkles, Command, Users, ShoppingBag } from 'lucide-react';
-import clsx from 'clsx';
-import { http as axios } from '@/Utils/http';
 import { router } from '@inertiajs/react';
+import clsx from 'clsx';
+import { Search, X, Loader2, Package, User, ChevronRight, Sparkles, Command, Users, ShoppingBag } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { http as axios } from '@/Utils/http';
 
 interface SearchResult {
     id: number;

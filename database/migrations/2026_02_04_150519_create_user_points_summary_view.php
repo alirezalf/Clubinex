@@ -4,7 +4,15 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
     public function up(): void {
-        // تغییر CREATE VIEW به CREATE OR REPLACE VIEW برای جلوگیری از خطا
+        // The view body uses MySQL-only SQL (CREATE OR REPLACE VIEW, NOW(),
+        // DATE_ADD ... INTERVAL) and is not referenced anywhere in the
+        // application code, so skip it on non-MySQL connections (e.g. SQLite
+        // in the test suite) instead of failing them.
+        if (! in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'])) {
+            return;
+        }
+
+        // CREATE OR REPLACE VIEW for idempotency on MySQL.
         DB::statement("
             CREATE OR REPLACE VIEW user_points_summary AS
             SELECT 
@@ -56,6 +64,7 @@ return new class extends Migration {
     }
 
     public function down(): void {
+        // IF EXISTS keeps this safe on connections where the view was skipped.
         DB::statement('DROP VIEW IF EXISTS user_points_summary');
     }
 };

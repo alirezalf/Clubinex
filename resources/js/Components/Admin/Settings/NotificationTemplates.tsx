@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import { BellRing, Edit2, Plus, X, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface Template {
     id: number;

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
 import { Link } from '@inertiajs/react';
 import { ChevronRight, ChevronLeft, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 export default function LandingHero() {
     const slides = [

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Plus, Trash2, Save, AlertTriangle, List, Type, Hash, Star, Edit } from 'lucide-react';
+import React, { useState } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
 
 export default function Questions({ survey, questions }: any) {
     const [adding, setAdding] = useState(false);

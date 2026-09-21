@@ -1,5 +1,6 @@
-import React, { SelectHTMLAttributes, forwardRef } from 'react';
 import clsx from 'clsx';
+import type { SelectHTMLAttributes} from 'react';
+import React, { forwardRef } from 'react';
 
 interface Props extends SelectHTMLAttributes<HTMLSelectElement> {
     label?: string;

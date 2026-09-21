@@ -1,6 +1,6 @@
-import React from 'react';
 import { useForm } from '@inertiajs/react';
 import { X, CheckCircle, Loader2 } from 'lucide-react';
+import React from 'react';
 import FormInput from '@/Components/Form/FormInput';
 import FormSelect from '@/Components/Form/FormSelect';
 

@@ -1,7 +1,7 @@
-import React from 'react';
 import { Head, useForm } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Monitor, Smartphone, Tablet, ShieldAlert } from 'lucide-react';
+import React from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
 
 interface Session {
     id: string;

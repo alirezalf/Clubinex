@@ -1,10 +1,10 @@
-import React from 'react';
 import { Head } from '@inertiajs/react';
-import GuestLayout from '@/Layouts/GuestLayout';
+import React from 'react';
 import DynamicSlider from '@/Components/DynamicSlider';
-import LandingHero from './Welcome/Partials/LandingHero';
-import LandingFeatures from './Welcome/Partials/LandingFeatures';
+import GuestLayout from '@/Layouts/GuestLayout';
 import LandingCTA from './Welcome/Partials/LandingCTA';
+import LandingFeatures from './Welcome/Partials/LandingFeatures';
+import LandingHero from './Welcome/Partials/LandingHero';
 
 interface SeoData {
     title: string;

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import { X, ChevronRight, LayoutGrid, Smartphone, Home, Wrench, Shirt, Monitor, Watch, Headphones, Camera, Gamepad2, Gift, Coffee, Music, Sun, Star, Zap, Car, Bike, Book, PenTool } from 'lucide-react';
+import React, { useState } from 'react';
 
 // لیست آیکون‌ها در اینجا هم نیاز است یا می‌توان در فایل جداگانه تعریف کرد
 const AVAILABLE_ICONS: Record<string, any> = {
@@ -11,8 +11,7 @@ const AVAILABLE_ICONS: Record<string, any> = {
 };
 
 export default function CategoryModal({ isOpen, onClose, category, categories }: any) {
-    if (!isOpen) return null;
-
+    // Hooks must run unconditionally — early return happens below, after hooks.
     const isEditing = !!category;
     const [showIconPicker, setShowIconPicker] = useState(false);
 
@@ -23,6 +22,8 @@ export default function CategoryModal({ isOpen, onClose, category, categories }:
         icon: category?.icon || '',
         is_active: category ? Boolean(category.is_active) : true
     });
+
+    if (!isOpen) return null;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

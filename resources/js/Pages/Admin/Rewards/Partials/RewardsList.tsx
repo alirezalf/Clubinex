@@ -1,9 +1,9 @@
 import { useForm } from '@inertiajs/react';
-import { Plus, X, Loader2, Edit2, Gift, Trash2 } from 'lucide-react';
 import { router } from '@inertiajs/react';
+import { Plus, X, Loader2, Edit2, Gift, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 import Pagination from '@/Components/Pagination';
-import { PaginatedData } from '@/types';
+import type { PaginatedData } from '@/types';
 
 interface Reward {
     id: number;

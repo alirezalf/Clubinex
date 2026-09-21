@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import { Dna, Plus, X, ChevronDown, ChevronUp, Info, Gift, CheckCircle, ShoppingBag } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
+import { Dna, Plus, X, ChevronDown, ChevronUp, Info, Gift, CheckCircle, ShoppingBag } from 'lucide-react';
+import React, { useState } from 'react';
 import PrizeItem from './PrizeItem';
 
 interface Prize {

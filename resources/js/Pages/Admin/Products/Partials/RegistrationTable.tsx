@@ -1,5 +1,5 @@
-import React from 'react';
 import { Eye, CheckCircle2, Clock, XCircle, User } from 'lucide-react';
+import React from 'react';
 
 interface Props {
     registrations: { data: any[] };

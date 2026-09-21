@@ -1,6 +1,6 @@
-import React from 'react';
-import { Shield, CheckCircle, Lock } from 'lucide-react';
 import clsx from 'clsx';
+import { Shield, CheckCircle, Lock } from 'lucide-react';
+import React from 'react';
 
 interface Tier {
     id: number;

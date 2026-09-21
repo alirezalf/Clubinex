@@ -1,6 +1,6 @@
 
-import React from 'react';
 import { User, Phone, MapPin, CreditCard } from 'lucide-react';
+import React from 'react';
 
 interface Props {
     user: {

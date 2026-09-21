@@ -1,29 +1,29 @@
 
 import { Head, useForm, router, usePage } from '@inertiajs/react';
+import clsx from 'clsx';
 import { Save, Globe, Smartphone, Palette, Share2, Phone, Mail, BellRing, Code, ShoppingBag, Headphones, Shield, User as UserIcon, MessageSquare, CreditCard, Package } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import clsx from 'clsx';
 
 // Import Components
-import SettingsSidebar from './Settings/Partials/SettingsSidebar';
-import ThemeCustomizer from '@/Components/Admin/Settings/ThemeCustomizer';
-import TemplateEditor from '@/Components/Admin/Settings/NotificationTemplates';
+import ContactSettings from '@/Components/Admin/Settings/ContactSettings';
+import EmailSettings from '@/Components/Admin/Settings/EmailSettings';
 import EmailThemesManager from '@/Components/Admin/Settings/EmailThemes';
+import GeneralSettings from '@/Components/Admin/Settings/GeneralSettings';
+import LicenseSettings from '@/Components/Admin/Settings/LicenseSettings';
+import LoginSettings from '@/Components/Admin/Settings/LoginSettings';
+import TemplateEditor from '@/Components/Admin/Settings/NotificationTemplates';
+import PaymentSettings from '@/Components/Admin/Settings/PaymentSettings';
+import SecuritySettings from '@/Components/Admin/Settings/SecuritySettings';
+import SmsSettings from '@/Components/Admin/Settings/SmsSettings';
 import SmsTemplatesManager from '@/Components/Admin/Settings/SmsTemplatesManager';
+import SocialSettings from '@/Components/Admin/Settings/SocialSettings';
+import SystemToolsSettings from '@/Components/Admin/Settings/SystemToolsSettings';
+import ThemeCustomizer from '@/Components/Admin/Settings/ThemeCustomizer';
 import TicketSettings from '@/Components/Admin/Settings/TicketSettings';
 import WordPressSettings from '@/Components/Admin/Settings/WordPressSettings';
-import SecuritySettings from '@/Components/Admin/Settings/SecuritySettings';
-import SystemToolsSettings from '@/Components/Admin/Settings/SystemToolsSettings';
-import GeneralSettings from '@/Components/Admin/Settings/GeneralSettings';
-import ContactSettings from '@/Components/Admin/Settings/ContactSettings';
-import SocialSettings from '@/Components/Admin/Settings/SocialSettings';
-import SmsSettings from '@/Components/Admin/Settings/SmsSettings';
-import EmailSettings from '@/Components/Admin/Settings/EmailSettings';
-import LoginSettings from '@/Components/Admin/Settings/LoginSettings';
-import PaymentSettings from '@/Components/Admin/Settings/PaymentSettings';
-import LicenseSettings from '@/Components/Admin/Settings/LicenseSettings';
+import DashboardLayout from '@/Layouts/DashboardLayout';
 import type { PageProps, User } from '@/types/index';
+import SettingsSidebar from './Settings/Partials/SettingsSidebar';
 
 // Types
 interface SettingItem {

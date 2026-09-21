@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
 import { CheckCircle, ArrowRight, Save } from 'lucide-react';
-import SimpleForm from './Partials/SimpleForm';
+import React, { useState, useEffect } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 import AdvancedForm from './Partials/AdvancedForm';
+import SimpleForm from './Partials/SimpleForm';
 
 interface Category {
     id: number;

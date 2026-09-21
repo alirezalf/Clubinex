@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Settings, ListOrdered, ArrowUpAZ, ArrowDownAZ, Printer, ChevronDown, ChevronUp } from 'lucide-react';
 import clsx from 'clsx';
+import { Settings, ListOrdered, ArrowUpAZ, ArrowDownAZ, Printer, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface PrintConfig {
     title: string;

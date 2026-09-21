@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { CheckCircle, XCircle, X } from 'lucide-react';
 import clsx from 'clsx';
+import { CheckCircle, XCircle, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 export type ToastType = 'success' | 'error';
 
@@ -14,6 +14,11 @@ interface ToastProps {
 export default function Toast({ message, type, onClose, duration = 5000 }: ToastProps) {
     const [progress, setProgress] = useState(100);
     const [isClosing, setIsClosing] = useState(false);
+
+    const handleClose = () => {
+        setIsClosing(true);
+        setTimeout(onClose, 300); // Wait for exit animation
+    };
 
     useEffect(() => {
         const interval = 100; // Update every 100ms
@@ -32,11 +37,6 @@ export default function Toast({ message, type, onClose, duration = 5000 }: Toast
 
         return () => clearInterval(timer);
     }, [duration]);
-
-    const handleClose = () => {
-        setIsClosing(true);
-        setTimeout(onClose, 300); // Wait for exit animation
-    };
 
     const isSuccess = type === 'success';
 

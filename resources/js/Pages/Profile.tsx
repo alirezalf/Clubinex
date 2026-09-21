@@ -1,14 +1,15 @@
 import { Head, useForm, Link } from '@inertiajs/react';
-import React, { useRef, FormEvent, useState, useEffect } from 'react';
+import type { FormEvent} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import type { PageProps, User } from '@/types';
 import { http as axios } from '@/Utils/http';
 
 // Partials
-import UpgradeAlert from './Profile/Partials/UpgradeAlert';
+import PasswordForm from './Profile/Partials/PasswordForm';
 import ProfileHeader from './Profile/Partials/ProfileHeader';
 import ProfileInfoForm from './Profile/Partials/ProfileInfoForm';
-import PasswordForm from './Profile/Partials/PasswordForm';
+import UpgradeAlert from './Profile/Partials/UpgradeAlert';
 
 type Props = PageProps<{
     user: User & {
@@ -107,7 +108,7 @@ export default function Profile({ user, provinces, initialCities }: Props) {
         { value: data.postal_code, label: 'کد پستی' }
     ];
 
-    let missing = fields.filter(f => !f.value || f.value.toString().trim() === '').map(f => f.label);
+    const missing = fields.filter(f => !f.value || f.value.toString().trim() === '').map(f => f.label);
 
     const hasAvatar = data.avatar !== null || (user.avatar && user.avatar.trim() !== '');
     if (!hasAvatar) missing.push('عکس پروفایل');

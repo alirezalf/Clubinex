@@ -1,6 +1,7 @@
-import React, { FormEvent, useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Loader2, User, Mail, Lock, Phone, RefreshCw, UserPlus } from 'lucide-react';
+import type { FormEvent} from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Register() {
     const [captchaUrl, setCaptchaUrl] = useState<string | null>(null);

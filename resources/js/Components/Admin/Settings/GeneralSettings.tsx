@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react';
-import { Globe, Image as ImageIcon, Upload, Trash2, Loader2 } from 'lucide-react';
-import { InputGroup } from './SharedInputs';
 import { router } from '@inertiajs/react';
+import { Globe, Image as ImageIcon, Upload, Trash2, Loader2 } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { InputGroup } from './SharedInputs';
 
 export default function GeneralSettings({ data, setData }: { data: any, setData: (key: string, value: any) => void }) {
     const fileInputRef = useRef<HTMLInputElement>(null);

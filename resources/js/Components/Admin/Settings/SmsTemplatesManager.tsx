@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import { Plus, Edit2, Trash2, X, MessageSquare } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface SmsTemplate {
     id: number;

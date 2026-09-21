@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
 import { Head, usePage, Link } from '@inertiajs/react';
-import { Smartphone, Mail, UserPlus, Sparkles, Home, ChevronLeft, ChevronRight, Shield, Star, Gift, CheckCircle } from 'lucide-react';
-import OtpLoginForm from './Partials/OtpLoginForm';
-import EmailLoginForm from './Partials/EmailLoginForm';
-import RegisterForm from './Partials/RegisterForm';
 import clsx from 'clsx';
+import { Smartphone, Mail, UserPlus, Sparkles, Home, ChevronLeft, ChevronRight, Shield, Star, Gift, CheckCircle } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import EmailLoginForm from './Partials/EmailLoginForm';
+import OtpLoginForm from './Partials/OtpLoginForm';
+import RegisterForm from './Partials/RegisterForm';
 
 interface ModernLoginProps {
     mode: 'mobile' | 'email' | 'register';
@@ -31,20 +31,20 @@ export default function ModernLogin({ mode, setMode, captchaUrl, refreshCaptcha,
     const slideInterval = pageSlider?.interval || 5000;
 
     // Auto-slide effect
-    useEffect(() => {
-        if (!hasSlider || slides.length <= 1) return;
-        const interval = setInterval(() => {
-            goToNextSlide();
-        }, slideInterval);
-        return () => clearInterval(interval);
-    }, [hasSlider, slides.length, currentSlide, slideInterval]);
-
     const goToNextSlide = useCallback(() => {
         if (isTransitioning || slides.length <= 1) return;
         setIsTransitioning(true);
         setCurrentSlide((prev) => (prev + 1) % slides.length);
         setTimeout(() => setIsTransitioning(false), 600);
     }, [slides.length, isTransitioning]);
+
+    useEffect(() => {
+        if (!hasSlider || slides.length <= 1) return;
+        const interval = setInterval(() => {
+            goToNextSlide();
+        }, slideInterval);
+        return () => clearInterval(interval);
+    }, [hasSlider, slides.length, goToNextSlide, slideInterval]);
 
     const goToPrevSlide = useCallback(() => {
         if (isTransitioning || slides.length <= 1) return;

@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { X, Trash2, Plus, RefreshCw, Loader2, Sparkles, Copy, Settings } from 'lucide-react';
-import { http as axios } from '@/Utils/http';
 import { useForm } from '@inertiajs/react';
+import { X, Trash2, Plus, RefreshCw, Loader2, Sparkles, Copy, Settings } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { http as axios } from '@/Utils/http';
 
 export default function ManageSerialsModal({ isOpen, onClose, productId, productTitle, modelName }: any) {
-    if (!isOpen) return null;
-
+    // Hooks must run unconditionally — early return happens below, after hooks.
     const [activeTab, setActiveTab] = useState<'manual' | 'generate'>('manual');
     const [serials, setSerials] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -39,13 +38,15 @@ export default function ManageSerialsModal({ isOpen, onClose, productId, product
     };
 
     useEffect(() => {
-        if (productId) {
+        if (productId && isOpen) {
             fetchSerials(1);
             reset();
             resetGen();
             clearErrors();
         }
     }, [productId, isOpen]);
+
+    if (!isOpen) return null;
 
     // پیشنهاد کد تصادفی سمت کلاینت
     const generateSuggestion = () => {

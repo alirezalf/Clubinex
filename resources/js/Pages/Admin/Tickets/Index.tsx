@@ -1,10 +1,10 @@
-import React from 'react';
 import { Head, router } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import Pagination from '@/Components/Pagination';
-import { PageProps } from '@/types';
-import { Inbox, CheckCircle, Archive, LayoutList, RefreshCcw, Headset } from 'lucide-react';
 import clsx from 'clsx';
+import { Inbox, CheckCircle, Archive, LayoutList, RefreshCcw, Headset } from 'lucide-react';
+import React from 'react';
+import Pagination from '@/Components/Pagination';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 import TicketsTable from './Partials/TicketsTable';
 
 interface Ticket {

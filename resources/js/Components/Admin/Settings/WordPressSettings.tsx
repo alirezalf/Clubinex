@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { ShoppingBag, RefreshCw, CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import { InputGroup } from './SharedInputs';
-import { http as axios } from '@/Utils/http';
 import { router } from '@inertiajs/react';
+import { ShoppingBag, RefreshCw, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { http as axios } from '@/Utils/http';
+import { InputGroup } from './SharedInputs';
 
 interface WpData {
     wp_url: string;

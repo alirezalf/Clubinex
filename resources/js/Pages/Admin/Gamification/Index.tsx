@@ -2,9 +2,9 @@
 import { Head } from '@inertiajs/react';
 import React from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps, PaginatedData } from '@/types';
-import WheelManager from './Partials/WheelManager';
+import type { PageProps, PaginatedData } from '@/types';
 import SurveyManager from './Partials/SurveyManager';
+import WheelManager from './Partials/WheelManager';
 
 interface Prize {
     id: number;

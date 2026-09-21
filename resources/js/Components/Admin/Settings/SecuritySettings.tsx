@@ -1,5 +1,5 @@
-import React from 'react';
 import { Shield, Lock, Activity, Eye, AlertTriangle, UserIcon } from 'lucide-react';
+import React from 'react';
 
 export default function SecuritySettings({ data, setData, roles }: { data: any, setData: any, roles?: {id: number, name: string}[] }) {
     return (

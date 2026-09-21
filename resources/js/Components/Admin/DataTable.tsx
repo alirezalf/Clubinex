@@ -1,6 +1,6 @@
-import React from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import clsx from 'clsx';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import React from 'react';
 
 export interface Column<T> {
     key: string;

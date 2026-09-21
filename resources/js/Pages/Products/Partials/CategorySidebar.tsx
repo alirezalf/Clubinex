@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
-import { Layers, ChevronRight, Circle, ChevronDown, X, FolderOpen } from 'lucide-react';
 import clsx from 'clsx';
+import { Layers, ChevronRight, Circle, ChevronDown, X, FolderOpen } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface Category {
     id: number;
@@ -36,7 +36,7 @@ export default function CategorySidebar({ categories, activeCategory, isOpenMobi
 
     const isActive = (id: number) => activeCategory == id;
 
-    const SidebarContent = () => (
+    const renderSidebarContent = () => (
         <div className="flex flex-col h-full">
             <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                 <h3 className="font-bold text-gray-800 flex items-center gap-2 text-sm">
@@ -126,7 +126,7 @@ export default function CategorySidebar({ categories, activeCategory, isOpenMobi
         <>
             {/* Desktop Sidebar */}
             <div className="hidden lg:block w-64 shrink-0 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24 h-[calc(100vh-120px)]">
-                <SidebarContent />
+                {renderSidebarContent()}
             </div>
 
             {/* Mobile Sidebar (Drawer) */}
@@ -137,7 +137,7 @@ export default function CategorySidebar({ categories, activeCategory, isOpenMobi
                     
                     {/* Drawer Content */}
                     <div className="relative w-72 bg-white h-full shadow-2xl animate-in slide-in-from-right duration-300">
-                        <SidebarContent />
+                        {renderSidebarContent()}
                     </div>
                 </div>
             )}

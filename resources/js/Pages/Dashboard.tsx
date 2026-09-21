@@ -1,8 +1,8 @@
-import React, { Suspense, lazy } from 'react';
 import { Head } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
 import { Loader2 } from 'lucide-react';
+import React, { Suspense, lazy } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 
 const AdminDashboard = lazy(() => import('./Dashboard/AdminDashboard'));
 const UserDashboard = lazy(() => import('./Dashboard/UserDashboard'));

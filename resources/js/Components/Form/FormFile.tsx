@@ -1,6 +1,6 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Upload, FileText, X, Image as ImageIcon } from 'lucide-react';
 import clsx from 'clsx';
+import { Upload, FileText, X, Image as ImageIcon } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
 
 interface Props {
     label?: string;

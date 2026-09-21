@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import { X, CheckCircle, XCircle, Loader2, ZoomIn, FileText, User } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface Props {
     isOpen: boolean;

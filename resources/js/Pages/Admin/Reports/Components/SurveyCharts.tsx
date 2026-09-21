@@ -1,9 +1,9 @@
+import { PieChart as PieIcon, MapPin, CheckCircle2 } from 'lucide-react';
 import React from 'react';
 import { 
     PieChart, Pie, Cell, Tooltip as ReTooltip, Legend, ResponsiveContainer,
     BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
-import { PieChart as PieIcon, MapPin, CheckCircle2 } from 'lucide-react';
 
 interface Props {
     demographics: any;

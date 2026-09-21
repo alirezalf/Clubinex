@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
-import SliderSettingsForm from './Partials/SliderSettingsForm';
+import type { PageProps } from '@/types';
 import SlideManager from './Partials/SlideManager';
 import SliderPreview from './Partials/SliderPreview';
+import SliderSettingsForm from './Partials/SliderSettingsForm';
 
 type Props = PageProps<{
     slider?: any;

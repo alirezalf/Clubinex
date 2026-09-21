@@ -1,5 +1,5 @@
-import React from 'react';
 import { X, Check, Printer } from 'lucide-react';
+import React from 'react';
 
 interface Props {
     isOpen: boolean;

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { List, CheckSquare, Square, ChevronDown, ChevronUp } from 'lucide-react';
 import clsx from 'clsx';
+import { List, CheckSquare, Square, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface Props {
     fields: Record<string, string>;

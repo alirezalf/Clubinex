@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
 import { Camera, Award, Star, Sparkles, Medal, TrendingUp } from 'lucide-react';
-import { User } from '@/types';
+import React, { useRef, useState } from 'react';
+import type { User } from '@/types';
 
 interface Props {
     user: User & {

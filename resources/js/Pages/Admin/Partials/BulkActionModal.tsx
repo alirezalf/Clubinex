@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import { X, CheckCircle, Shield, Award, MessageSquare, Loader2 } from 'lucide-react';
+import React, { useEffect } from 'react';
 
 interface Props {
     isOpen: boolean;

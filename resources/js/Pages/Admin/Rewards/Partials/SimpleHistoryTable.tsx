@@ -1,6 +1,7 @@
 
-import React, { ReactNode } from 'react';
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
+import React from 'react';
 
 interface Props<T> {
     title: string;

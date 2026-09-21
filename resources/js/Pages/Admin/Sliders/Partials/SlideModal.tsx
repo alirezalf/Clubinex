@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import { X, Save, Upload, Layout, Type, Zap, Move, Trash2 } from 'lucide-react';
-import { ColorPicker } from '@/Components/Admin/Settings/SharedInputs';
 import clsx from 'clsx';
+import { X, Save, Upload, Layout, Type, Zap, Move, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { ColorPicker } from '@/Components/Admin/Settings/SharedInputs';
 
 interface Props {
     sliderId: number;

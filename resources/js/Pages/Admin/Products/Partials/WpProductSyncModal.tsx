@@ -1,11 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, RefreshCw, Loader2, StopCircle, ArrowLeft, AlertTriangle } from 'lucide-react';
-import { http as axios } from '@/Utils/http';
 import { router } from '@inertiajs/react';
+import { X, RefreshCw, Loader2, StopCircle, ArrowLeft, AlertTriangle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { http as axios } from '@/Utils/http';
 
 export default function WpProductSyncModal({ isOpen, onClose }: any) {
-    if (!isOpen) return null;
-
+    // Hooks must run unconditionally — early return happens below, after hooks.
     const [loadingWpSchema, setLoadingWpSchema] = useState(false);
     const [wpFields, setWpFields] = useState<string[]>([]);
     const [isSyncing, setIsSyncing] = useState(false);
@@ -30,6 +29,7 @@ export default function WpProductSyncModal({ isOpen, onClose }: any) {
     ];
 
     useEffect(() => {
+        if (!isOpen) return;
         const fetchSchema = async () => {
             setLoadingWpSchema(true);
             try {
@@ -44,7 +44,9 @@ export default function WpProductSyncModal({ isOpen, onClose }: any) {
             }
         };
         fetchSchema();
-    }, []);
+    }, [isOpen]);
+
+    if (!isOpen) return null;
 
     const startSyncProcess = async () => {
         if (!mapping.title) {
@@ -57,7 +59,7 @@ export default function WpProductSyncModal({ isOpen, onClose }: any) {
         let page = 1;
         let finished = false;
 
-        let currentStats = { created: 0, updated: 0, total: 0, current_page: 0 };
+        const currentStats = { created: 0, updated: 0, total: 0, current_page: 0 };
         setSyncStats(currentStats);
         setSyncProgress(5);
 

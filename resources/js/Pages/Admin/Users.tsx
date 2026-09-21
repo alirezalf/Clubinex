@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { Plus, Eye, Edit, CheckCircle, ShieldBan, User, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import ConfirmModal from '@/Components/ConfirmModal';
+import Pagination from '@/Components/Pagination';
+import type { Column } from '@/Components/Table/DataTable';
+import DataTable from '@/Components/Table/DataTable';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import type { PageProps, PaginatedData } from '@/types';
-import DataTable, { Column } from '@/Components/Table/DataTable';
-import Pagination from '@/Components/Pagination';
 
 // Import Partials
+import BulkActionModal from './Partials/BulkActionModal';
 import CreateUserModal from './Partials/CreateUserModal';
 import EditUserModal from './Partials/EditUserModal';
-import BulkActionModal from './Partials/BulkActionModal';
-import UserFilters from './Partials/UserFilters';
 import UserBulkFloatingBar from './Partials/UserBulkFloatingBar';
-import ConfirmModal from '@/Components/ConfirmModal';
+import UserFilters from './Partials/UserFilters';
 
 interface AdminUser {
     id: number;

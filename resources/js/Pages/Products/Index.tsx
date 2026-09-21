@@ -9,11 +9,11 @@ import {
   Edit,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
+import SearchInput from "@/Components/SearchInput";
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import type { PageProps } from "@/types";
 import CategorySidebar from "./Partials/CategorySidebar";
 import ProductGrid from "./Partials/ProductGrid";
-import SearchInput from "@/Components/SearchInput";
 
 interface Product {
   id: number;

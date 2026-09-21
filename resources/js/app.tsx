@@ -1,10 +1,10 @@
 import './bootstrap';
 import '../css/app.css';
 
-import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import { route as routeFn } from 'ziggy-js';
 
 const appName = (import.meta as any).env.VITE_APP_NAME || 'Clubinex';

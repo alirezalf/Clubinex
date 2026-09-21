@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
-import { http as axios } from '@/Utils/http';
 import { Dna, Trophy, History, Frown, Box, Sparkles, XCircle, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
+import { http as axios } from '@/Utils/http';
 import WheelSpinner from './Partials/WheelSpinner';
 
 interface Prize {

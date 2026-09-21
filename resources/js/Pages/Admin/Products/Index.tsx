@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
 import { Head, router } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import Pagination from '@/Components/Pagination';
 import { Plus, RefreshCw, Box, FileText } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import Pagination from '@/Components/Pagination';
 import SearchInput from '@/Components/SearchInput';
-import {
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type {
     PageProps,
     PaginatedData,
     Product,
     ProductRegistration,
 } from '@/types';
 
-import ProductTable from './Partials/ProductTable';
-import RegistrationTable from './Partials/RegistrationTable';
 import CreateProductModal from './Partials/CreateProductModal';
 import ImportSerialsModal from './Partials/ImportSerialsModal';
-import WpProductSyncModal from './Partials/WpProductSyncModal';
 import ManageSerialsModal from './Partials/ManageSerialsModal';
+import ProductTable from './Partials/ProductTable';
 import RegistrationReviewModal from './Partials/RegistrationReviewModal';
+import RegistrationTable from './Partials/RegistrationTable';
+import WpProductSyncModal from './Partials/WpProductSyncModal';
 
 interface Category {
     id: number;

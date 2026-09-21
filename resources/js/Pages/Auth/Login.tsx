@@ -1,5 +1,5 @@
-import React, { useState, Suspense, lazy } from 'react';
 import { usePage } from '@inertiajs/react';
+import React, { useState, Suspense, lazy } from 'react';
 import { useThemeSystem } from '@/Hooks/useThemeSystem';
 
 const ClassicLogin = lazy(() => import('./ClassicLogin'));

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { Smartphone, Mail, UserPlus, Sparkles, Home, ChevronLeft, Shield, Gift, Award } from 'lucide-react';
-import OtpLoginForm from './Partials/OtpLoginForm';
-import EmailLoginForm from './Partials/EmailLoginForm';
-import RegisterForm from './Partials/RegisterForm';
 import clsx from 'clsx';
+import { Smartphone, Mail, UserPlus, Sparkles, Home, ChevronLeft, Shield, Gift, Award } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import EmailLoginForm from './Partials/EmailLoginForm';
+import OtpLoginForm from './Partials/OtpLoginForm';
+import RegisterForm from './Partials/RegisterForm';
 
 interface MinimalLoginProps {
     mode: 'mobile' | 'email' | 'register';

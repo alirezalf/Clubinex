@@ -1,14 +1,13 @@
-import React, { useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import { X, Save } from 'lucide-react';
+import React, { useEffect } from 'react';
+import FormFile from '@/Components/Form/FormFile';
 import FormInput from '@/Components/Form/FormInput';
 import FormSelect from '@/Components/Form/FormSelect';
 import FormTextarea from '@/Components/Form/FormTextarea';
-import FormFile from '@/Components/Form/FormFile';
 
 export default function CreateProductModal({ isOpen, onClose, categories, product }: any) {
-    if (!isOpen) return null;
-
+    // Hooks must run unconditionally — early return happens below, after hooks.
     const isEditing = !!product;
 
     const { data, setData, post, processing, reset, errors, clearErrors, transform } = useForm({
@@ -39,6 +38,8 @@ export default function CreateProductModal({ isOpen, onClose, categories, produc
         }
         clearErrors();
     }, [product, isOpen]);
+
+    if (!isOpen) return null;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

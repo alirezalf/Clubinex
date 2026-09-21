@@ -1,6 +1,6 @@
-import React from 'react';
 import { Head } from '@inertiajs/react';
 import { CloudOff, Clock, Wrench } from 'lucide-react';
+import React from 'react';
 
 export default function Error503() {
     return (

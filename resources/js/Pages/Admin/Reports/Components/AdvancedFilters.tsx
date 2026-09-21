@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Filter, Plus, Trash2, ChevronDown, ChevronUp, Check, RefreshCw } from 'lucide-react';
 import clsx from 'clsx';
+import { Filter, Plus, Trash2, ChevronDown, ChevronUp, Check, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface AdvancedFilterItem {
     id: number;

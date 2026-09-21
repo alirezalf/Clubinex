@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
-import { http as axios } from '@/Utils/http';
 import { Loader2, ArrowLeft, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
+import { http as axios } from '@/Utils/http';
 
 interface Props {
     captchaUrl: string | null;
