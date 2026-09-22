@@ -81,6 +81,9 @@ class OtpService
 
         if ($user->wasRecentlyCreated) {
             $defaultRole = \App\Models\SystemSetting::getValue('security', 'default_role', 'user');
+            if (! \Spatie\Permission\Models\Role::where('name', $defaultRole)->exists()) {
+                \Spatie\Permission\Models\Role::firstOrCreate(['name' => $defaultRole]);
+            }
             $user->assignRole($defaultRole);
             if ($referredById && $referredById !== $user->id) {
                 \App\Models\ReferralNetwork::createReferral($referredById, $user->id);

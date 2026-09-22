@@ -69,6 +69,9 @@ class CreateNewUser implements CreatesNewUsers
 
         // اختصاص نقش پیش‌فرض
         $defaultRole = \App\Models\SystemSetting::getValue('security', 'default_role', 'user');
+        if (! \Spatie\Permission\Models\Role::where('name', $defaultRole)->exists()) {
+            \Spatie\Permission\Models\Role::firstOrCreate(['name' => $defaultRole]);
+        }
         $user->assignRole($defaultRole);
 
         // پردازش کد معرف (Referral System)

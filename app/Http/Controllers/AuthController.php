@@ -149,6 +149,11 @@ class AuthController extends Controller
         ]);
 
         $defaultRole = \App\Models\SystemSetting::getValue('security', 'default_role', 'user');
+        // Ensure the default role exists before assigning (fresh installs / tests may
+        // not have run the role seeder yet) — otherwise Spatie throws and register 500s.
+        if (! \Spatie\Permission\Models\Role::where('name', $defaultRole)->exists()) {
+            \Spatie\Permission\Models\Role::firstOrCreate(['name' => $defaultRole]);
+        }
         $user->assignRole($defaultRole);
 
         if ($referredById && $referredById !== $user->id) {
