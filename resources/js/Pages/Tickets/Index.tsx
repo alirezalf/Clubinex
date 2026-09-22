@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
-import { MessageSquare, Plus, Archive, LayoutList, RefreshCcw, CheckCircle2, Search, X, Clock, AlertCircle } from 'lucide-react';
-import Pagination from '@/Components/Pagination';
 import clsx from 'clsx';
+import { MessageSquare, Plus, Archive, LayoutList, RefreshCcw, CheckCircle2, Search, X, Clock, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import Pagination from '@/Components/Pagination';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 
 type Props = PageProps<{
     tickets: { data: any[]; links: any[] };

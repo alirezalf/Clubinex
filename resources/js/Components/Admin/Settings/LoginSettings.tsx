@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
-import { Save, Layout, Type, Palette, Image as ImageIcon, Monitor, Smartphone, RefreshCw, Check } from 'lucide-react';
-import FormInput from '@/Components/Form/FormInput';
-import FormFile from '@/Components/Form/FormFile';
 import clsx from 'clsx';
+import { Save, Layout, Type, Palette, Image as ImageIcon, Monitor, Smartphone, RefreshCw, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import FormFile from '@/Components/Form/FormFile';
+import FormInput from '@/Components/Form/FormInput';
 
 interface LoginSettingsProps {
     data: any;

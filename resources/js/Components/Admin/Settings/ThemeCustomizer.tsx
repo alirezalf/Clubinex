@@ -1,9 +1,9 @@
-import React from 'react';
-import { Palette, Save, Laptop } from 'lucide-react';
 import { router } from '@inertiajs/react';
-import ThemePreview from './ThemePreview';
-import ThemePresets from '@/Components/Theme/ThemePresets';
+import { Palette, Save, Laptop } from 'lucide-react';
+import React from 'react';
 import ThemeControls from '@/Components/Theme/ThemeControls';
+import ThemePresets from '@/Components/Theme/ThemePresets';
+import ThemePreview from './ThemePreview';
 
 export default function ThemeCustomizer({ data, setData, submit, handleFileChange }: any) {
 

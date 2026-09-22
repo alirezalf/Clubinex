@@ -15,6 +15,7 @@ class RewardRedemption extends Model
         'reward_id',
         'lucky_wheel_spin_id', // اضافه شده
         'points_spent',
+        'cash_spent',
         'status',
         'admin_note',
         'delivery_info',

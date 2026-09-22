@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
-import { Bell, Clock, Check, CheckCheck, Trash2, BookOpen, ChevronDown, MessageSquare } from 'lucide-react';
 import clsx from 'clsx';
+import { Bell, Clock, Check, CheckCheck, Trash2, BookOpen, ChevronDown, MessageSquare } from 'lucide-react';
+import React, { useState } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 
 interface Notification {
     id: string;

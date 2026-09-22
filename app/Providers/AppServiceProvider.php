@@ -29,6 +29,29 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Self-healing storage symlink (معادل artisan storage:link)
+        // اگر لینک public/storage وجود نداشته باشد، فایل‌های آپلودی (آواتار، عکس محصول،
+        // فاکتور، لوگو و ...) با خطای 404 نمایش داده می‌شوند. این کد به صورت خودکار آن را می‌سازد.
+        try {
+            $publicStorage = public_path('storage');
+            if (!file_exists($publicStorage)) {
+                @symlink(storage_path('app/public'), $publicStorage);
+                if (!file_exists($publicStorage)) {
+                    // هاست‌هایی که symlink را نمی‌پذیرند: کپی یک‌باره محتویات
+                    @mkdir($publicStorage, 0755, true);
+                    if (is_dir(storage_path('app/public'))) {
+                        foreach (\Illuminate\Support\Facades\File::allFiles(storage_path('app/public')) as $file) {
+                            $target = $publicStorage . '/' . $file->getRelativePathname();
+                            @mkdir(dirname($target), 0755, true);
+                            @copy($file->getPathname(), $target);
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // silent - never block boot
+        }
+
         // Rate Limiting
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());

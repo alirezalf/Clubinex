@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
 import { Award, ArrowLeft, Crown, Star } from 'lucide-react';
-import TierCard from './Partials/TierCard';
-import SpecialClubCard from './Partials/SpecialClubCard';
+import React, { useState } from 'react';
 import ConfirmModal from '@/Components/ConfirmModal';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
+import SpecialClubCard from './Partials/SpecialClubCard';
+import TierCard from './Partials/TierCard';
 
 interface Tier {
     id: number;

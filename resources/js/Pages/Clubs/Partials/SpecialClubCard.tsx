@@ -1,6 +1,6 @@
-import React from 'react';
-import { Star, CheckCircle, Lock } from 'lucide-react';
 import clsx from 'clsx';
+import { Star, CheckCircle, Lock } from 'lucide-react';
+import React from 'react';
 
 interface SpecialClub {
     id: number;

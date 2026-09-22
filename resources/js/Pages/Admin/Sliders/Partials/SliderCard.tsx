@@ -1,6 +1,6 @@
-import React from 'react';
 import { Link } from '@inertiajs/react';
 import { Edit2, Trash2, Layers, Eye } from 'lucide-react';
+import React from 'react';
 
 interface Props {
     slider: {

@@ -1,6 +1,6 @@
-import React from 'react';
 import { useForm } from '@inertiajs/react';
 import { Mail, Lock, RefreshCw, Loader2 } from 'lucide-react';
+import React from 'react';
 
 interface Props {
     captchaUrl: string | null;

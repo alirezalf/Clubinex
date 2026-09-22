@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo } from 'react';
 import { useForm } from '@inertiajs/react';
-import { Shield, X, Save, CheckSquare } from 'lucide-react';
 import clsx from 'clsx';
+import { Shield, X, Save, CheckSquare } from 'lucide-react';
+import React, { useEffect, useMemo } from 'react';
 
 interface Permission {
     id: number;

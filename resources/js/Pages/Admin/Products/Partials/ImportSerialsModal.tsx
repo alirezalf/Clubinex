@@ -1,13 +1,14 @@
-import React from 'react';
 import { useForm } from '@inertiajs/react';
 import { X, Upload } from 'lucide-react';
+import React from 'react';
 
 export default function ImportSerialsModal({ isOpen, onClose, selectedProduct }: any) {
-    if (!isOpen || !selectedProduct) return null;
-
+    // Hooks must run unconditionally — early return happens below, after hooks.
     const { data: importData, setData: setImportData, post: postImport, processing: importProcessing, reset: resetImport } = useForm({
         file: null as File | null,
     });
+
+    if (!isOpen || !selectedProduct) return null;
 
     const submitImport = (e: React.FormEvent) => {
         e.preventDefault();

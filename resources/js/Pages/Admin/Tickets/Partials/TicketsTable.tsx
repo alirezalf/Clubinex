@@ -1,7 +1,7 @@
-import React from 'react';
 import { Link } from '@inertiajs/react';
-import { MessageSquare, User, Clock } from 'lucide-react';
 import clsx from 'clsx';
+import { MessageSquare, User, Clock } from 'lucide-react';
+import React from 'react';
 
 interface Ticket {
     id: number;

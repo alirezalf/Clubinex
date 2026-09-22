@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Layers, Plus, RefreshCw } from 'lucide-react';
-import CategoryTable from './Partials/CategoryTable';
+import React, { useState } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
 import CategoryModal from './Partials/CategoryModal';
+import CategoryTable from './Partials/CategoryTable';
 import WpCategorySyncModal from './Partials/WpCategorySyncModal';
 
 export default function AdminCategories({ categories, parents, flash }: any) {

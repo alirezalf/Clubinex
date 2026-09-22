@@ -1,8 +1,8 @@
 
-import React from 'react';
-import { Loader2 } from 'lucide-react';
 import { usePage } from '@inertiajs/react';
-import { PageProps } from '@/types';
+import { Loader2 } from 'lucide-react';
+import React from 'react';
+import type { PageProps } from '@/types';
 
 interface Props {
     wheel: any;
@@ -95,7 +95,7 @@ export default function WheelSpinner({ wheel, prizes, rotation, spinning, userPo
 
                                     const color = prize.color || defaultColors[index % defaultColors.length];
                                     const textColor = prize.text_color || '#ffffff';
-                                    const rawFontSize = prize.font_size || 7;
+                                    const rawFontSize = prize.font_size || 5.5;
                                     const fontSize = Math.min(rawFontSize, 10) / 100; // Cap max at 10 and convert to SVG scale
                                     const orientation = prize.text_orientation || 'horizontal';
 
@@ -117,7 +117,7 @@ export default function WheelSpinner({ wheel, prizes, rotation, spinning, userPo
                                         return lines;
                                     };
 
-                                    const lines = wrapText(prize.title, 14); // Wrap after 14 chars for smaller fonts
+                                    const lines = wrapText(prize.title, 18); // Wrap after 18 chars for smaller fonts
 
                                     return (
                                         <g key={prize.id}>

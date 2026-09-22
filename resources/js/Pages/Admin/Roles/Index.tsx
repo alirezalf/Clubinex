@@ -1,11 +1,11 @@
 import { Head, router } from '@inertiajs/react';
 import { Shield, Plus } from 'lucide-react';
 import React, { useState } from 'react';
+import ConfirmModal from '@/Components/ConfirmModal';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import type { PageProps } from '@/types';
 import RoleCard from './Partials/RoleCard';
 import RoleModal from './Partials/RoleModal';
-import ConfirmModal from '@/Components/ConfirmModal';
 
 interface Role {
     id: number;

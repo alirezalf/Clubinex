@@ -1,6 +1,6 @@
-import React from 'react';
-import { Headphones, Clock, User as UserIcon, Info } from 'lucide-react';
 import { Link } from '@inertiajs/react';
+import { Headphones, Clock, User as UserIcon, Info } from 'lucide-react';
+import React from 'react';
 
 interface User {
     id: number;

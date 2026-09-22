@@ -1,6 +1,6 @@
+import { Eye } from 'lucide-react';
 import React from 'react';
 import DynamicSlider from '@/Components/DynamicSlider';
-import { Eye } from 'lucide-react';
 
 interface Props {
     sliderSettings: any;

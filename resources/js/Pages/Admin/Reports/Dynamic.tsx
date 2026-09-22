@@ -1,20 +1,20 @@
 
-import React, { useState, useEffect, useRef } from 'react';
 import { Head, usePage } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
-import { Search, FileSpreadsheet, Printer } from 'lucide-react';
-import { http as axios } from '@/Utils/http';
 import clsx from 'clsx';
+import { Search, FileSpreadsheet, Printer } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
+import { http as axios } from '@/Utils/http';
 
 const PersianDatePicker = React.lazy(() => import('@/Components/PersianDatePicker'));
 
 // Import Components
+import AdvancedFilters from './Components/AdvancedFilters';
 import DataSourceSelector from './Components/DataSourceSelector';
 import FieldSelector from './Components/FieldSelector';
-import ReportTable from './Components/ReportTable';
 import ReportSettings from './Components/ReportSettings';
-import AdvancedFilters from './Components/AdvancedFilters';
+import ReportTable from './Components/ReportTable';
 
 interface Entity {
     label: string;

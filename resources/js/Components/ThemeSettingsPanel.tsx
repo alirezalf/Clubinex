@@ -3,8 +3,8 @@ import clsx from 'clsx';
 import { X, Save, RotateCcw, Palette } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { generateColorShades, getContrastColor } from '@/Utils/ThemeUtils';
-import ThemePresets from './Theme/ThemePresets';
 import ThemeControls from './Theme/ThemeControls';
+import ThemePresets from './Theme/ThemePresets';
 
 interface Props {
     isOpen: boolean;

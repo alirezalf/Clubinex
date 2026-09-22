@@ -5,12 +5,12 @@ import React, { useState, useEffect } from 'react';
 import type { PageProps } from '@/types';
 
 // Sub-components & Config
-import SidebarHeader from './SidebarComponents/SidebarHeader';
-import SidebarProfile from './SidebarComponents/SidebarProfile';
-import SidebarMenu from './SidebarComponents/SidebarMenu';
-import SidebarFooter from './SidebarComponents/SidebarFooter';
-import SidebarStyles from './SidebarComponents/SidebarStyles';
 import { getMenuItems, getAdminItems, getMenuGroups } from './SidebarComponents/SidebarConfig';
+import SidebarFooter from './SidebarComponents/SidebarFooter';
+import SidebarHeader from './SidebarComponents/SidebarHeader';
+import SidebarMenu from './SidebarComponents/SidebarMenu';
+import SidebarProfile from './SidebarComponents/SidebarProfile';
+import SidebarStyles from './SidebarComponents/SidebarStyles';
 
 interface SidebarProps {
     isOpen: boolean;

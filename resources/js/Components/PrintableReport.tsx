@@ -1,6 +1,6 @@
-import React from 'react';
 import { usePage } from '@inertiajs/react';
-import { PageProps } from '@/types';
+import React from 'react';
+import type { PageProps } from '@/types';
 
 interface PrintConfig {
     title: string;

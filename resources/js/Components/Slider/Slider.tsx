@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
-import { SliderSettings } from './types';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 import SlideItem from './SlideItem';
+import type { SliderSettings } from './types';
 
 interface Props {
     slider: SliderSettings | null;
@@ -20,43 +20,6 @@ export default function Slider({ slider, className = '' }: Props) {
     const totalSlides = slides.length;
     const gap = slider?.gap || 0;
     const isLoop = slider?.loop !== false; // Default to true if undefined
-
-    // اگر اسلایدری وجود نداشت یا اسلایدی نداشت، پلیس‌هولدر را نمایش بده (برای پیش‌نمایش در ادمین)
-    if (!slider || slides.length === 0) {
-        const radius = slider?.border_radius || 'rounded-2xl';
-        const height = slider?.height_class || 'h-64';
-        return (
-            <div className={`relative overflow-hidden group bg-gray-200 ${height} ${radius} ${className}`}>
-                <img
-                    alt="Placeholder"
-                    className="w-full h-full object-cover absolute inset-0 z-0 opacity-80"
-                    src="https://placehold.co/1200x400/ea580c/FFF?text=Noruz+Festival"
-                />
-                <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <span className="bg-black/50 text-white px-4 py-2 rounded text-sm backdrop-blur-sm">
-                        منتظر محتوا...
-                    </span>
-                </div>
-            </div>
-        );
-    }
-
-    // Auto Play
-    useEffect(() => {
-        resetTimeout();
-
-        // Stop auto play if we reached the end and loop is disabled
-        if (!isLoop && currentIndex >= totalSlides - slidesPerView) {
-            return;
-        }
-
-        if (slider && totalSlides > slidesPerView) {
-            timeoutRef.current = setTimeout(() => {
-                handleNext();
-            }, slider.interval || 5000);
-        }
-        return () => resetTimeout();
-    }, [currentIndex, slider]);
 
     const resetTimeout = () => {
         if (timeoutRef.current) {
@@ -107,6 +70,43 @@ export default function Slider({ slider, className = '' }: Props) {
         setIsAnimating(true);
         setTimeout(() => setIsAnimating(false), 800);
     };
+
+    // Auto Play
+    useEffect(() => {
+        resetTimeout();
+
+        // Stop auto play if we reached the end and loop is disabled
+        if (!isLoop && currentIndex >= totalSlides - slidesPerView) {
+            return;
+        }
+
+        if (slider && totalSlides > slidesPerView) {
+            timeoutRef.current = setTimeout(() => {
+                handleNext();
+            }, slider.interval || 5000);
+        }
+        return () => resetTimeout();
+    }, [currentIndex, slider]);
+
+    // اگر اسلایدری وجود نداشت یا اسلایدی نداشت، پلیس‌هولدر را نمایش بده (برای پیش‌نمایش در ادمین)
+    if (!slider || slides.length === 0) {
+        const radius = slider?.border_radius || 'rounded-2xl';
+        const height = slider?.height_class || 'h-64';
+        return (
+            <div className={`relative overflow-hidden group bg-gray-200 ${height} ${radius} ${className}`}>
+                <img
+                    alt="Placeholder"
+                    className="w-full h-full object-cover absolute inset-0 z-0 opacity-80"
+                    src="https://placehold.co/1200x400/ea580c/FFF?text=Noruz+Festival"
+                />
+                <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <span className="bg-black/50 text-white px-4 py-2 rounded text-sm backdrop-blur-sm">
+                        منتظر محتوا...
+                    </span>
+                </div>
+            </div>
+        );
+    }
 
     const getRadiusClass = () => slider.border_radius || 'rounded-2xl';
     const getHeightClass = () => slider.height_class || 'h-64';

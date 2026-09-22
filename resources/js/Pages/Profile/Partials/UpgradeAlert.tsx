@@ -1,7 +1,7 @@
-import React from 'react';
 import { router } from '@inertiajs/react';
 import { ArrowUpCircle, Shield, Award } from 'lucide-react';
-import { User } from '@/types';
+import React from 'react';
+import type { User } from '@/types';
 
 interface Props {
     user: User & {

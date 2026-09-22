@@ -1,5 +1,5 @@
-import React from 'react';
 import { Shield, Edit2, Trash2 } from 'lucide-react';
+import React from 'react';
 
 interface Role {
     id: number;

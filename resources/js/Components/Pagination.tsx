@@ -1,6 +1,6 @@
-import React from 'react';
 import { Link } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React from 'react';
 
 interface PaginationProps {
     links: {
@@ -17,7 +17,7 @@ export default function Pagination({ links, className = '' }: PaginationProps) {
     return (
         <div className={`flex flex-wrap justify-center gap-1 mt-6 ${className}`}>
             {links.map((link, key) => {
-                let label = link.label;
+                const label = link.label;
 
                 // Replace text labels with icons if needed
                 if (label.includes('Previous')) {

@@ -1,6 +1,6 @@
-import React from 'react';
 import { Link } from '@inertiajs/react';
 import { ChevronLeft, Home } from 'lucide-react';
+import React from 'react';
 
 export interface BreadcrumbItem {
     label: string;

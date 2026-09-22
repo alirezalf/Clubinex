@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
-import { ArrowLeft, Printer, Download, Settings } from 'lucide-react';
 import clsx from 'clsx';
+import { ArrowLeft, Printer, Download, Settings } from 'lucide-react';
+import React, { useState } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 
 // Components
-import SurveyCharts from './Components/SurveyCharts';
-import QuestionAnalysis from './Components/QuestionAnalysis';
 import ParticipantsTable from './Components/ParticipantsTable';
 import PrintSettingsModal from './Components/PrintSettings';
+import QuestionAnalysis from './Components/QuestionAnalysis';
+import SurveyCharts from './Components/SurveyCharts';
 
 interface Props extends PageProps {
     survey: any;

@@ -1,6 +1,6 @@
-import React from 'react';
 import { Link } from '@inertiajs/react';
 import { Eye } from 'lucide-react';
+import React from 'react';
 import SortableHeader from './SortableHeader';
 
 export default function SurveysTable({ data, sort, onSort, from }: any) {

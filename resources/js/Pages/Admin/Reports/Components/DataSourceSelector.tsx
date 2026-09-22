@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Database, ChevronDown, Check } from 'lucide-react';
 import clsx from 'clsx';
+import { Database, ChevronDown, Check } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface Props {
     entities: Record<string, { label: string }>;

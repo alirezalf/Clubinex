@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
 import { useForm, router, Link } from '@inertiajs/react';
 import { Search, Filter, Truck, AlertCircle, Loader2, UserCheck, Eye, X, Settings } from 'lucide-react';
-import PersianDatePicker from '@/Components/PersianDatePicker';
+import React, { useState } from 'react';
 import Pagination from '@/Components/Pagination';
-import { PaginatedData } from '@/types';
+import PersianDatePicker from '@/Components/PersianDatePicker';
+import type { PaginatedData } from '@/types';
 
 interface Redemption {
     id: number;

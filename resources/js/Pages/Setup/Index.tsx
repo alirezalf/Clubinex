@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { Shield, Smartphone, Lock, AlertCircle, ArrowRight, Loader2, Mail, XCircle } from 'lucide-react';
 import clsx from 'clsx';
+import { Shield, Smartphone, Lock, AlertCircle, ArrowRight, Loader2, Mail, XCircle } from 'lucide-react';
+import React, { useState } from 'react';
 
 export default function Setup() {
     const { data, setData, post, processing, errors } = useForm({

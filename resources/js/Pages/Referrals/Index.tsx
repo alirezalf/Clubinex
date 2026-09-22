@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import Pagination from '@/Components/Pagination';
-import { PageProps } from '@/types';
 import { Users, Copy, Check, Share2, Coins, UserPlus } from 'lucide-react';
+import React, { useState } from 'react';
+import Pagination from '@/Components/Pagination';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import { PageProps } from '@/types';
 
 export default function ReferralsIndex({ referralCode, stats, referrals }: any) {
     const [copied, setCopied] = useState(false);

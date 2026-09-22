@@ -1,5 +1,6 @@
-import React, { InputHTMLAttributes, forwardRef, ReactNode } from 'react';
 import clsx from 'clsx';
+import type { InputHTMLAttributes, ReactNode } from 'react';
+import React, { forwardRef } from 'react';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
     label?: string;

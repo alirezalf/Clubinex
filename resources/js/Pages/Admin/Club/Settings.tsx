@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
+import { Award, Save, Edit2, Shield, Zap, Plus, X, Settings as SettingsIcon, Trash2, List, Image as ImageIcon } from 'lucide-react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { PageProps } from '@/types';
-import { Award, Save, Edit2, Shield, Zap, Plus, X, Settings as SettingsIcon, Trash2, List, Image as ImageIcon } from 'lucide-react';
 
 export default function ClubSettings({ clubs, rules, flash }: any) {
     const [showCreateModal, setShowCreateModal] = useState(false);

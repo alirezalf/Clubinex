@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
 import { CheckCircle, ArrowRight, Save } from 'lucide-react';
-import SimpleForm from './Partials/SimpleForm';
+import React, { useState, useEffect } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 import AdvancedForm from './Partials/AdvancedForm';
+import SimpleForm from './Partials/SimpleForm';
 
 interface Category {
     id: number;
@@ -52,7 +52,12 @@ export default function ProductCreate({ categories, prefilledProduct, agentInfo,
     const urlMode = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('mode') : null;
 
     // اگر محصولی از قبل انتخاب شده باشد یا در حال ویرایش باشیم، مستقیماً به تب پیشرفته می‌رویم
-    const initialMode = (prefilledProduct || editingRegistration) ? 'advanced' : (urlMode === 'advanced' ? 'advanced' : 'simple');
+    // در غیر این صورت mode صریح URL (simple/advanced) اولویت دارد و پیش‌فرض حالت سریع است
+    const initialMode = (editingRegistration)
+        ? 'advanced'
+        : (prefilledProduct && urlMode !== 'simple')
+            ? 'advanced'
+            : (urlMode === 'advanced' ? 'advanced' : 'simple');
     const [regMode, setRegMode] = useState<'simple' | 'advanced'>(initialMode);
 
     // Determine if the current user is an agent based on profile or role

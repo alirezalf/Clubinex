@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
-import { ShoppingCart, Gift, History } from 'lucide-react';
 import clsx from 'clsx';
-import RewardItem from './Partials/RewardItem';
+import { ShoppingCart, Gift, History } from 'lucide-react';
+import React, { useState } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 import RedemptionHistory from './Partials/RedemptionHistory';
+import RewardItem from './Partials/RewardItem';
 
 interface Reward {
     id: number;

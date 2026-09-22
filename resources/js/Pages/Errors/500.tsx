@@ -1,6 +1,6 @@
-import React from 'react';
 import { Head } from '@inertiajs/react';
 import { ServerCrash, RefreshCcw } from 'lucide-react';
+import React from 'react';
 
 export default function Error500() {
     return (

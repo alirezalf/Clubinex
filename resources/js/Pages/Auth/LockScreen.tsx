@@ -1,6 +1,6 @@
-import React from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { Lock, ArrowRight, Loader2 } from 'lucide-react';
+import React from 'react';
 
 interface Props {
     user: {

@@ -1,7 +1,8 @@
-import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { Instagram, Twitter, Linkedin, Phone, Mail, MapPin, Send, Calendar, User, LayoutDashboard } from 'lucide-react';
-import { PageProps } from '@/types';
+import type { PropsWithChildren} from 'react';
+import React, { useEffect, useState } from 'react';
+import type { PageProps } from '@/types';
 
 // تعریف اینترفیس برای تنظیمات سایت
 interface SiteSettings {

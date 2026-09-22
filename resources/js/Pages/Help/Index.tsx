@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
 import { Head } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { Book, Shield, Settings, Server, Users, Code, Search, ChevronRight, FileText, Lock, Sparkles, Terminal } from 'lucide-react';
 import clsx from 'clsx';
+import { Book, Shield, Settings, Server, Users, Code, Search, ChevronRight, FileText, Lock, Sparkles, Terminal } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
 
 interface Article {
     id: number;
@@ -61,7 +61,7 @@ export default function HelpIndex({ isAdmin, categories }: { isAdmin: boolean, c
     };
 
     return (
-        <DashboardLayout breadcrumbs={[{ label: 'راهنمای سیستم', url: '#' }]}>
+        <DashboardLayout breadcrumbs={[{ label: 'راهنمای سیستم', href: '#' }]}>
             <Head title="مرکز آموزش و مستندات" />
 
             <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-140px)]">

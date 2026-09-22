@@ -1,7 +1,7 @@
-import React from 'react';
 import { Head } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Info, User, Phone, Layers, ShieldCheck, Star } from 'lucide-react';
+import React from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
 
 interface Props {
     appVersion: string;

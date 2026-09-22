@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useMemo } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { http as axios } from '@/Utils/http';
+import clsx from 'clsx';
 import {
     TrendingUp, ShoppingBag, Users, Barcode, FileQuestion,
     Loader2, X, Eye, FileText
 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Pagination from '@/Components/Pagination';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import ReportFilters from './Partials/ReportFilters';
-import clsx from 'clsx';
 import type { PageProps } from '@/types';
+import { http as axios } from '@/Utils/http';
+import ProductsTable from './Partials/ProductsTable';
+import RedemptionsTable from './Partials/RedemptionsTable';
+import ReportFilters from './Partials/ReportFilters';
 
 // Import New Partials
-import TransactionsTable from './Partials/TransactionsTable';
-import RedemptionsTable from './Partials/RedemptionsTable';
-import UsersTable from './Partials/UsersTable';
-import ProductsTable from './Partials/ProductsTable';
 import SurveysTable from './Partials/SurveysTable';
+import TransactionsTable from './Partials/TransactionsTable';
+import UsersTable from './Partials/UsersTable';
 
 interface Props extends PageProps {
     data: {

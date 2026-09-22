@@ -1,5 +1,5 @@
-import React from 'react';
 import { Phone } from 'lucide-react';
+import React from 'react';
 import { InputGroup } from './SharedInputs';
 
 export default function ContactSettings({ data, setData }: { data: any, setData: any }) {

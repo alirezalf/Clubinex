@@ -1,5 +1,5 @@
-import React from 'react';
 import { Share2 } from 'lucide-react';
+import React from 'react';
 import { InputGroup } from './SharedInputs';
 
 export default function SocialSettings({ data, setData }: { data: any, setData: any }) {

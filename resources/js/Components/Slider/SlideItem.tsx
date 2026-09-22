@@ -1,6 +1,6 @@
-import React from 'react';
 import { Link } from '@inertiajs/react';
-import { Slide } from './types';
+import React from 'react';
+import type { Slide } from './types';
 
 interface Props {
     slide: Slide;

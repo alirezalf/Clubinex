@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import { Edit2, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface Prize {
     id: number;

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
 import { Barcode, Search, CheckCircle, Package, AlertTriangle, Loader2 } from 'lucide-react';
-import { http as axios } from '@/Utils/http';
+import React, { useState } from 'react';
 import FormInput from '@/Components/Form/FormInput';
+import { http as axios } from '@/Utils/http';
 
 interface Props {
     data: any;

@@ -1,5 +1,5 @@
-import React from 'react';
 import { FileSpreadsheet, Edit2, Trash2, List } from 'lucide-react';
+import React from 'react';
 
 export default function ProductTable({ products, onImportSerial, onEdit, onDelete, onManageSerials }: any) {
     return (

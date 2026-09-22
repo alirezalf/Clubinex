@@ -1,11 +1,11 @@
 
-import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps } from '@/types';
 import { Award, ShoppingBag, Dna, Package, ArrowRight, Users } from 'lucide-react';
-import UserInfoCard from './Partials/UserInfoCard';
+import React from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps } from '@/types';
 import SimpleHistoryTable from './Partials/SimpleHistoryTable';
+import UserInfoCard from './Partials/UserInfoCard';
 
 interface Props extends PageProps {
     user: {
@@ -138,7 +138,7 @@ export default function UserHistory({ user, stats, transactions, rewards, produc
                                         {spin.prize}
                                     </span>
                                 </td>
-                                <td className="px-4 py-3 text-red-500 text-xs font-bold">{spin.cost > 0 ? spin.cost : 'رایگان'}</td>
+                                <td className="px-4 py-3 text-red-500 text-xs font-bold">{spin.cost > 0 ? spin.cost : '—'}</td>
                                 <td className="px-4 py-3 text-gray-500 text-xs dir-ltr text-right">{spin.date}</td>
                             </tr>
                         )}

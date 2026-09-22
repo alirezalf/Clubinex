@@ -1,12 +1,12 @@
-import React from 'react';
 import { Head, router } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { PageProps, PaginatedData } from '@/types';
 import { Gift, ShoppingBag } from 'lucide-react';
+import React from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PageProps, PaginatedData } from '@/types';
 
 // Import Partials
-import RewardsList from './Partials/RewardsList';
 import RedemptionsList from './Partials/RedemptionsList';
+import RewardsList from './Partials/RewardsList';
 
 interface Reward {
     id: number;

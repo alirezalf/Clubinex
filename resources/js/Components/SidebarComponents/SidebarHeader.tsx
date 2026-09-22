@@ -1,5 +1,5 @@
-import { Hexagon, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
 import clsx from 'clsx';
+import { Hexagon, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
 import React from 'react';
 import MarqueeText from '../MarqueeText';
 

@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import clsx from 'clsx';
 import {
     ShieldCheck, CreditCard, ArrowUpRight, ArrowDownLeft,
     AlertCircle, Copy, Check, User, Users, Gift, TrendingUp,
     Award, Sparkles, Clock, ChevronLeft, Zap, Star
 } from 'lucide-react';
-import clsx from 'clsx';
-import { PageProps } from '@/types';
+import React, { useState } from 'react';
+import type { PageProps } from '@/types';
 import QuickAccess from './Components/QuickAccess';
 
 interface UserStats {

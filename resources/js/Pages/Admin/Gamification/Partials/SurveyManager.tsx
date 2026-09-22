@@ -1,11 +1,11 @@
-import React, { useState, Suspense } from 'react';
 import { useForm, router, Link } from '@inertiajs/react';
 import { Target, Plus, Trophy, Hash, Star, Clock, Edit2, ListChecks, Loader2, Copy, Power, Trash2, X } from 'lucide-react';
+import React, { useState, Suspense } from 'react';
 
 const PersianDatePicker = React.lazy(() => import('@/Components/PersianDatePicker'));
 
 import Pagination from '@/Components/Pagination';
-import { PaginatedData } from '@/types';
+import type { PaginatedData } from '@/types';
 
 interface Survey {
     id: number;

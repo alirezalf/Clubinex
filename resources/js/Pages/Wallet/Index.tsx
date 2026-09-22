@@ -1,8 +1,8 @@
-import React from 'react';
 import { Head, useForm } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, Clock, CheckCircle, XCircle } from 'lucide-react';
+import React from 'react';
 import Pagination from '@/Components/Pagination';
+import DashboardLayout from '@/Layouts/DashboardLayout';
 
 interface Wallet {
     id: number;

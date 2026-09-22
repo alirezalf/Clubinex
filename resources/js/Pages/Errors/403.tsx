@@ -1,6 +1,6 @@
-import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { ShieldAlert, Home, ArrowRight } from 'lucide-react';
+import React from 'react';
 
 export default function Error403() {
     return (

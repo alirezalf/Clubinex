@@ -1,10 +1,10 @@
-import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { Smartphone, Mail, UserPlus, Home } from 'lucide-react';
-import OtpLoginForm from './Partials/OtpLoginForm';
-import EmailLoginForm from './Partials/EmailLoginForm';
-import RegisterForm from './Partials/RegisterForm';
 import clsx from 'clsx';
+import { Smartphone, Mail, UserPlus, Home } from 'lucide-react';
+import React from 'react';
+import EmailLoginForm from './Partials/EmailLoginForm';
+import OtpLoginForm from './Partials/OtpLoginForm';
+import RegisterForm from './Partials/RegisterForm';
 
 interface ClassicLoginProps {
     mode: 'mobile' | 'email' | 'register';

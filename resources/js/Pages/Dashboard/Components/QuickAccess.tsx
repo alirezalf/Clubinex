@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
+import clsx from 'clsx';
 import {
     LayoutGrid, Settings, ShoppingCart, Dna, Gift, Users,
     FileText, Package, MessageSquare, Bell, Star, UserPlus,
     Zap, X, Plus, Barcode, Database, ChevronLeft, Sparkles
 } from 'lucide-react';
-import clsx from 'clsx';
+import React, { useState } from 'react';
 
 // List of all available quick actions
 const AVAILABLE_ACTIONS = [
@@ -31,17 +31,17 @@ const ADMIN_ACTIONS = [
 interface Props {
     pinned: string[];
     frequent: string[];
-    isAdmin: boolean;
-}
+    isAdmin: boolean;}
 
-import { usePage } from '@inertiajs/react';
+
+
 
 export default function QuickAccess({ pinned = [], frequent = [], isAdmin }: Props) {
     const { modules } = usePage<any>().props;
     const [showModal, setShowModal] = useState(false);
     const [selectedItems, setSelectedItems] = useState<string[]>(pinned);
 
-    let rawPool = isAdmin ? [...ADMIN_ACTIONS, ...AVAILABLE_ACTIONS] : AVAILABLE_ACTIONS;
+    const rawPool = isAdmin ? [...ADMIN_ACTIONS, ...AVAILABLE_ACTIONS] : AVAILABLE_ACTIONS;
 
     // Filter out disabled modules
     const pool = rawPool.filter(item => {

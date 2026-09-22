@@ -1,15 +1,16 @@
-import axios from 'axios';
 import { usePage, router } from '@inertiajs/react';
+import axios from 'axios';
 import clsx from 'clsx';
 import type { ReactNode } from 'react';
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import type { BreadcrumbItem } from '@/Components/Breadcrumbs';
 import Breadcrumbs from '@/Components/Breadcrumbs';
+import ToastContainer from '@/Components/Dashboard/ToastContainer';
 import Header from '@/Components/Header';
 import Sidebar from '@/Components/Sidebar';
-import ToastContainer from '@/Components/Dashboard/ToastContainer';
+import type { ThemeSettings } from '@/Hooks/useThemeSystem';
+import { useThemeSystem } from '@/Hooks/useThemeSystem';
 import type { PageProps } from '@/types';
-import { useThemeSystem, ThemeSettings } from '@/Hooks/useThemeSystem';
 
 const ThemeSettingsPanel = lazy(() => import('@/Components/ThemeSettingsPanel'));
 const DynamicSlider = lazy(() => import('@/Components/DynamicSlider'));

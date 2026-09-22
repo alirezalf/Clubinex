@@ -1,6 +1,6 @@
-import React from 'react';
 import { useForm } from '@inertiajs/react';
 import { Lock, Save, KeyRound, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import React from 'react';
 import { useState } from 'react';
 import FormInput from '@/Components/Form/FormInput';
 

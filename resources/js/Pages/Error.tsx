@@ -1,6 +1,6 @@
-import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { AlertTriangle, Home } from 'lucide-react';
+import React from 'react';
 
 interface Props {
     status: number;

@@ -33,7 +33,7 @@ export async function request(method: string, url: string, data?: any, config: a
     const response = await fetch(url, options);
 
     let responseData;
-    let contentType = response.headers.get('content-type');
+    const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
          responseData = await response.json();
     } else {

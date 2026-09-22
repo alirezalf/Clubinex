@@ -1,5 +1,5 @@
-import React from 'react';
 import { Filter } from 'lucide-react';
+import React from 'react';
 import SearchInput from '@/Components/SearchInput';
 
 interface Props {

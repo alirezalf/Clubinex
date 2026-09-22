@@ -27,7 +27,7 @@ class ProfileUpdateRequest extends FormRequest
             'city_id' => ['nullable', 'exists:cities,id'],
             'postal_code' => ['nullable', 'digits_between:5,10'],
             'address' => ['nullable', 'string', 'max:500'],
-            'avatar' => ['nullable', 'image', 'max:2048'], // 2MB
+            'avatar' => ['nullable', 'image', 'max:5120'], // 5MB
             
             // فیلدهای مربوط به نماینده
             'is_agent' => ['boolean'],

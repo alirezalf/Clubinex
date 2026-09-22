@@ -1,6 +1,6 @@
-import React from 'react';
-import { Users, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from '@inertiajs/react';
+import { Users, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import React from 'react';
 
 interface Props {
     participants: { data: any[], links: any[] };

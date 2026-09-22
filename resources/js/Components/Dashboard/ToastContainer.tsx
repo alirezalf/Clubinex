@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Toast, { ToastType } from '@/Components/Toast';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import type { ToastType } from '@/Components/Toast';
+import Toast from '@/Components/Toast';
 
 interface Props {
     flash: { message: string | null; error: string | null };
@@ -8,6 +9,13 @@ interface Props {
 export default function ToastContainer({ flash }: Props) {
     const [toasts, setToasts] = useState<{ id: number; message: string; type: ToastType }[]>([]);
     const processedFlashRef = useRef<{ message?: string | null; error?: string | null }>({});
+
+    const addToast = useCallback((message: string, type: ToastType) => {
+        setToasts(prev => {
+            if (prev.some(t => t.message === message && t.type === type)) return prev;
+            return [...prev, { id: Date.now() + Math.random(), message, type }];
+        });
+    }, []);
 
     useEffect(() => {
         if (flash.message && flash.message !== processedFlashRef.current.message) {
@@ -18,14 +26,7 @@ export default function ToastContainer({ flash }: Props) {
             addToast(flash.error, 'error');
             processedFlashRef.current.error = flash.error;
         }
-    }, [flash]);
-
-    const addToast = (message: string, type: ToastType) => {
-        setToasts(prev => {
-            if (prev.some(t => t.message === message && t.type === type)) return prev;
-            return [...prev, { id: Date.now() + Math.random(), message, type }];
-        });
-    };
+    }, [flash, addToast]);
 
     const removeToast = (id: number) => {
         setToasts(prev => prev.filter(t => t.id !== id));

@@ -1,7 +1,7 @@
-import React from "react";
-import { Package, Barcode, FileText, Loader2 } from "lucide-react";
-import Pagination from "@/Components/Pagination";
 import { router } from "@inertiajs/react";
+import { Package, Barcode, FileText, Loader2 } from "lucide-react";
+import React from "react";
+import Pagination from "@/Components/Pagination";
 
 interface Product {
   id: number;

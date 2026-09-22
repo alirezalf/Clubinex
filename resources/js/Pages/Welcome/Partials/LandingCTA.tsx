@@ -1,6 +1,6 @@
-import React from 'react';
 import { Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
+import React from 'react';
 
 export default function LandingCTA() {
     return (

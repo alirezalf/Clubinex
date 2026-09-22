@@ -1,8 +1,8 @@
-import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import { CheckCircle, Trophy, ArrowRight, XCircle, Award } from 'lucide-react';
 import clsx from 'clsx';
+import { CheckCircle, Trophy, ArrowRight, XCircle, Award } from 'lucide-react';
+import React from 'react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
 
 interface Props {
     survey: {

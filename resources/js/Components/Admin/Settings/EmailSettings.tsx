@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
 import { Mail, RefreshCw, Loader2, CheckCircle, XCircle } from 'lucide-react';
-import { InputGroup } from './SharedInputs';
+import React, { useState } from 'react';
 import { http as axios } from '@/Utils/http';
+import { InputGroup } from './SharedInputs';
 
 export default function EmailSettings({ data, setData, emailThemes = [] }: { data: any, setData: any, emailThemes?: any[] }) {
     const [testing, setTesting] = useState(false);

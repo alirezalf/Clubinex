@@ -1,6 +1,6 @@
-import React from 'react';
-import { Layout, Sun, Moon, Palette, Monitor, MenuSquare, X, CreditCard, Layers, Box } from 'lucide-react';
 import clsx from 'clsx';
+import { Layout, Sun, Moon, Palette, Monitor, MenuSquare, X, CreditCard, Layers, Box } from 'lucide-react';
+import React from 'react';
 
 interface Props {
     data: any;
