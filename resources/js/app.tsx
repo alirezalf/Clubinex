@@ -7,7 +7,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { route as routeFn } from 'ziggy-js';
 
-const appName = (import.meta as any).env.VITE_APP_NAME || 'Clubinex';
+const appName = import.meta.env.VITE_APP_NAME || 'Clubinex';
+
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use App\Services\ThemeService;
+use Illuminate\Support\Facades\Log;
 
 class ProfileController extends Controller
 {
@@ -66,6 +67,7 @@ class ProfileController extends Controller
 
     public function update(ProfileUpdateRequest $request)
     {
+       
         /** @var \App\Models\User $user */
         $user = auth()->user();
         $validated = $request->validated();

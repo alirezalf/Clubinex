@@ -80,7 +80,7 @@ export default function Profile({ user, provinces, initialCities }: Props) {
 
     const submitInfo = (e: FormEvent) => {
         e.preventDefault();
-        post(route('profile'), {
+        post(route('profile.update'), {
             forceFormData: true,
             onSuccess: () => {
                 setData('avatar', null);
