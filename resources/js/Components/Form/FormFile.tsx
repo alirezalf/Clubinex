@@ -9,12 +9,14 @@ interface Props {
     accept?: string;
     previewUrl?: string;
     currentFileName?: string;
+    maxSizeMb?: number;
 }
 
-export default function FormFile({ label, error, onChange, accept = "image/*", previewUrl, currentFileName }: Props) {
+export default function FormFile({ label, error, onChange, accept = "image/*", previewUrl, currentFileName, maxSizeMb = 5 }: Props) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [localPreview, setLocalPreview] = useState<string | null>(null);
     const [imageError, setImageError] = useState<boolean>(false);
+    const [validationError, setValidationError] = useState<string | null>(null);
 
     // تابع برای پاکسازی نام فایل (حذف فاصله و کاراکترهای خاص)
     const sanitizeFileName = (fileName: string): string => {
@@ -42,11 +44,13 @@ export default function FormFile({ label, error, onChange, accept = "image/*", p
             const originalFile = e.target.files[0];
 
             // بررسی حجم فایل
-            if (originalFile.size > 5 * 1024 * 1024) { // 5MB
-                alert('حجم فایل نباید بیشتر از ۵ مگابایت باشد.');
+            if (originalFile.size > maxSizeMb * 1024 * 1024) {
+                setValidationError(`حجم فایل نباید بیشتر از ${maxSizeMb} مگابایت باشد.`);
                 if (inputRef.current) inputRef.current.value = '';
                 return;
             }
+
+            setValidationError(null);
 
             // بررسی نام فایل و هشدار اگر فاصله دارد
             if (originalFile.name.includes(' ')) {
@@ -91,6 +95,7 @@ export default function FormFile({ label, error, onChange, accept = "image/*", p
         onChange(null);
         setLocalPreview(null);
         setImageError(false);
+        setValidationError(null);
         if (inputRef.current) inputRef.current.value = '';
     };
 
@@ -159,7 +164,7 @@ export default function FormFile({ label, error, onChange, accept = "image/*", p
                             )}
                         </span>
                         <span className="mt-2 text-[10px] text-gray-400 bg-white/50 px-2 py-1 rounded">
-                            حداکثر حجم: ۵ مگابایت | فرمت‌های مجاز: {accept.replace('image/', '').toUpperCase()}
+                            حداکثر حجم: {maxSizeMb} مگابایت | فرمت‌های مجاز: {accept.replace('image/', '').toUpperCase()}
                         </span>
                     </div>
                 )}
@@ -220,7 +225,7 @@ export default function FormFile({ label, error, onChange, accept = "image/*", p
                 </div>
             )}
 
-            {error && <p className="mt-1 text-xs text-red-500 font-bold flex items-center gap-1"><X size={12}/> {error}</p>}
+            {(validationError || error) && <p className="mt-1 text-xs text-red-500 font-bold flex items-center gap-1"><X size={12}/> {validationError || error}</p>}
         </div>
     );
 }

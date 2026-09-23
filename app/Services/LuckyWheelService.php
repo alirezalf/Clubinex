@@ -91,19 +91,21 @@
 
                   $canGivePrize = true;
 
-                  if ($lockedPrize->stock !== null) {
-                      if ($lockedPrize->stock > 0) {
-                          $lockedPrize->decrement('stock');
-                      } else {
-                          $canGivePrize = false;
-                      }
-                  }
-
                   if ($canGivePrize && $lockedPrize->daily_limit !== null) {
                       $todayWinCount = LuckyWheelSpin::where('prize_id', $lockedPrize->id)
                                           ->whereDate('created_at', \Carbon\Carbon::today())
                                           ->count();
                       if ($todayWinCount >= $lockedPrize->daily_limit) {
+                          $canGivePrize = false;
+                      }
+                  }
+
+                  // موجودی فقط بعد از عبور از سقف روزانه کم می‌شود؛ در غیر این صورت
+                  // جایزه‌ای که به کاربر داده نشده بود از موجودی کم می‌شد.
+                  if ($canGivePrize && $lockedPrize->stock !== null) {
+                      if ($lockedPrize->stock > 0) {
+                          $lockedPrize->decrement('stock');
+                      } else {
                           $canGivePrize = false;
                       }
                   }
@@ -126,7 +128,7 @@
                   'user_id' => $user->id,
                   'lucky_wheel_id' => $wheel->id,
                   'prize_id' => $selectedPrize->id,
-                  'cost_paid' => $wheel->cost_per_spin,
+                  'cost_paid' => $isFreeSpin ? 0 : $wheel->cost_per_spin,
                   'is_win' => $isWin
               ]);
 

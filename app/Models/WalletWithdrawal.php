@@ -12,6 +12,7 @@ class WalletWithdrawal extends Model
     protected $fillable = [
         'user_id',
         'wallet_id',
+        'wallet_transaction_id',
         'amount',
         'bank_name',
         'iban_number',
@@ -29,6 +30,11 @@ class WalletWithdrawal extends Model
     public function wallet()
     {
         return $this->belongsTo(Wallet::class);
+    }
+
+    public function walletTransaction()
+    {
+        return $this->belongsTo(WalletTransaction::class);
     }
 
     public function getCreatedAtJalaliAttribute()

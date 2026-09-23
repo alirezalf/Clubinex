@@ -95,7 +95,7 @@ export default function WheelSpinner({ wheel, prizes, rotation, spinning, userPo
 
                                     const color = prize.color || defaultColors[index % defaultColors.length];
                                     const textColor = prize.text_color || '#ffffff';
-                                    const rawFontSize = prize.font_size || 5.5;
+                                    const rawFontSize = prize.font_size || 3.2;
                                     const fontSize = Math.min(rawFontSize, 10) / 100; // Cap max at 10 and convert to SVG scale
                                     const orientation = prize.text_orientation || 'horizontal';
 

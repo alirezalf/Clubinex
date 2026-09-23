@@ -7,6 +7,7 @@ use App\Models\SurveyAnswer;
 use App\Models\PointTransaction;
 use App\Models\PointRule;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Morilog\Jalali\Jalalian;
@@ -126,6 +127,11 @@ class SurveyController extends Controller
 
         $survey->total_points = $survey->questions->sum('points');
 
+        // تایمر مرورگر قابل اتکا نیست؛ شروع آزمون در نشست سمت سرور نگهداری می‌شود.
+        if ($survey->duration_minutes) {
+            session()->putIfAbsent("survey_started_at_{$survey->id}", now()->timestamp);
+        }
+
         return Inertia::render('Surveys/Show', [
             'survey' => $survey
         ]);
@@ -187,16 +193,48 @@ class SurveyController extends Controller
             return redirect()->route('surveys.index')->with('error', 'زمان شرکت در این مسابقه به پایان رسیده است.');
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'answers' => 'required|array',
-            'answers.*.question_id' => 'required|exists:survey_questions,id',
+            'answers.*.question_id' => 'required|integer|distinct|exists:survey_questions,id',
             'answers.*.value' => 'required',
         ]);
 
         $user = auth()->user();
 
+        if ($survey->duration_minutes) {
+            $startedAt = session()->get("survey_started_at_{$survey->id}");
+            $expiresAt = $startedAt
+                ? now()->setTimestamp((int) $startedAt)->addMinutes($survey->duration_minutes)
+                : null;
+
+            if (!$expiresAt || now()->greaterThan($expiresAt)) {
+                return redirect()->route('surveys.index')->with('error', 'مهلت زمانی این آزمون به پایان رسیده است.');
+            }
+        }
+
         if ($survey->getUserAttemptCount($user->id) >= $survey->max_attempts) {
             return back()->with('error', 'شما قبلاً در این آزمون شرکت کرده‌اید.');
+        }
+
+        $questions = $survey->questions()->get()->keyBy('id');
+        $submittedQuestionIds = collect($validated['answers'])
+            ->pluck('question_id')
+            ->map(fn ($id) => (int) $id);
+
+        if ($submittedQuestionIds->contains(fn ($id) => !$questions->has($id))) {
+            throw ValidationException::withMessages([
+                'answers' => 'همه پاسخ‌ها باید مربوط به سؤال‌های همین نظرسنجی باشند.',
+            ]);
+        }
+
+        $missingRequired = $questions->where('is_required', true)
+            ->pluck('id')
+            ->diff($submittedQuestionIds);
+
+        if ($missingRequired->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'answers' => 'لطفاً به همه سؤال‌های اجباری پاسخ دهید.',
+            ]);
         }
 
         try {
@@ -207,8 +245,14 @@ class SurveyController extends Controller
             $correctCount = 0;
             $earnedPoints = 0;
 
-            foreach ($request->answers as $ans) {
-                $question = $survey->questions->find($ans['question_id']);
+            foreach ($validated['answers'] as $ans) {
+                $question = $questions->get((int) $ans['question_id']);
+
+                if ($question->isMultipleChoice() && !array_key_exists((int) $ans['value'], $question->options ?? [])) {
+                    throw ValidationException::withMessages([
+                        'answers' => 'گزینه انتخاب‌شده برای یکی از سؤال‌ها معتبر نیست.',
+                    ]);
+                }
 
                 $answerData = [
                     'user_id' => $user->id,
@@ -261,8 +305,13 @@ class SurveyController extends Controller
 
             DB::commit();
 
+            session()->forget("survey_started_at_{$survey->id}");
+
             return redirect()->route('surveys.result', $survey->slug)->with('earned_points', $earnedPoints);
 
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'خطا در ثبت پاسخ‌ها: ' . $e->getMessage());

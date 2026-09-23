@@ -17,11 +17,6 @@ class TicketController extends Controller
 {
     public function index(Request $request)
     {
-        // هنگام مشاهده لیست تیکت‌ها، تمام تیکت‌هایی که پاسخ ادمین دارند را به عنوان خوانده شده علامت‌گذاری کن
-        Ticket::where('user_id', Auth::id())
-            ->where('status', 'answered')
-            ->update(['status' => 'pending']);
-
         $status = $request->input('status', 'active');
         $query = Ticket::where('user_id', Auth::id())->with(['assignedTo'])->latest();
 

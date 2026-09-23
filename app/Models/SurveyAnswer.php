@@ -290,10 +290,8 @@ class SurveyAnswer extends Model
                 ]
             );
 
-            // اعطای امتیاز (اگر مسابقه باشد و کاربر تمام سوالات را پاسخ داده باشد)
-            if ($survey->isQuiz() && $answer->isCorrect()) {
-                $answer->awardPoints();
-            }
+            // امتیاز کل مسابقه در SurveyController::submit ثبت می‌شود تا یک پاسخ
+            // از دو مسیر مستقل امتیاز نگیرد.
         }
 
         return $answer;

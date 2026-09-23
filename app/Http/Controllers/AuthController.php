@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserStatus;
 use App\Services\OtpService;
 use App\Models\ActivityLog;
 use App\Http\Requests\Auth\LoginRequest;
@@ -143,7 +144,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'mobile' => $request->mobile,
             'password' => Hash::make($request->password),
-            'status_id' => 1, // Active
+            'status_id' => UserStatus::where('slug', 'active')->value('id') ?? 1,
             'referred_by' => $referredById,
             'referral_code' => strtoupper(substr(md5($request->mobile . time()), 0, 8)),
         ]);

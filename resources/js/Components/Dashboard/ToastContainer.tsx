@@ -3,12 +3,12 @@ import type { ToastType } from '@/Components/Toast';
 import Toast from '@/Components/Toast';
 
 interface Props {
-    flash: { message: string | null; error: string | null };
+    flash: { message: string | null; success?: string | null; error: string | null };
 }
 
 export default function ToastContainer({ flash }: Props) {
     const [toasts, setToasts] = useState<{ id: number; message: string; type: ToastType }[]>([]);
-    const processedFlashRef = useRef<{ message?: string | null; error?: string | null }>({});
+    const processedFlashRef = useRef<{ message?: string | null; success?: string | null; error?: string | null }>({});
 
     const addToast = useCallback((message: string, type: ToastType) => {
         setToasts(prev => {
@@ -21,6 +21,10 @@ export default function ToastContainer({ flash }: Props) {
         if (flash.message && flash.message !== processedFlashRef.current.message) {
             addToast(flash.message, 'success');
             processedFlashRef.current.message = flash.message;
+        }
+        if (flash.success && flash.success !== processedFlashRef.current.success) {
+            addToast(flash.success, 'success');
+            processedFlashRef.current.success = flash.success;
         }
         if (flash.error && flash.error !== processedFlashRef.current.error) {
             addToast(flash.error, 'error');

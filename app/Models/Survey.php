@@ -235,7 +235,8 @@ class Survey extends Model
      */
     public function getUserAttemptCount($userId)
     {
-        return $this->answers()->where('user_id', $userId)->count();
+        // یک نوبت شرکت از چند پاسخ تشکیل می‌شود؛ شمارش رکورد پاسخ، دفعات شرکت نیست.
+        return $this->answers()->where('user_id', $userId)->exists() ? 1 : 0;
     }
 
     /**

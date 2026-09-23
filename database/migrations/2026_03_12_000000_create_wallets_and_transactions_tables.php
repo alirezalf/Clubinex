@@ -33,10 +33,15 @@ return new class extends Migration
             $table->index('created_at');
         });
 
-        Schema::create('wallet_withdrawals', function (Blueprint $table) {
+         Schema::create('wallet_withdrawals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('wallet_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('wallet_transaction_id')
+                ->nullable()
+                ->after('wallet_id')
+                ->constrained('wallet_transactions')
+                ->nullOnDelete();
             $table->decimal('amount', 15, 2);
             $table->string('bank_name')->nullable();
             $table->string('iban_number')->nullable(); // شماره شبا

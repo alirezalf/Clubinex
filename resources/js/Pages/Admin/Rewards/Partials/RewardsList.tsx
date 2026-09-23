@@ -9,6 +9,7 @@ interface Reward {
     id: number;
     title: string;
     points_cost: number;
+    cash_cost: number;
     type: string;
     stock: number;
     description: string;
@@ -31,6 +32,7 @@ export default function RewardsList({ rewards, clubs }: Props) {
     const { data, setData, post, processing, reset, clearErrors, transform } = useForm({
         title: '',
         points_cost: '',
+        cash_cost: '0',
         type: 'physical',
         stock: '',
         description: '',
@@ -51,6 +53,7 @@ export default function RewardsList({ rewards, clubs }: Props) {
         setData({
             title: reward.title || '',
             points_cost: String(reward.points_cost),
+            cash_cost: String(reward.cash_cost ?? 0),
             type: reward.type || 'physical',
             stock: String(reward.stock),
             description: reward.description || '',
@@ -273,6 +276,19 @@ export default function RewardsList({ rewards, clubs }: Props) {
                                 </div>
                                 <div>
                                     <label className="mb-1 block text-sm font-medium">
+                                        هزینه نقدی (اختیاری)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={data.cash_cost}
+                                        onChange={(e) => setData('cash_cost', e.target.value)}
+                                        className="w-full rounded-lg border px-3 py-2"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium">
                                         موجودی
                                     </label>
                                     <input
@@ -367,6 +383,7 @@ export default function RewardsList({ rewards, clubs }: Props) {
                                     className="w-full rounded-lg border px-3 py-2 text-sm"
                                     accept="image/*"
                                 />
+                                {errors.image && <p className="mt-1 text-xs text-red-500">{errors.image}</p>}
                             </div>
 
                             <div className="flex items-center gap-2 pt-2">

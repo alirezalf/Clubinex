@@ -100,7 +100,13 @@ class SettingController extends Controller
 
     public function update(Request $request)
     {
-        $data = $request->except(['_token', '_method']);
+        // Request::except() only contains normal input. Merge uploaded files as
+        // well; otherwise a tab containing only a newly selected image never
+        // reaches the loop below and the setting is silently left unchanged.
+        $data = array_merge(
+            $request->except(['_token', '_method']),
+            $request->allFiles()
+        );
         $themeKeys = ThemeService::getAllowedKeys();
 
         // 1. Handle Reset Personal Theme
@@ -147,7 +153,8 @@ class SettingController extends Controller
             // Handle File Uploads
             if ($request->hasFile($key)) {
                 $file = $request->file($key);
-                $filename = time() . '_' . $file->getClientOriginalName();
+                \Illuminate\Support\Facades\File::ensureDirectoryExists(public_path('uploads/settings'));
+                $filename = $file->hashName();
                 $file->move(public_path('uploads/settings'), $filename);
                 $value = '/uploads/settings/' . $filename;
             }

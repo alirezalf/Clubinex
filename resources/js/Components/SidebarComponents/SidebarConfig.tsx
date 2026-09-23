@@ -140,6 +140,7 @@ export const getAdminItems = (badgeCount: number = 0, rewardsCount: number = 0, 
         href: '#',
         group: 'admin',
         module: 'enable_products',
+        badge: registrationsCount,
         description: 'مدیریت محصولات و امتیازات',
         subItems: [
             { name: 'موجودی', icon: Box, href: route('admin.products.index', { tab: 'inventory' }), group: 'admin' },

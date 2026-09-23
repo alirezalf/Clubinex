@@ -24,7 +24,14 @@ class ProfileUpdateRequest extends FormRequest
             'gender' => ['nullable', 'in:male,female,other'],
             'job' => ['nullable', 'string', 'max:100'],
             'province_id' => ['nullable', 'exists:provinces,id'],
-            'city_id' => ['nullable', 'exists:cities,id'],
+            'city_id' => [
+                'nullable',
+                Rule::exists('cities', 'id')->where(fn ($query) =>
+                    $this->filled('province_id')
+                        ? $query->where('province_id', $this->input('province_id'))
+                        : $query
+                ),
+            ],
             'postal_code' => ['nullable', 'digits_between:5,10'],
             'address' => ['nullable', 'string', 'max:500'],
             'avatar' => ['nullable', 'image', 'max:5120'], // 5MB
@@ -33,6 +40,14 @@ class ProfileUpdateRequest extends FormRequest
             'is_agent' => ['boolean'],
             'agent_code' => ['nullable', 'string', 'max:20', 'required_if:is_agent,true'],
             'store_name' => ['nullable', 'string', 'max:100'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'avatar.image' => 'فایل انتخاب‌شده برای تصویر پروفایل معتبر نیست. فقط JPG، PNG، WEBP یا GIF انتخاب کنید.',
+            'avatar.max' => 'حجم تصویر پروفایل نباید بیشتر از ۵ مگابایت باشد.',
         ];
     }
 }

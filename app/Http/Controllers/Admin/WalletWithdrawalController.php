@@ -47,6 +47,15 @@ class WalletWithdrawalController extends Controller
         }
 
         DB::transaction(function () use ($withdrawal, $request) {
+            $withdrawal = WalletWithdrawal::query()
+                ->with(['wallet', 'walletTransaction'])
+                ->lockForUpdate()
+                ->findOrFail($withdrawal->id);
+
+            if (!in_array($withdrawal->status, ['pending', 'approved'], true)) {
+                return;
+            }
+
             $status = $request->status;
 
             if ($status === 'rejected') {
@@ -55,19 +64,24 @@ class WalletWithdrawalController extends Controller
 
                 // Add wallet transaction to show refunded amount
                 $withdrawal->wallet->transactions()->create([
-                    'amount' => clone $withdrawal->amount,
+                    'amount' => $withdrawal->amount,
                     'type' => 'deposit',
                     'status' => 'success',
                     'description' => 'برگشت وجه به دلیل رد درخواست برداشت وجه',
                 ]);
             } else if ($status === 'paid') {
-                // Find pending transaction and make it successful
-                $pendingTx = $withdrawal->wallet->transactions()
-                    ->where('amount', $withdrawal->amount)
-                    ->where('type', 'withdrawal')
-                    ->where('status', 'pending')
-                    ->latest()
-                    ->first();
+                $pendingTx = $withdrawal->walletTransaction;
+
+                // Support withdrawal records created before the transaction link existed.
+                if (!$pendingTx) {
+                    $pendingTx = $withdrawal->wallet->transactions()
+                        ->where('amount', $withdrawal->amount)
+                        ->where('type', 'withdrawal')
+                        ->where('status', 'pending')
+                        ->latest()
+                        ->first();
+                }
+
                 if ($pendingTx) {
                     $pendingTx->update(['status' => 'success']);
                 }

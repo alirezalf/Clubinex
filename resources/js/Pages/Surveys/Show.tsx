@@ -7,7 +7,7 @@ import type { PageProps } from '@/types';
 interface Question {
     id: number;
     question: string;
-    type: 'multiple_choice' | 'text' | 'number';
+    type: 'multiple_choice' | 'text' | 'number' | 'rating';
     options?: string[];
     is_required: boolean;
     points: number;
@@ -218,6 +218,25 @@ export default function SurveyShow({ survey }: SurveyProps) {
                                         onChange={(e) => handleTextChange(q.id, e.target.value)}
                                         value={answers[q.id] || ''}
                                     />
+                                )}
+
+                                {q.type === 'rating' && (
+                                    <div className="flex flex-wrap gap-2">
+                                        {[1, 2, 3, 4, 5].map((value) => (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                onClick={() => handleTextChange(q.id, String(value))}
+                                                className={`h-10 w-10 rounded-lg border font-bold transition-colors ${
+                                                    String(answers[q.id]) === String(value)
+                                                        ? 'border-primary-500 bg-primary-500 text-white'
+                                                        : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                {value}
+                                            </button>
+                                        ))}
+                                    </div>
                                 )}
                             </div>
                         </div>

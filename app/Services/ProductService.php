@@ -323,6 +323,18 @@ class ProductService
             $points = $this->calculatePoints($product);
         }
 
+        $serial = null;
+        if ($product && $reg->serial_code) {
+            $serial = ProductSerial::query()
+                ->where('serial_code', $reg->serial_code)
+                ->lockForUpdate()
+                ->first();
+
+            if ($serial && $serial->is_used && $serial->used_by !== $reg->user_id) {
+                throw new Exception('این سریال قبلاً برای کاربر دیگری ثبت شده است.');
+            }
+        }
+
         // 1. اعطای امتیاز به کاربر
         PointTransaction::awardPoints(
             $reg->user_id,
@@ -361,7 +373,7 @@ class ProductService
         // 3. ثبت سریال در سیستم (به عنوان استفاده شده) برای جلوگیری از ثبت مجدد
         if ($product && $reg->serial_code) {
             try {
-                $serial = ProductSerial::firstOrNew(['serial_code' => $reg->serial_code]);
+                $serial ??= new ProductSerial(['serial_code' => $reg->serial_code]);
 
                 // If the serial exists, we don't change its product_id unless it's new
                 if (!$serial->exists) {
@@ -373,7 +385,9 @@ class ProductService
                 $serial->used_at = now();
                 $serial->save();
             } catch (Exception $e) {
-                // خطا نادیده گرفته می‌شود
+                // The approval transaction must not commit awarded points if
+                // the corresponding serial cannot be persisted.
+                throw $e;
             }
         }
 

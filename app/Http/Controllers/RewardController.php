@@ -30,7 +30,7 @@ class RewardController extends Controller
 
         if ($user) {
             $rewardsQuery->withCount(['redemptions as user_redemptions_count' => function ($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('user_id', $user->id)->where('status', '!=', 'rejected');
             }]);
         }
 

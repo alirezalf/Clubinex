@@ -11,7 +11,7 @@ interface Props {
 export default function RegistrationReviewModal({ isOpen, onClose, registration }: Props) {
     const [isZoomed, setIsZoomed] = useState(false);
 
-    const { data, setData, post, processing, reset } = useForm({
+    const { data, setData, post, processing, reset, transform } = useForm({
         status: '',
         admin_note: ''
     });
@@ -25,11 +25,14 @@ export default function RegistrationReviewModal({ isOpen, onClose, registration 
         }
 
         if (confirm(status === 'approved' ? 'آیا از تایید این درخواست اطمینان دارید؟ امتیاز به کاربر داده می‌شود.' : 'آیا از رد این درخواست اطمینان دارید؟')) {
-            setData({ status, admin_note: data.admin_note });
+            // مقدار state در React همان لحظه تضمین‌شده نیست؛ status را مستقیماً
+            // در payload درخواست قرار می‌دهیم تا مقدار خالی ارسال نشود.
+            transform((formData) => ({ ...formData, status }));
             post(route('admin.products.registration_status', registration.id), {
                 onSuccess: () => {
                     onClose();
                     reset();
+                    transform((formData) => formData);
                 }
             });
         }

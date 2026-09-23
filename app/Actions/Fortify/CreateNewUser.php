@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Models\UserStatus;
 use App\Models\ReferralNetwork;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -62,7 +63,7 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $input['email'],
             'mobile' => $input['mobile'],
             'password' => Hash::make($input['password']),
-            'status_id' => 1, // Active
+            'status_id' => UserStatus::where('slug', 'active')->value('id') ?? 1,
             // تولید خودکار کد ریفرال برای خود کاربر جدید هنگام ثبت نام
             'referral_code' => strtoupper(substr(md5($input['mobile'] . time()), 0, 8)),
         ]);

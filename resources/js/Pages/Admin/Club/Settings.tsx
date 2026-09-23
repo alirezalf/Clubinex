@@ -276,7 +276,7 @@ export default function ClubSettings({ clubs, rules, flash }: any) {
 
 // Component for Global Settings (Daily Limit)
 const GeneralClubSettings = () => {
-    const { data, setData, post, processing } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         daily_point_limit: ''
     });
 
@@ -407,6 +407,7 @@ const ClubCard = ({ club }: any) => {
                     <div>
                         <label className="text-xs font-bold text-gray-600 mb-1 block">تغییر تصویر</label>
                         <input type="file" onChange={e => setData('image', e.target.files ? e.target.files[0] : null)} className="w-full border rounded-lg px-2 py-1 text-xs" accept="image/*" />
+                        {errors.image && <p className="mt-1 text-xs text-red-500">{errors.image}</p>}
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">

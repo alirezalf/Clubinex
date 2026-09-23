@@ -32,7 +32,7 @@ export default function BulkActionModal({ isOpen, onClose, selectedIds, actionTy
                 message: '',
             });
         }
-    }, [isOpen]); // فقط هنگام باز شدن اجرا شود
+    }, [isOpen, selectedIds, actionType]);
 
     if (!isOpen || !actionType) return null;
 

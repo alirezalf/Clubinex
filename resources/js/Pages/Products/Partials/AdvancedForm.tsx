@@ -308,6 +308,7 @@ export default function AdvancedForm({
                             error={errors.invoice_file}
                             currentFileName={data.invoice_file?.name}
                             previewUrl={editingRegistration?.invoice_image_url}
+                            accept="image/jpeg,image/png,image/gif,.pdf"
                          />
                     </div>
                 </div>

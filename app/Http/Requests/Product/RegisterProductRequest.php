@@ -54,4 +54,15 @@ class RegisterProductRequest extends FormRequest
             'customer_mobile_number' => 'شماره موبایل مشتری',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'tool_pic_file.mimes' => 'تصویر ابزار باید JPG، PNG یا GIF باشد.',
+            'tool_pic_file.max' => 'حجم تصویر ابزار نباید بیشتر از ۵ مگابایت باشد.',
+            'invoice_file.required' => 'تصویر یا فایل PDF فاکتور خرید الزامی است.',
+            'invoice_file.mimes' => 'فاکتور باید تصویر JPG/PNG یا فایل PDF باشد.',
+            'invoice_file.max' => 'حجم فایل فاکتور نباید بیشتر از ۵ مگابایت باشد.',
+        ];
+    }
 }

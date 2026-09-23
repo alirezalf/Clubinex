@@ -32,8 +32,10 @@ class ProductReportService
             ->latest();
 
         if ($request->search) {
-            $query->where('title', 'like', "%{$request->search}%")
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', "%{$request->search}%")
                   ->orWhere('model_name', 'like', "%{$request->search}%");
+            });
         }
 
         return $query->paginate(15)->withQueryString();
@@ -44,10 +46,12 @@ class ProductReportService
         $query = ProductSerial::with(['user', 'product.category'])->latest();
 
         if ($request->search) {
-            $query->where('serial_code', 'like', "%{$request->search}%")
-                  ->orWhereHas('product', function ($q) use ($request) {
-                      $q->where('title', 'like', "%{$request->search}%");
+            $query->where(function ($q) use ($request) {
+                $q->where('serial_code', 'like', "%{$request->search}%")
+                  ->orWhereHas('product', function ($productQuery) use ($request) {
+                      $productQuery->where('title', 'like', "%{$request->search}%");
                   });
+            });
         }
 
         if ($request->status && $request->status !== 'all') {
@@ -73,12 +77,15 @@ class ProductReportService
         $query = ProductRegistration::with(['user', 'category', 'admin'])->latest();
 
         if ($request->search) {
-            $query->where('serial_code', 'like', "%{$request->search}%")
+            $query->where(function ($q) use ($request) {
+                $q->where('serial_code', 'like', "%{$request->search}%")
                   ->orWhere('product_name', 'like', "%{$request->search}%")
-                  ->orWhereHas('user', function ($q) use ($request) {
-                      $q->where('mobile', 'like', "%{$request->search}%")
+                  ->orWhereHas('user', function ($userQuery) use ($request) {
+                      $userQuery->where('mobile', 'like', "%{$request->search}%")
+                        ->orWhere('first_name', 'like', "%{$request->search}%")
                         ->orWhere('last_name', 'like', "%{$request->search}%");
                   });
+            });
         }
 
         if ($request->status && $request->status !== 'all') {

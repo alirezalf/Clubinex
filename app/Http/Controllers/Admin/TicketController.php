@@ -81,10 +81,15 @@ class TicketController extends Controller
         }
 
         try {
+            $attachment = $request->hasFile('attachment')
+                ? \Illuminate\Support\Facades\Storage::url($request->file('attachment')->store('ticket-attachments', 'public'))
+                : null;
+
             TicketMessage::create([
                 'ticket_id' => $ticket->id,
                 'user_id' => Auth::id(),
-                'message' => $request->message
+                'message' => $request->message,
+                'attachment' => $attachment,
             ]);
 
             // وقتی ادمین پاسخ داد، وضعیت به "پاسخ داده شده" تغییر می‌کند

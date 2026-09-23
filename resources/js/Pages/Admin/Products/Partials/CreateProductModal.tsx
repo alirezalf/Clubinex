@@ -160,6 +160,7 @@ export default function CreateProductModal({ isOpen, onClose, categories, produc
                                     onChange={(file) => setData('image', file)}
                                     error={errors.image}
                                     previewUrl={product?.display_image}
+                                    maxSizeMb={2}
                                 />
                             </div>
 

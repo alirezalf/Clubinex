@@ -10,13 +10,15 @@ interface Props {
     };
     avatarData: File | null;
     onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    avatarError?: string;
     progress: number;
     missingFields?: string[];
 }
 
-export default function ProfileHeader({ user, avatarData, onFileChange, progress, missingFields = [] }: Props) {
+export default function ProfileHeader({ user, avatarData, onFileChange, avatarError, progress, missingFields = [] }: Props) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [localError, setLocalError] = useState<string | null>(null);
 
     const handleAvatarClick = () => {
         fileInputRef.current?.click();
@@ -25,6 +27,19 @@ export default function ProfileHeader({ user, avatarData, onFileChange, progress
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
+            if (!file.type.startsWith('image/')) {
+                setLocalError('فقط فایل تصویری (JPG، PNG، WEBP یا GIF) مجاز است.');
+                e.target.value = '';
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                setLocalError('حجم تصویر پروفایل نباید بیشتر از ۵ مگابایت باشد.');
+                e.target.value = '';
+                return;
+            }
+
+            setLocalError(null);
             setImagePreview(URL.createObjectURL(file));
             onFileChange(e);
         }
@@ -94,9 +109,14 @@ export default function ProfileHeader({ user, avatarData, onFileChange, progress
                         type="file"
                         ref={fileInputRef}
                         className="hidden"
-                        accept="image/*"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
                         onChange={handleFileChange}
                     />
+                    {(localError || avatarError) && (
+                        <p className="absolute top-full left-1/2 mt-3 w-64 -translate-x-1/2 rounded-lg bg-red-50 px-3 py-2 text-center text-xs font-medium text-red-600 shadow-sm">
+                            {localError || avatarError}
+                        </p>
+                    )}
                 </div>
 
                 {/* اطلاعات کاربر */}
@@ -208,4 +228,3 @@ export default function ProfileHeader({ user, avatarData, onFileChange, progress
         </div>
     );
 }
-

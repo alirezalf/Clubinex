@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use App\Services\ThemeService;
-use Illuminate\Support\Facades\Log;
 
 class ProfileController extends Controller
 {
@@ -67,7 +66,6 @@ class ProfileController extends Controller
 
     public function update(ProfileUpdateRequest $request)
     {
-       
         /** @var \App\Models\User $user */
         $user = auth()->user();
         $validated = $request->validated();
@@ -85,14 +83,27 @@ class ProfileController extends Controller
 
         // Handle Agent Logic
         if ($request->boolean('is_agent')) {
-            $exists = Agent::where('agent_code', $request->agent_code)->where('user_id', '!=', $user->id)->exists();
+            $exists = Agent::withTrashed()
+                ->where('agent_code', $request->agent_code)
+                ->where('user_id', '!=', $user->id)
+                ->exists();
             if ($exists) return back()->withErrors(['agent_code' => 'این کد نمایندگی قبلاً ثبت شده است.']);
 
-            Agent::updateOrCreate(['user_id' => $user->id], [
+            $agent = Agent::withTrashed()->firstOrNew(['user_id' => $user->id]);
+            if ($agent->exists && $agent->trashed()) {
+                $agent->restore();
+            }
+
+            $agent->fill([
                 'agent_code' => $request->agent_code,
                 'store_name' => $request->store_name,
                 'is_active' => false, // نمایندگان باید تایید شوند
-            ]);
+            ])->save();
+
+            $validated['agent_id'] = $agent->id;
+        } else {
+            Agent::where('user_id', $user->id)->delete();
+            $validated['agent_id'] = null;
         }
 
         // Cleanup user fields

@@ -133,6 +133,7 @@ class RewardService
 
             if ($reward->cash_cost > 0) {
                 $wallet = $user->wallet()->firstOrCreate(['user_id' => $user->id], ['balance' => 0]);
+                $wallet = $wallet->newQuery()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
                 if ($wallet->balance < $reward->cash_cost) {
                     throw new Exception('موجودی کیف پول شما برای دریافت این جایزه کافی نیست.');
                 }
@@ -224,6 +225,7 @@ class RewardService
             // ۲. برگشت وجه کیف پول
             if ($redemption->cash_spent > 0) {
                 $wallet = $user->wallet()->firstOrCreate(['user_id' => $user->id], ['balance' => 0]);
+                $wallet = $wallet->newQuery()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
                 $wallet->increment('balance', $redemption->cash_spent);
                 $wallet->transactions()->create([
                     'amount' => $redemption->cash_spent,
@@ -278,9 +280,30 @@ class RewardService
      */
     public function updateRedemptionStatus(int $id, string $status, ?string $adminNote, ?string $trackingCode, int $adminId)
     {
-        $redemption = RewardRedemption::with(['reward', 'user'])->findOrFail($id);
+        return DB::transaction(function () use ($id, $status, $adminNote, $trackingCode, $adminId) {
+            $redemption = RewardRedemption::with(['reward', 'user'])
+                ->whereKey($id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        return DB::transaction(function () use ($redemption, $status, $adminNote, $trackingCode, $adminId) {
+            if ($redemption->status === $status) {
+                return $redemption;
+            }
+
+            $allowedTransitions = [
+                'pending' => ['processing', 'rejected', 'converted'],
+                'processing' => ['shipped', 'delivered', 'completed', 'rejected', 'converted'],
+                'shipped' => ['delivered', 'completed', 'rejected'],
+                'delivered' => ['completed'],
+                'completed' => [],
+                'rejected' => [],
+                // تبدیلِ جایزهٔ گردونه به امتیاز ممکن است با تصمیم ادمین برگشت داده شود.
+                'converted' => ['rejected'],
+            ];
+
+            if (!in_array($status, $allowedTransitions[$redemption->status] ?? [], true)) {
+                throw new Exception('تغییر وضعیت انتخاب‌شده برای وضعیت فعلی درخواست مجاز نیست.');
+            }
 
             // اگر وضعیت به "رد شده" تغییر کرد و قبلاً رد نشده بود -> برگشت امتیاز به کاربر
             if ($status === 'rejected' && $redemption->status !== 'rejected') {
@@ -324,6 +347,7 @@ class RewardService
                 // ۳. برگشت وجه کیف پول
                 if ($redemption->cash_spent > 0) {
                     $wallet = $redemption->user->wallet()->firstOrCreate(['user_id' => $redemption->user_id], ['balance' => 0]);
+                    $wallet = $wallet->newQuery()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
                     $wallet->increment('balance', $redemption->cash_spent);
                     $wallet->transactions()->create([
                         'amount' => $redemption->cash_spent,

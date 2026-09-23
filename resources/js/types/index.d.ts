@@ -62,6 +62,7 @@ export type PageProps<
     };
     flash: {
         message: string | null;
+        success?: string | null;
         error: string | null;
     };
     loginSettings?: Record<string, any>;

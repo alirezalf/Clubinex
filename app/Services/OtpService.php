@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\UserStatus;
 use App\Services\SMS\SmsManager;
 use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Cache;
@@ -73,7 +74,7 @@ class OtpService
         $user = User::firstOrCreate(
             ['mobile' => $mobile],
             [
-                'status_id' => 1,
+                'status_id' => UserStatus::where('slug', 'active')->value('id') ?? 1,
                 'referred_by' => $referredById,
                 'referral_code' => strtoupper(substr(md5($mobile . time()), 0, 8)),
             ]
@@ -128,6 +129,13 @@ class OtpService
         $user = User::where('mobile', $mobile)->first();
 
         if (!$user) {
+            return null;
+        }
+
+        $expiryMinutes = max(1, (int) SystemSetting::getValue('sms', 'otp_expiry_minutes', 5));
+        if (!$user->otp || !$user->updated_at || $user->updated_at->lt(now()->subMinutes($expiryMinutes))) {
+            $user->update(['otp' => null]);
+
             return null;
         }
 

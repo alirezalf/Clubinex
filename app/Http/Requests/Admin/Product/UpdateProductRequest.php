@@ -24,4 +24,12 @@ class UpdateProductRequest extends FormRequest
             'is_active' => 'boolean'
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'image.image' => 'تصویر محصول معتبر نیست.',
+            'image.max' => 'حجم تصویر محصول نباید بیشتر از ۲ مگابایت باشد.',
+        ];
+    }
 }

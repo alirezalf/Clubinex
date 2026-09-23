@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Wallet;
+use App\Models\User;
 use App\Models\WalletTransaction;
 use App\Models\SystemSetting;
 use App\Models\PointTransaction;
@@ -64,13 +65,19 @@ class WalletController extends Controller
 
         $amount = $request->points * $rate;
 
-        DB::transaction(function () use ($user, $request, $amount) {
+        $converted = DB::transaction(function () use ($user, $request, $amount) {
+            $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedUser->current_points < $request->points) {
+                return false;
+            }
+
             // کسر امتیاز
-            $newBalance = $user->current_points - $request->points;
-            $user->update(['current_points' => $newBalance]);
+            $newBalance = $lockedUser->current_points - $request->points;
+            $lockedUser->update(['current_points' => $newBalance]);
 
             PointTransaction::create([
-                'user_id' => $user->id,
+                'user_id' => $lockedUser->id,
                 'amount' => $request->points,
                 'type' => 'spend',
                 'description' => 'تبدیل امتیاز به شارژ کیف پول',
@@ -79,6 +86,7 @@ class WalletController extends Controller
 
             // شارژ کیف پول
             $wallet = $user->wallet()->firstOrCreate(['user_id' => $user->id], ['balance' => 0]);
+            $wallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
             $wallet->increment('balance', $amount);
 
             $wallet->transactions()->create([
@@ -87,7 +95,12 @@ class WalletController extends Controller
                 'status' => 'success',
                 'description' => 'شارژ از طریق تبدیل امتیاز',
             ]);
+            return true;
         });
+
+        if (!$converted) {
+            return back()->with('error', 'امتیاز شما برای این تبدیل کافی نیست.');
+        }
 
         return back()->with('success', 'امتیاز شما با موفقیت به شارژ کیف پول تبدیل شد.');
     }
@@ -112,10 +125,17 @@ class WalletController extends Controller
             return back()->with('error', 'موجودی کیف پول شما برای این تبدیل کافی نیست.');
         }
 
-        DB::transaction(function () use ($user, $wallet, $request, $amountToPay) {
+        $converted = DB::transaction(function () use ($user, $wallet, $request, $amountToPay) {
+            $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $lockedWallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedWallet->balance < $amountToPay) {
+                return false;
+            }
+
             // کسر پول
-            $wallet->decrement('balance', $amountToPay);
-            $wallet->transactions()->create([
+            $lockedWallet->decrement('balance', $amountToPay);
+            $lockedWallet->transactions()->create([
                 'amount' => $amountToPay,
                 'type' => 'withdrawal',
                 'status' => 'success',
@@ -123,17 +143,22 @@ class WalletController extends Controller
             ]);
 
             // اضافه کردن امتیاز
-            $newBalance = $user->current_points + $request->points;
-            $user->update(['current_points' => $newBalance]);
+            $newBalance = $lockedUser->current_points + $request->points;
+            $lockedUser->update(['current_points' => $newBalance]);
 
             PointTransaction::create([
-                'user_id' => $user->id,
+                'user_id' => $lockedUser->id,
                 'amount' => $request->points,
                 'type' => 'earn',
                 'description' => 'خرید امتیاز با اعتبار کیف پول',
                 'balance_after' => $newBalance,
             ]);
+            return true;
         });
+
+        if (!$converted) {
+            return back()->with('error', 'موجودی کیف پول شما برای این تبدیل کافی نیست.');
+        }
 
         return back()->with('success', 'اعتبار کیف پول با موفقیت به امتیاز تبدیل شد.');
     }
@@ -169,11 +194,27 @@ class WalletController extends Controller
             return Inertia::location($payment['payment_url']);
         }
 
+        // A gateway-request failure must not leave an indistinguishable
+        // pending deposit behind; the user can safely start a new request.
+        $transaction->update(['status' => 'failed']);
+
         return back()->with('error', $payment['message']);
     }
 
     public function verify(Request $request, WalletTransaction $transaction)
     {
+        if ($transaction->wallet->user_id !== auth()->id()) {
+            abort(404);
+        }
+
+        if ($transaction->status === 'success') {
+            return redirect()->route('wallet.index')->with('success', 'پرداخت قبلاً با موفقیت ثبت شده است.');
+        }
+
+        if ($transaction->status !== 'pending') {
+            return redirect()->route('wallet.index')->with('error', 'این تراکنش قابل تأیید نیست.');
+        }
+
         if ($request->Status !== 'OK') {
             $transaction->update(['status' => 'failed']);
             return redirect()->route('wallet.index')->with('error', 'پرداخت توسط کاربر لغو شد یا ناموفق بود.');
@@ -183,12 +224,29 @@ class WalletController extends Controller
 
         if ($payment['success']) {
             DB::transaction(function () use ($transaction, $payment) {
-                $transaction->update([
+                $lockedTransaction = WalletTransaction::query()
+                    ->with('wallet')
+                    ->lockForUpdate()
+                    ->findOrFail($transaction->id);
+
+                if ($lockedTransaction->status === 'success') {
+                    return;
+                }
+
+                if ($lockedTransaction->status !== 'pending') {
+                    return;
+                }
+
+                $lockedTransaction->update([
                     'status' => 'success',
                     'reference_id' => $payment['ref_id']
                 ]);
 
-                $transaction->wallet->increment('balance', $transaction->amount);
+                Wallet::query()
+                    ->whereKey($lockedTransaction->wallet_id)
+                    ->lockForUpdate()
+                    ->firstOrFail()
+                    ->increment('balance', $lockedTransaction->amount);
             });
 
             return redirect()->route('wallet.index')->with('success', 'کیف پول شما با موفقیت شارژ شد. کد رهگیری: ' . $payment['ref_id']);
@@ -204,7 +262,7 @@ class WalletController extends Controller
             'amount' => 'required|numeric|min:1000',
             'bank_name' => 'required|string|max:100',
             'iban_number' => 'nullable|string|max:50',
-            'card_number' => 'required|string|size:16',
+            'card_number' => ['required', 'string', 'regex:/^\d{16}$/'],
             'account_holder' => 'required|string|max:100',
         ]);
 
@@ -215,12 +273,18 @@ class WalletController extends Controller
             return back()->with('error', 'موجودی کیف پول شما برای این برداشت کافی نیست.');
         }
 
-        DB::transaction(function () use ($user, $wallet, $request) {
+        $created = DB::transaction(function () use ($user, $wallet, $request) {
+            $lockedWallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedWallet->balance < $request->amount) {
+                return false;
+            }
+
             // Deduct the requested amount from the wallet to lock it
-            $wallet->decrement('balance', $request->amount);
+            $lockedWallet->decrement('balance', $request->amount);
 
             // Record as pending withdrawal in wallet transactions
-            $wallet->transactions()->create([
+            $walletTransaction = $lockedWallet->transactions()->create([
                 'amount' => $request->amount,
                 'type' => 'withdrawal',
                 'status' => 'pending',
@@ -230,7 +294,8 @@ class WalletController extends Controller
             // Save actual withdrawal request
             \App\Models\WalletWithdrawal::create([
                 'user_id' => $user->id,
-                'wallet_id' => $wallet->id,
+                'wallet_id' => $lockedWallet->id,
+                'wallet_transaction_id' => $walletTransaction->id,
                 'amount' => $request->amount,
                 'bank_name' => $request->bank_name,
                 'iban_number' => $request->iban_number,
@@ -238,7 +303,12 @@ class WalletController extends Controller
                 'account_holder' => $request->account_holder,
                 'status' => 'pending',
             ]);
+            return true;
         });
+
+        if (!$created) {
+            return back()->with('error', 'موجودی کیف پول شما برای این برداشت کافی نیست.');
+        }
 
         return back()->with('success', 'درخواست برداشت وجه با موفقیت ثبت شد و در انتظار بررسی است.');
     }

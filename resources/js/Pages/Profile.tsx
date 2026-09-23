@@ -118,7 +118,7 @@ export default function Profile({ user, provinces, initialCities }: Props) {
 
    const calculateProgress = () => {
     const missingCount = getMissingFields().length;
-    const totalFields = 10; // 9 text fields + 1 avatar
+    const totalFields = 11; // 10 profile fields + 1 avatar
     return Math.round(((totalFields - missingCount) / totalFields) * 100);
 };
 
@@ -134,6 +134,7 @@ export default function Profile({ user, provinces, initialCities }: Props) {
                     user={user}
                     avatarData={data.avatar}
                     onFileChange={handleFileChange}
+                    avatarError={errors.avatar}
                     progress={calculateProgress()}
                     missingFields={getMissingFields()}
                 />
